@@ -13,7 +13,6 @@ defmodule Algoliax.Resources.Object do
     Config.client_http().get_object(Utils.index_name(settings), %{objectID: object_id})
   end
 
-  # POST /1/indexes/{indexName}/batch
   def save_objects(settings, module, models, attributes, opts) do
     Index.ensure_settings(settings)
 
@@ -36,16 +35,18 @@ defmodule Algoliax.Resources.Object do
     Config.client_http().save_objects(index_name, body)
   end
 
-  # PUT /1/indexes/{indexName}/{objectID}
   def save_object(settings, module, model, attributes) do
     Index.ensure_settings(settings)
 
-    object = build_object(settings, module, model, attributes)
-    index_name = Utils.index_name(settings)
-    Config.client_http().save_object(index_name, object)
+    if apply(module, :to_be_indexed?, [model]) do
+      object = build_object(settings, module, model, attributes)
+      index_name = Utils.index_name(settings)
+      Config.client_http().save_object(index_name, object)
+    else
+      {:not_indexable, model}
+    end
   end
 
-  # DELETE /1/indexes/{indexName}/{objectID}
   def delete_object(settings, module, model, attributes) do
     Index.ensure_settings(settings)
 
@@ -54,7 +55,6 @@ defmodule Algoliax.Resources.Object do
     Config.client_http().delete_object(index_name, object)
   end
 
-  @doc false
   def reindex(settings, module, index_attributes, query, opts \\ []) do
     Index.ensure_settings(settings)
 
@@ -76,13 +76,13 @@ defmodule Algoliax.Resources.Object do
     end)
   end
 
-  @doc false
   def reindex_atomic(settings, _module, _index_attributes) do
     Index.ensure_settings(settings)
 
     index_name = Utils.index_name(settings)
     tmp_index_name = index_name <> ".tmp"
-    tmp_settings = Keyword.put(settings, :index_name, tmp_index_name)
+    _tmp_settings = Keyword.put(settings, :index_name, tmp_index_name)
+    :ok
   end
 
   defp build_batch_object(settings, module, model, attributes, action) do
@@ -115,7 +115,7 @@ defmodule Algoliax.Resources.Object do
     if apply(module, :to_be_indexed?, [model]) do
       "updateObject"
     else
-      if Keyword.get(opts, :safe) do
+      if Keyword.get(opts, :force_delete) do
         "deleteObject"
       end
     end

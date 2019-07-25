@@ -1,7 +1,7 @@
 defmodule Algoliax.Utils do
   @moduledoc false
 
-  @attribute_prefix "agoliax_attr_"
+  @attribute_prefix "algoliax_attr_"
 
   def prefix_attribute(attribute) do
     :"#{@attribute_prefix}#{attribute}"
