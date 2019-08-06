@@ -53,12 +53,33 @@ defmodulePeople do
 end
 ```
 
+By default all object are indexed, but it's possible to override this behaviour by overriding the function `to_be_indexed?`
+
+```elixir
+defmodulePeople do
+  ...
+
+  @impl Algoliax
+  def to_be_indexed?(model) do
+    model.age > 20
+  end
+end
+```
+
+```elixir
+# This object will be indexed
+people1 = %People{reference: 10, last_name: "Doe", first_name: "John", age: 13}
+
+# This object will not be indexed
+people2 = %People{reference: 87, last_name: "Fred", first_name: "Al", age: 70}
+```
+
 #### Available functions
 
 ```elixir
 people1 = %People{reference: 10, last_name: "Doe", first_name: "John", age: 20}
 
-people2 = %People{reference: 10, last_name: "Doe", first_name: "John", age: 20}
+people2 = %People{reference: 87, last_name: "Fred", first_name: "Al", age: 70}
 
 # Get people index settings
 People.get_settings()
