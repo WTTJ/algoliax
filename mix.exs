@@ -8,6 +8,7 @@ defmodule Algoliax.MixProject do
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
+      aliases: aliases(),
       elixirc_paths: elixirc_paths(Mix.env()),
 
       # docs
@@ -42,6 +43,13 @@ defmodule Algoliax.MixProject do
       {:inflex, "~> 2.0.0"},
       {:mox, "~> 0.5", only: :test},
       {:credo, "~> 1.1.2", only: [:dev, :test], runtime: false}
+    ]
+  end
+
+  defp aliases do
+    [
+      # Ensures database is reset before tests are run
+      test: ["ecto.drop --quiet", "ecto.create --quiet", "ecto.migrate", "test"]
     ]
   end
 end

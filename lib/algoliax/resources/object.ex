@@ -28,11 +28,7 @@ defmodule Algoliax.Resources.Object do
       end)
       |> Enum.reject(&is_nil/1)
 
-    body = %{
-      requests: objects
-    }
-
-    Config.client_http().save_objects(index_name, body)
+    Config.client_http().save_objects(index_name, %{requests: objects})
   end
 
   def save_object(settings, module, model, attributes) do
@@ -69,10 +65,8 @@ defmodule Algoliax.Resources.Object do
           from(m in module)
       end
 
-    stream = repo.stream(query)
-
-    repo.transaction(fn ->
-      save_objects(settings, module, stream, index_attributes, opts)
+    Utils.find_in_batches(repo, query, 0, fn batch ->
+      save_objects(settings, module, batch, index_attributes, opts)
     end)
   end
 

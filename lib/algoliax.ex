@@ -4,6 +4,14 @@ defmodule Algoliax do
 
   ### Configuration
 
+  Algoliax needs only `:api_key` and `application_id` config. These configs can either be on config files or using environment varialble `"ALGOLIA_API_KEY"` and `"ALGOLIA_APPLICATION_ID"`.
+
+      config :algoliax,
+        api_key: "",
+        application_id: ""
+
+  ### Usage
+
   - `:index_name`, specificy the index where the object will be added on. **Required**
   - `:object_id`, specify the attribute used to as algolia objectID. Default `:id`.
 
@@ -84,6 +92,16 @@ defmodule Algoliax do
   @callback get_object(model :: map() | struct()) :: {:ok, map()} | {:error, map()}
 
   @doc """
+  Delete object from algolia. By passing the model, the object is retreived using the object_id configured
+
+  ## Example
+      people = %People{reference: 10, last_name: "Doe", first_name: "John", age: 20},
+
+      People.delete_object(people)
+  """
+  @callback delete_object(model :: map() | struct()) :: {:ok, map()} | {:error, map()}
+
+  @doc """
   Reindex [Ecto](https://hexdocs.pm/ecto/Ecto.html) specific
   """
   @callback reindex(query :: Ecto.Query.t()) :: {:ok, map()} | {:error, map()}
@@ -95,7 +113,6 @@ defmodule Algoliax do
 
   @doc """
   Check if current object can be indexed or not. By default it's always true. To override this behaviour overide this function in your model
-
 
   ## Example
 
@@ -114,6 +131,11 @@ defmodule Algoliax do
       end
   """
   @callback to_be_indexed?(model :: map()) :: true | false
+
+  @doc """
+  Get index settings from Algolia
+  """
+  @callback get_settings() :: {:ok, map()} | {:error, map()}
 
   @doc """
   Configure index
@@ -137,18 +159,22 @@ defmodule Algoliax do
 
       @before_compile unquote(__MODULE__)
 
+      @impl Algoliax
       def get_settings do
         Index.get_settings(@settings)
       end
 
+      @impl Algoliax
       def configure_index do
         Index.configure_index(@settings)
       end
 
+      @impl Algoliax
       def delete_index do
         Index.delete_index(@settings)
       end
 
+      @impl Algoliax
       def to_be_indexed?(model) do
         true
       end
@@ -170,23 +196,28 @@ defmodule Algoliax do
         )
       end
 
+      @impl Algoliax
       def save_object(model) do
         apply(__MODULE__, :to_be_indexed?, [model])
         Object.save_object(@settings, __MODULE__, model, @index_attributes)
       end
 
+      @impl Algoliax
       def delete_object(model) do
         Object.delete_object(@settings, __MODULE__, model, @index_attributes)
       end
 
+      @impl Algoliax
       def get_object(model) do
         Object.get_object(@settings, __MODULE__, model, @index_attributes)
       end
 
+      @impl Algoliax
       def reindex(query \\ nil) do
         Object.reindex(@settings, __MODULE__, @index_attributes, query)
       end
 
+      @impl Algoliax
       def reindex_atomic do
         Object.reindex_atomic(@settings, __MODULE__, @index_attributes)
       end
