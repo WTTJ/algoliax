@@ -2,14 +2,23 @@ defmodule Algoliax.Client do
   @moduledoc false
 
   @callback get_object(index_name :: binary(), object :: map()) :: {:ok, map()} | {:error, any()}
+
   @callback save_objects(index_name :: binary(), objects :: list()) ::
               {:ok, map()} | {:error, any()}
+
   @callback save_object(index_name :: binary(), object :: map()) :: {:ok, map()} | {:error, any()}
+
   @callback delete_object(index_name :: binary(), object :: map()) ::
               {:ok, map()} | {:error, any()}
+
   @callback get_settings(index_name :: binary()) :: {:ok, map()} | {:error, any()}
+
   @callback configure_index(index_name :: binary(), Keyword.t()) :: {:ok, map()} | {:error, any()}
+
   @callback delete_index(index_name :: binary()) :: {:ok, map()} | {:error, any()}
+
+  @callback move_index(index_name :: binary(), new_index_name :: binary()) ::
+              {:ok, map()} | {:error, any()}
 end
 
 defmodule Algoliax.Client.Http do
@@ -68,6 +77,13 @@ defmodule Algoliax.Client.Http do
     do_request(method, url)
   end
 
+  @impl Algoliax.Client
+  def move_index(index_name, body) do
+    Logger.debug("Moving index = #{index_name}")
+    {method, url} = Routes.url(:move_index, index_name, nil)
+    do_request(method, url, body)
+  end
+
   defp do_request(method, url, body \\ nil) do
     method
     |> :hackney.request(url, request_headers(), Jason.encode!(body), [:with_body])
@@ -78,12 +94,6 @@ defmodule Algoliax.Client.Http do
       {:ok, code, _, response} ->
         {:error, code, response}
     end
-
-    # {:ok, _status, _headers, ref} =
-    #   :hackney.request(method, url, request_headers(), Jason.encode!(body))
-
-    # {:ok, response} = ref |> :hackney.body()
-    # response |> Jason.decode!()
   end
 
   defp request_headers do

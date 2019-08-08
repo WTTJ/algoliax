@@ -1,5 +1,6 @@
 defmodule Algoliax.Routes do
   @moduledoc false
+  alias Algoliax.Config
 
   @suffix_host_read "-dsn.algolia.net/1/indexes"
   @suffix_host_write ".algolia.net/1/indexes"
@@ -8,6 +9,12 @@ defmodule Algoliax.Routes do
     path = "/#{index_name}"
     url = url(:write, path)
     {:delete, url}
+  end
+
+  def url(:move_index, index_name, _) do
+    path = "/#{index_name}/operation"
+    url = url(:write, path)
+    {:post, url}
   end
 
   def url(:get_settings, index_name, _) do
@@ -47,14 +54,10 @@ defmodule Algoliax.Routes do
   end
 
   defp url(:write, path) do
-    "https://" <> application_id() <> @suffix_host_write <> path
+    "https://" <> Config.application_id() <> @suffix_host_write <> path
   end
 
   defp url(:read, path) do
-    "https://" <> application_id() <> @suffix_host_read <> path
-  end
-
-  defp application_id do
-    System.get_env("ALGOLIA_APPLICATION_ID") || Application.get_env(:algoliax, :application_id)
+    "https://" <> Config.application_id() <> @suffix_host_read <> path
   end
 end

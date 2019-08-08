@@ -3,8 +3,6 @@ defmodule AlgoliaxTest.Struct do
   doctest Algoliax
 
   defmodule People do
-    use Ecto.Schema
-
     use Algoliax,
       index_name: :algoliax_people,
       attributes_for_faceting: ["age"],

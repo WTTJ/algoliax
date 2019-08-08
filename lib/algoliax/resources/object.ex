@@ -70,13 +70,22 @@ defmodule Algoliax.Resources.Object do
     end)
   end
 
-  def reindex_atomic(settings, _module, _index_attributes) do
+  def reindex_atomic(settings, module, index_attributes) do
     Index.ensure_settings(settings)
 
     index_name = Utils.index_name(settings)
-    tmp_index_name = index_name <> ".tmp"
-    _tmp_settings = Keyword.put(settings, :index_name, tmp_index_name)
-    :ok
+
+    tmp_index_name = :"#{index_name}.tmp"
+    tmp_settings = Keyword.put(settings, :index_name, tmp_index_name)
+
+    Index.ensure_settings(tmp_settings)
+
+    reindex(tmp_settings, module, index_attributes, nil)
+
+    Config.client_http().move_index(tmp_index_name, %{
+      operation: "move",
+      destination: "#{index_name}"
+    })
   end
 
   defp build_batch_object(settings, module, model, attributes, action) do
