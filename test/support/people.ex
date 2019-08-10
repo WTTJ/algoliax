@@ -1,4 +1,6 @@
 defmodule Algoliax.People do
+  @moduledoc false
+
   use Algoliax,
     index_name: :algoliax_people,
     attributes_for_faceting: ["age"],

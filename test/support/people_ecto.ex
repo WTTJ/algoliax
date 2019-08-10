@@ -1,4 +1,6 @@
 defmodule Algoliax.PeopleEcto do
+  @moduledoc false
+
   use Ecto.Schema
 
   use Algoliax,

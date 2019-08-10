@@ -16,6 +16,8 @@ defmodule Algoliax.Resources.Object do
   def save_objects(settings, module, models, attributes, opts) do
     Index.ensure_settings(settings)
 
+    save_objects_tmp(settings, module, models, attributes, opts)
+
     index_name = Utils.index_name(settings)
 
     objects =
@@ -33,6 +35,8 @@ defmodule Algoliax.Resources.Object do
 
   def save_object(settings, module, model, attributes) do
     Index.ensure_settings(settings)
+
+    save_object_tmp(settings, module, model, attributes)
 
     if apply(module, :to_be_indexed?, [model]) do
       object = build_object(settings, module, model, attributes)
@@ -74,18 +78,50 @@ defmodule Algoliax.Resources.Object do
     Index.ensure_settings(settings)
 
     index_name = Utils.index_name(settings)
-
     tmp_index_name = :"#{index_name}.tmp"
     tmp_settings = Keyword.put(settings, :index_name, tmp_index_name)
 
     Index.ensure_settings(tmp_settings)
+    Algoliax.Agent.start_reindexing(index_name)
 
     reindex(tmp_settings, module, index_attributes, nil)
 
-    Config.client_http().move_index(tmp_index_name, %{
-      operation: "move",
-      destination: "#{index_name}"
-    })
+    response =
+      Config.client_http().move_index(tmp_index_name, %{
+        operation: "move",
+        destination: "#{index_name}"
+      })
+
+    Algoliax.Agent.delete_settings(tmp_index_name)
+    Algoliax.Agent.stop_reindexing(index_name)
+
+    response
+  end
+
+  def save_object_tmp(settings, module, model, attributes) do
+    Task.async(fn ->
+      index_name = Utils.index_name(settings)
+
+      if Algoliax.Agent.reindexing?(index_name) do
+        tmp_index_name = :"#{index_name}.tmp"
+        tmp_settings = Algoliax.Agent.get_settings(tmp_index_name)
+
+        save_object(tmp_settings, module, model, attributes)
+      end
+    end)
+  end
+
+  def save_objects_tmp(settings, module, models, attributes, opts) do
+    Task.async(fn ->
+      index_name = Utils.index_name(settings)
+
+      if Algoliax.Agent.reindexing?(index_name) do
+        tmp_index_name = :"#{index_name}.tmp"
+        tmp_settings = Algoliax.Agent.get_settings(tmp_index_name)
+
+        save_objects(tmp_settings, module, models, attributes, opts)
+      end
+    end)
   end
 
   defp build_batch_object(settings, module, model, attributes, action) do
