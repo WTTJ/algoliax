@@ -1,6 +1,6 @@
 # Algoliax
 
-![](https://github.com/StephaneRob/algoliax/workflows/test_workflow/badge.svg)
+![https://github.com/StephaneRob/algoliax/actions](https://github.com/StephaneRob/algoliax/workflows/mix%20test/badge.svg)
 
 This package let you easily integrate Algolia to your elixir application. It can be used with built in elixir struct or with [ecto](https://github.com/elixir-ecto/ecto) schemas.
 

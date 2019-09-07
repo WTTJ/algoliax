@@ -1,4 +1,4 @@
-name: test_workflow
+name: mix test
 
 on: push
 
