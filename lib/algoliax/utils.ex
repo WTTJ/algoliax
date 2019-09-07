@@ -72,12 +72,14 @@ defmodule Algoliax.Utils do
 
     results = repo.all(q)
 
-    exectute.(results)
+    response = exectute.(results)
 
     if length(results) == @batch_size do
       last_id = results |> List.last() |> Map.get(:id)
 
-      find_in_batches(repo, query, exectute, last_id)
+      find_in_batches(repo, query, last_id, exectute)
+    else
+      response
     end
   end
 end

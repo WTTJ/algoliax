@@ -42,7 +42,8 @@ defmodule Algoliax.MixProject do
       {:postgrex, ">= 0.0.0"},
       {:inflex, "~> 2.0.0"},
       {:mox, "~> 0.5", only: :test},
-      {:credo, "~> 1.1.2", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.1.2", only: [:dev, :test], runtime: false},
+      {:faker, "~> 0.12", only: :test}
     ]
   end
 

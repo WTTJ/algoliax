@@ -32,59 +32,59 @@ defmodule Algoliax.Client.Http do
   def get_object(index_name, object) do
     Logger.debug("Getting object #{inspect(object)}")
     {method, url} = Routes.url(:get_object, index_name, object)
-    do_request(method, url)
+    request(method, url)
   end
 
   @impl Algoliax.Client
   def save_objects(index_name, objects) do
     Logger.debug("Saving objects #{inspect(objects)}")
     {method, url} = Routes.url(:save_objects, index_name, objects)
-    do_request(method, url, objects)
+    request(method, url, objects)
   end
 
   @impl Algoliax.Client
   def save_object(index_name, object) do
     Logger.debug("Saving object #{inspect(object)}")
     {method, url} = Routes.url(:save_object, index_name, object)
-    do_request(method, url, object)
+    request(method, url, object)
   end
 
   @impl Algoliax.Client
   def delete_object(index_name, object) do
     Logger.debug("Deleting object #{inspect(object)}")
     {method, url} = Routes.url(:delete_object, index_name, object)
-    do_request(method, url)
+    request(method, url)
   end
 
   @impl Algoliax.Client
   def get_settings(index_name) do
     Logger.debug("Getting settings for index = #{index_name}")
     {method, url} = Routes.url(:get_settings, index_name, nil)
-    do_request(method, url)
+    request(method, url)
   end
 
   @impl Algoliax.Client
   def configure_index(index_name, settings) do
     Logger.debug("Configuring index = #{index_name} with #{inspect(settings)}")
     {method, url} = Routes.url(:configure_index, index_name, settings)
-    do_request(method, url, settings)
+    request(method, url, settings)
   end
 
   @impl Algoliax.Client
   def delete_index(index_name) do
     Logger.debug("Deleting index = #{index_name}")
     {method, url} = Routes.url(:delete_index, index_name, nil)
-    do_request(method, url)
+    request(method, url)
   end
 
   @impl Algoliax.Client
   def move_index(index_name, body) do
     Logger.debug("Moving index = #{index_name}")
     {method, url} = Routes.url(:move_index, index_name, nil)
-    do_request(method, url, body)
+    request(method, url, body)
   end
 
-  defp do_request(method, url, body \\ nil) do
+  defp request(method, url, body \\ nil) do
     method
     |> :hackney.request(url, request_headers(), Jason.encode!(body), [:with_body])
     |> case do

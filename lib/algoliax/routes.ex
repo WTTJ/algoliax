@@ -5,6 +5,11 @@ defmodule Algoliax.Routes do
   @suffix_host_read "-dsn.algolia.net/1/indexes"
   @suffix_host_write ".algolia.net/1/indexes"
 
+  @fallback_host "-%{retry}.algolianet.com"
+
+  # def url(action, retry \\ 0) do
+  # end
+
   def url(:delete_index, index_name, _) do
     path = "/#{index_name}"
     url = url(:write, path)
