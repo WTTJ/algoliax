@@ -9,6 +9,16 @@ jobs:
     container:
       image: elixir:1.9.1-slim
 
+    services:
+      postgres:
+        image: postgres:11.5-alpine
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: algoliax
+          POSTGRES_DB: algoliax_test
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
     steps:
       - uses: actions/checkout@v1
       - name: Install Dependencies
@@ -18,3 +28,7 @@ jobs:
           mix deps.get
       - name: Run Tests
         run: mix test
+        env:
+          DB_USERNAME: algoliax
+          POSTGRES_HOST: postgres
+          POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}
