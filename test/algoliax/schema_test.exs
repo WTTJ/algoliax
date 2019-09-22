@@ -24,7 +24,7 @@ defmodule AlgoliaxTest.Schema do
     :ok
   end
 
-  test "save_object" do
+  test "reindex" do
     Algoliax.Client.HttpMock
     |> expect(:save_objects, fn :algoliax_people, _ ->
       %{
@@ -34,5 +34,17 @@ defmodule AlgoliaxTest.Schema do
     end)
 
     PeopleEcto.reindex()
+  end
+
+  test "reindex_atomic" do
+    Algoliax.Client.HttpMock
+    |> expect(:save_objects, fn :algoliax_people, _ ->
+      %{
+        "taskID" => 792,
+        "objectIDs" => [@ref2, @ref1]
+      }
+    end)
+
+    PeopleEcto.reindex_atomic()
   end
 end

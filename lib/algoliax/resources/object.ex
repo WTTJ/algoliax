@@ -75,6 +75,8 @@ defmodule Algoliax.Resources.Object do
   end
 
   def reindex_atomic(settings, module, index_attributes) do
+    Utils.repo(settings)
+
     Index.ensure_settings(settings)
 
     index_name = Utils.index_name(settings)

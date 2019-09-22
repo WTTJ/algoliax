@@ -56,12 +56,6 @@ defmodule Algoliax.Utils do
     end
   end
 
-  def cursor_attribute(settings) do
-    cursor_attribute = Keyword.get(settings, :cursor_attribute)
-
-    if cursor_attribute, do: cursor_attribute, else: :id
-  end
-
   def find_in_batches(repo, query, id, exectute) do
     q =
       if id > 0 do

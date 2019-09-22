@@ -7,10 +7,6 @@ defmodule Algoliax.Agent do
     Agent.start_link(fn -> %{} end, name: __MODULE__)
   end
 
-  def stop do
-    Agent.stop(__MODULE__)
-  end
-
   def reset do
     Agent.update(__MODULE__, fn _state ->
       %{}
@@ -73,11 +69,5 @@ defmodule Algoliax.Agent do
     Agent.update(__MODULE__, fn state ->
       Map.delete(state, index_name)
     end)
-  end
-
-  def get_object_id_attribute(index_name) do
-    index_name
-    |> get_settings()
-    |> Keyword.get(:object_id)
   end
 end
