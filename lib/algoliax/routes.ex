@@ -2,67 +2,55 @@ defmodule Algoliax.Routes do
   @moduledoc false
   alias Algoliax.Config
 
-  @suffix_host_read "-dsn.algolia.net/1/indexes"
-  @suffix_host_write ".algolia.net/1/indexes"
+  @host_read "-dsn.algolia.net/1/indexes"
+  @host_write ".algolia.net/1/indexes"
+  @host_retry ".algolianet.com/1/indexes"
 
-  @fallback_host "-%{retry}.algolianet.com"
+  @paths %{
+    delete_index: {"/{index_name}", :delete},
+    move_index: {"/{index_name}/operation", :post},
+    get_settings: {"/{index_name}/settings", :get},
+    configure_index: {"/{index_name}/settings", :put},
+    save_objects: {"/{index_name}/batch", :post},
+    get_object: {"/{index_name}/{object_id}", :get},
+    save_object: {"/{index_name}/{object_id}", :put},
+    delete_object: {"/{index_name}/{object_id}", :delete}
+  }
 
-  # def url(action, retry \\ 0) do
-  # end
+  def url(action, url_params, retry \\ 0) do
+    {action_path, method} =
+      @paths
+      |> Map.get(action)
 
-  def url(:delete_index, index_name, _) do
-    path = "/#{index_name}"
-    url = url(:write, path)
-    {:delete, url}
+    url =
+      action_path
+      |> build_path(url_params)
+      |> build_url(method, retry)
+
+    {method, url}
   end
 
-  def url(:move_index, index_name, _) do
-    path = "/#{index_name}/operation"
-    url = url(:write, path)
-    {:post, url}
+  defp build_path(path, args) do
+    args
+    |> Keyword.keys()
+    |> Enum.reduce(path, fn key, path ->
+      path
+      |> String.replace("{#{key}}", "#{Keyword.get(args, key)}")
+    end)
   end
 
-  def url(:get_settings, index_name, _) do
-    path = "/#{index_name}/settings"
-    url = url(:read, path)
-    {:get, url}
+  defp build_url(path, method, 0) do
+    host =
+      if method == :get do
+        @host_read
+      else
+        @host_write
+      end
+
+    "https://" <> Config.application_id() <> host <> path
   end
 
-  def url(:configure_index, index_name, _) do
-    path = "/#{index_name}/settings"
-    url = url(:write, path)
-    {:put, url}
-  end
-
-  def url(:save_objects, index_name, _) do
-    path = "/#{index_name}/batch"
-    url = url(:write, path)
-    {:post, url}
-  end
-
-  def url(:get_object, index_name, %{objectID: object_id}) do
-    path = "/#{index_name}/#{object_id}"
-    url = url(:read, path)
-    {:get, url}
-  end
-
-  def url(:save_object, index_name, %{objectID: object_id}) do
-    path = "/#{index_name}/#{object_id}"
-    url = url(:write, path)
-    {:put, url}
-  end
-
-  def url(:delete_object, index_name, %{objectID: object_id}) do
-    path = "/#{index_name}/#{object_id}"
-    url = url(:write, path)
-    {:delete, url}
-  end
-
-  defp url(:write, path) do
-    "https://" <> Config.application_id() <> @suffix_host_write <> path
-  end
-
-  defp url(:read, path) do
-    "https://" <> Config.application_id() <> @suffix_host_read <> path
+  defp build_url(path, _method, retry) do
+    "https://" <> Config.application_id() <> "-" <> "#{retry}" <> @host_retry <> path
   end
 end

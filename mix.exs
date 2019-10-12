@@ -10,6 +10,13 @@ defmodule Algoliax.MixProject do
       deps: deps(),
       aliases: aliases(),
       elixirc_paths: elixirc_paths(Mix.env()),
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test
+      ],
 
       # docs
       name: "Algoliax",
@@ -35,15 +42,17 @@ defmodule Algoliax.MixProject do
 
   defp deps do
     [
-      {:hackney, "~> 1.15.1"},
+      {:hackney, "~> 1.15.2"},
       {:jason, "~> 1.1"},
       {:ex_doc, "~> 0.21", only: :dev, runtime: false, override: true},
       {:ecto_sql, "~> 3.0"},
       {:postgrex, ">= 0.0.0"},
       {:inflex, "~> 2.0.0"},
       {:mox, "~> 0.5", only: :test},
+      {:mock, "~> 0.3.0", only: :test},
       {:credo, "~> 1.1.2", only: [:dev, :test], runtime: false},
-      {:faker, "~> 0.12", only: :test}
+      {:faker, "~> 0.12", only: :test},
+      {:excoveralls, "~> 0.10", only: :test}
     ]
   end
 

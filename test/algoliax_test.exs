@@ -3,7 +3,65 @@ defmodule AlgoliaxTest do
 
   import Mox
   alias Algoliax.People
-  alias Algoliax.PeopleGreater50
+
+  defmodule People do
+    @moduledoc false
+
+    use Algoliax,
+      index_name: :algoliax_people,
+      attributes_for_faceting: ["age"],
+      searchable_attributes: ["full_name"],
+      custom_ranking: ["desc(update_at)"],
+      object_id: :reference
+
+    defstruct reference: nil, last_name: nil, first_name: nil, age: nil
+
+    attributes([:first_name, :last_name])
+
+    attribute(:age)
+
+    attribute(:updated_at, Date.utc_today())
+
+    attribute :full_name do
+      Map.get(model, :first_name, "") <> " " <> Map.get(model, :last_name, "")
+    end
+
+    attribute :nickname do
+      Map.get(model, :first_name, "") |> String.downcase()
+    end
+  end
+
+  defmodule PeopleGreater50 do
+    @moduledoc false
+
+    use Algoliax,
+      index_name: :algoliax_people,
+      attributes_for_faceting: ["age"],
+      searchable_attributes: ["full_name"],
+      custom_ranking: ["desc(update_at)"],
+      object_id: :reference
+
+    defstruct reference: nil, last_name: nil, first_name: nil, age: nil
+
+    attributes([:first_name, :last_name])
+
+    attribute(:age)
+
+    attribute(:updated_at, Date.utc_today())
+
+    attribute :full_name do
+      Map.get(model, :first_name, "") <> " " <> Map.get(model, :last_name, "")
+    end
+
+    attribute :nickname do
+      Map.get(model, :first_name, "") |> String.downcase()
+    end
+
+    @impl Algoliax
+    def to_be_indexed?(model) do
+      model.age > 50
+    end
+  end
 
   setup :verify_on_exit!
 
@@ -39,7 +97,7 @@ defmodule AlgoliaxTest do
     end
 
     test "save_object" do
-      Algoliax.Client.HttpMock
+      Algoliax.RequestsMock
       |> expect(:save_object, fn :algoliax_people,
                                  %{
                                    age: 20,
@@ -67,7 +125,7 @@ defmodule AlgoliaxTest do
     end
 
     test "save_objects" do
-      Algoliax.Client.HttpMock
+      Algoliax.RequestsMock
       |> expect(:save_objects, fn :algoliax_people,
                                   %{
                                     requests: [
@@ -129,7 +187,7 @@ defmodule AlgoliaxTest do
     end
 
     test "save_object" do
-      Algoliax.Client.HttpMock
+      Algoliax.RequestsMock
       |> expect(:save_object, 0, fn :algoliax_people, _ ->
         %{
           "updatedAt" => "2013-01-18T15:33:13.556Z",
@@ -144,7 +202,7 @@ defmodule AlgoliaxTest do
     end
 
     test "save_objects" do
-      Algoliax.Client.HttpMock
+      Algoliax.RequestsMock
       |> expect(:save_objects, fn :algoliax_people,
                                   %{
                                     requests: [
@@ -180,7 +238,7 @@ defmodule AlgoliaxTest do
     end
 
     test "save_objects with force_delete" do
-      Algoliax.Client.HttpMock
+      Algoliax.RequestsMock
       |> expect(:save_objects, fn :algoliax_people,
                                   %{
                                     requests: [
@@ -226,5 +284,10 @@ defmodule AlgoliaxTest do
                "objectIDs" => ["89", "10"]
              } == PeopleGreater50.save_objects(peoples, force_delete: true)
     end
+  end
+
+  test "generate secured api key" do
+    Application.put_env(:algoliax, :api_key, "api_key")
+    assert Algoliax.generate_secured_api_key("reference:10")
   end
 end

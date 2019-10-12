@@ -10,7 +10,7 @@ defmodule Algoliax.Resources.Object do
     Index.ensure_settings(settings)
 
     object_id = get_object_id(settings, module, model, attributes)
-    Config.client_http().get_object(Utils.index_name(settings), %{objectID: object_id})
+    Config.requests().get_object(Utils.index_name(settings), %{objectID: object_id})
   end
 
   def save_objects(settings, module, models, attributes, opts) do
@@ -30,7 +30,7 @@ defmodule Algoliax.Resources.Object do
       end)
       |> Enum.reject(&is_nil/1)
 
-    Config.client_http().save_objects(index_name, %{requests: objects})
+    Config.requests().save_objects(index_name, %{requests: objects})
   end
 
   def save_object(settings, module, model, attributes) do
@@ -41,7 +41,7 @@ defmodule Algoliax.Resources.Object do
     if apply(module, :to_be_indexed?, [model]) do
       object = build_object(settings, module, model, attributes)
       index_name = Utils.index_name(settings)
-      Config.client_http().save_object(index_name, object)
+      Config.requests().save_object(index_name, object)
     else
       {:not_indexable, model}
     end
@@ -52,7 +52,7 @@ defmodule Algoliax.Resources.Object do
 
     object = build_object(settings, module, model, attributes)
     index_name = Utils.index_name(settings)
-    Config.client_http().delete_object(index_name, object)
+    Config.requests().delete_object(index_name, object)
   end
 
   def reindex(settings, module, index_attributes, query, opts \\ []) do
@@ -75,6 +75,8 @@ defmodule Algoliax.Resources.Object do
   end
 
   def reindex_atomic(settings, module, index_attributes) do
+    Utils.repo(settings)
+
     Index.ensure_settings(settings)
 
     index_name = Utils.index_name(settings)
@@ -87,7 +89,7 @@ defmodule Algoliax.Resources.Object do
     reindex(tmp_settings, module, index_attributes, nil)
 
     response =
-      Config.client_http().move_index(tmp_index_name, %{
+      Config.requests().move_index(tmp_index_name, %{
         operation: "move",
         destination: "#{index_name}"
       })
