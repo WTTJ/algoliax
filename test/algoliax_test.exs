@@ -97,7 +97,7 @@ defmodule AlgoliaxTest do
     end
 
     test "save_object" do
-      Algoliax.Client.HttpMock
+      Algoliax.RequestsMock
       |> expect(:save_object, fn :algoliax_people,
                                  %{
                                    age: 20,
@@ -125,7 +125,7 @@ defmodule AlgoliaxTest do
     end
 
     test "save_objects" do
-      Algoliax.Client.HttpMock
+      Algoliax.RequestsMock
       |> expect(:save_objects, fn :algoliax_people,
                                   %{
                                     requests: [
@@ -187,7 +187,7 @@ defmodule AlgoliaxTest do
     end
 
     test "save_object" do
-      Algoliax.Client.HttpMock
+      Algoliax.RequestsMock
       |> expect(:save_object, 0, fn :algoliax_people, _ ->
         %{
           "updatedAt" => "2013-01-18T15:33:13.556Z",
@@ -202,7 +202,7 @@ defmodule AlgoliaxTest do
     end
 
     test "save_objects" do
-      Algoliax.Client.HttpMock
+      Algoliax.RequestsMock
       |> expect(:save_objects, fn :algoliax_people,
                                   %{
                                     requests: [
@@ -238,7 +238,7 @@ defmodule AlgoliaxTest do
     end
 
     test "save_objects with force_delete" do
-      Algoliax.Client.HttpMock
+      Algoliax.RequestsMock
       |> expect(:save_objects, fn :algoliax_people,
                                   %{
                                     requests: [

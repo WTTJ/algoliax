@@ -18,7 +18,7 @@ defmodule Algoliax.Resources.Index do
 
   def get_settings(settings) do
     index_name = Utils.index_name(settings)
-    algolia_remote_settings = Config.client_http().get_settings(index_name)
+    algolia_remote_settings = Config.requests().get_settings(index_name)
     Agent.set_settings(index_name, algolia_remote_settings)
     algolia_remote_settings
   end
@@ -32,11 +32,11 @@ defmodule Algoliax.Resources.Index do
         {Settings.to_algolia_setting(setting), Keyword.get(settings, setting)}
       end)
 
-    Config.client_http().configure_index(index_name, algolia_settings)
+    Config.requests().configure_index(index_name, algolia_settings)
   end
 
   def delete_index(settings) do
     index_name = Utils.index_name(settings)
-    Config.client_http().delete_index(index_name)
+    Config.requests().delete_index(index_name)
   end
 end

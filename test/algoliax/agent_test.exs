@@ -43,7 +43,7 @@ defmodule Algoliax.AgentTest do
     assert :sys.get_state(agent_pid) == %{reindexing: %{}}
   end
 
-  test "reindexing?", %{agent_pid: agent_pid} do
+  test "reindexing?" do
     Agent.start_reindexing(@index_name)
     assert Agent.reindexing?(@index_name) == true
     Agent.stop_reindexing(@index_name)

@@ -1,75 +1,53 @@
 defmodule Algoliax.ClientTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
   import Mock
 
-  test_with_mock "save object", Algoliax.Request,
-    request: fn %{
-                  action: :save_object,
-                  url_params: [index_name: :index_name, object_id: 10],
-                  body: object
-                } ->
-      %{}
-    end do
-    Algoliax.Client.Http.save_object(:index_name, %{objectID: 10})
+  test_with_mock "test retries", :hackney, request: fn _, _, _, _, _ -> {:error, %{}} end do
+    Application.put_env(:algoliax, :api_key, "api_key")
 
-    assert_called(
-      Algoliax.Request.request(%{
-        action: :save_object,
-        body: %{objectID: 10},
-        url_params: [index_name: :index_name, object_id: 10]
-      })
+    Algoliax.Client.request(
+      %{action: :get_object, url_params: [index_name: :index_name, object_id: 10]},
+      0
     )
-  end
-
-  test_with_mock "get object", Algoliax.Request,
-    request: fn %{
-                  action: :get_object,
-                  url_params: [index_name: :index_name, object_id: 10]
-                } ->
-      %{}
-    end do
-    Algoliax.Client.Http.get_object(:index_name, %{objectID: 10})
 
     assert_called(
-      Algoliax.Request.request(%{
-        action: :get_object,
-        url_params: [index_name: :index_name, object_id: 10]
-      })
+      :hackney.request(
+        :get,
+        "https://APPLICATION_ID-dsn.algolia.net/1/indexes/index_name/10",
+        [{"X-Algolia-API-Key", "api_key"}, {"X-Algolia-Application-Id", "APPLICATION_ID"}],
+        "null",
+        [:with_body]
+      )
     )
-  end
-
-  test_with_mock "delete object", Algoliax.Request,
-    request: fn %{
-                  action: :delete_object,
-                  url_params: [index_name: :index_name, object_id: 10]
-                } ->
-      %{}
-    end do
-    Algoliax.Client.Http.delete_object(:index_name, %{objectID: 10})
 
     assert_called(
-      Algoliax.Request.request(%{
-        action: :delete_object,
-        url_params: [index_name: :index_name, object_id: 10]
-      })
+      :hackney.request(
+        :get,
+        "https://APPLICATION_ID-1.algolianet.com/1/indexes/index_name/10",
+        [{"X-Algolia-API-Key", "api_key"}, {"X-Algolia-Application-Id", "APPLICATION_ID"}],
+        "null",
+        [:with_body]
+      )
     )
-  end
-
-  test_with_mock "save objects", Algoliax.Request,
-    request: fn %{
-                  action: :save_objects,
-                  url_params: [index_name: :index_name],
-                  body: %{requests: [%{objectID: 10}]}
-                } ->
-      %{}
-    end do
-    Algoliax.Client.Http.save_objects(:index_name, %{requests: [%{objectID: 10}]})
 
     assert_called(
-      Algoliax.Request.request(%{
-        action: :save_objects,
-        url_params: [index_name: :index_name]
-      })
+      :hackney.request(
+        :get,
+        "https://APPLICATION_ID-2.algolianet.com/1/indexes/index_name/10",
+        [{"X-Algolia-API-Key", "api_key"}, {"X-Algolia-Application-Id", "APPLICATION_ID"}],
+        "null",
+        [:with_body]
+      )
+    )
+
+    assert_called(
+      :hackney.request(
+        :get,
+        "https://APPLICATION_ID-3.algolianet.com/1/indexes/index_name/10",
+        [{"X-Algolia-API-Key", "api_key"}, {"X-Algolia-Application-Id", "APPLICATION_ID"}],
+        "null",
+        [:with_body]
+      )
     )
   end
 end

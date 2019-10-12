@@ -1,1 +1,1 @@
-Mox.defmock(Algoliax.Client.HttpMock, for: Algoliax.Client)
+Mox.defmock(Algoliax.RequestsMock, for: Algoliax.RequestsBehaviour)

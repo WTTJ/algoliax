@@ -1,11 +1,11 @@
 defmodule Algoliax.Config do
   @moduledoc false
 
-  def client_http do
+  def requests do
     if Mix.env() == :test do
-      Algoliax.Client.HttpMock
+      Algoliax.RequestsMock
     else
-      Algoliax.Client.Http
+      Algoliax.Requests
     end
   end
 

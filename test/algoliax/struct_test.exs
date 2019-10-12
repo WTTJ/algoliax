@@ -31,7 +31,7 @@ defmodule AlgoliaxTest.Struct do
   end
 
   test "save_object" do
-    Algoliax.Client.HttpMock
+    Algoliax.RequestsMock
     |> expect(:save_object, fn _, _ ->
       %{}
     end)
@@ -42,7 +42,7 @@ defmodule AlgoliaxTest.Struct do
   end
 
   test "save_objects" do
-    Algoliax.Client.HttpMock
+    Algoliax.RequestsMock
     |> expect(:save_objects, fn _, _ ->
       %{}
     end)
@@ -56,7 +56,7 @@ defmodule AlgoliaxTest.Struct do
   end
 
   test "get_object" do
-    Algoliax.Client.HttpMock
+    Algoliax.RequestsMock
     |> expect(:get_object, fn _, _ ->
       %{}
     end)
@@ -66,7 +66,7 @@ defmodule AlgoliaxTest.Struct do
   end
 
   test "delete_object" do
-    Algoliax.Client.HttpMock
+    Algoliax.RequestsMock
     |> expect(:delete_object, fn _, _ ->
       %{}
     end)

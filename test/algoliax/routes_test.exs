@@ -34,17 +34,17 @@ defmodule Algoliax.RoutesTest do
                {:post, "https://APPLICATION_ID.algolia.net/1/indexes/algolia_index/batch"}
     end
 
-    test "url get_object", %{people: people} do
+    test "url get_object" do
       assert Routes.url(:get_object, index_name: @index_name, object_id: 10) ==
                {:get, "https://APPLICATION_ID-dsn.algolia.net/1/indexes/algolia_index/10"}
     end
 
-    test "url save_object", %{people: people} do
+    test "url save_object" do
       assert Routes.url(:save_object, index_name: @index_name, object_id: 10) ==
                {:put, "https://APPLICATION_ID.algolia.net/1/indexes/algolia_index/10"}
     end
 
-    test "url delete_object", %{people: people} do
+    test "url delete_object" do
       assert Routes.url(:delete_object, index_name: @index_name, object_id: 10) ==
                {:delete, "https://APPLICATION_ID.algolia.net/1/indexes/algolia_index/10"}
     end
@@ -71,17 +71,17 @@ defmodule Algoliax.RoutesTest do
                {:post, "https://APPLICATION_ID-1.algolianet.com/1/indexes/algolia_index/batch"}
     end
 
-    test "url get_object", %{people: people} do
+    test "url get_object" do
       assert Routes.url(:get_object, [index_name: @index_name, object_id: 10], 1) ==
                {:get, "https://APPLICATION_ID-1.algolianet.com/1/indexes/algolia_index/10"}
     end
 
-    test "url save_object", %{people: people} do
+    test "url save_object" do
       assert Routes.url(:save_object, [index_name: @index_name, object_id: 10], 1) ==
                {:put, "https://APPLICATION_ID-1.algolianet.com/1/indexes/algolia_index/10"}
     end
 
-    test "url delete_object", %{people: people} do
+    test "url delete_object" do
       assert Routes.url(:delete_object, [index_name: @index_name, object_id: 10], 1) ==
                {:delete, "https://APPLICATION_ID-1.algolianet.com/1/indexes/algolia_index/10"}
     end

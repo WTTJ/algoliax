@@ -1,113 +1,54 @@
 defmodule Algoliax.Client do
-  @moduledoc false
-
-  @callback get_object(index_name :: binary(), object :: map()) :: {:ok, map()} | {:error, any()}
-
-  @callback save_objects(index_name :: binary(), objects :: map()) ::
-              {:ok, map()} | {:error, any()}
-
-  @callback save_object(index_name :: binary(), object :: map()) :: {:ok, map()} | {:error, any()}
-
-  @callback delete_object(index_name :: binary(), object :: map()) ::
-              {:ok, map()} | {:error, any()}
-
-  @callback get_settings(index_name :: binary()) :: {:ok, map()} | {:error, any()}
-
-  @callback configure_index(index_name :: binary(), Keyword.t()) :: {:ok, map()} | {:error, any()}
-
-  @callback delete_index(index_name :: binary()) :: {:ok, map()} | {:error, any()}
-
-  @callback move_index(index_name :: binary(), new_index_name :: binary()) ::
-              {:ok, map()} | {:error, any()}
-end
-
-defmodule Algoliax.Client.Http do
-  @moduledoc false
   require Logger
 
-  import Algoliax.Request
+  alias Algoliax.{Config, Routes}
 
-  @behaviour Algoliax.Client
+  def request(request, retry \\ 0)
 
-  @impl Algoliax.Client
-  def get_object(index_name, %{objectID: object_id} = object) do
-    Logger.debug("Getting object #{inspect(object)}")
-
-    request(%{
-      action: :get_object,
-      url_params: [index_name: index_name, object_id: object_id]
-    })
+  def request(_request, 4) do
+    {:error, "Failed after 3 attempts"}
   end
 
-  @impl Algoliax.Client
-  def save_objects(index_name, objects) do
-    Logger.debug("Saving objects #{inspect(objects)}")
+  def request(%{action: action, url_params: url_params} = request, retry) do
+    body = Map.get(request, :body)
+    {method, url} = Routes.url(action, url_params, retry)
 
-    request(%{
-      action: :save_objects,
-      url_params: [index_name: index_name],
-      body: objects
-    })
+    log(action, method, url, body)
+
+    method
+    |> :hackney.request(url, request_headers(), Jason.encode!(body), [:with_body])
+    |> case do
+      {:ok, code, _headers, response} when code in 200..299 ->
+        {:ok, Jason.decode!(response)}
+
+      {:ok, code, _, response} ->
+        {:error, code, response}
+
+      error ->
+        Logger.debug("#{inspect(error)}")
+        request(request, retry + 1)
+    end
   end
 
-  @impl Algoliax.Client
-  def save_object(index_name, %{objectID: object_id} = object) do
-    Logger.debug("Saving object #{inspect(object)}")
-
-    request(%{
-      action: :save_object,
-      url_params: [index_name: index_name, object_id: object_id],
-      body: object
-    })
+  defp request_headers do
+    [
+      {"X-Algolia-API-Key", Config.api_key()},
+      {"X-Algolia-Application-Id", Config.application_id()}
+    ]
   end
 
-  @impl Algoliax.Client
-  def delete_object(index_name, %{objectID: object_id} = object) do
-    Logger.debug("Deleting object #{inspect(object)}")
+  defp log(action, method, url, body) do
+    action = action |> to_string() |> String.upcase()
+    method = method |> to_string() |> String.upcase()
+    message = "#{action}: #{method} #{url}"
 
-    request(%{
-      action: :delete_object,
-      url_params: [index_name: index_name, object_id: object_id],
-      body: object
-    })
-  end
+    message =
+      if body do
+        message <> ", body: #{inspect(body)}"
+      else
+        message
+      end
 
-  @impl Algoliax.Client
-  def get_settings(index_name) do
-    Logger.debug("Getting settings for index = #{index_name}")
-
-    request(%{
-      action: :get_settings,
-      url_params: [index_name: index_name]
-    })
-  end
-
-  @impl Algoliax.Client
-  def configure_index(index_name, settings) do
-    Logger.debug("Configuring index = #{index_name} with #{inspect(settings)}")
-
-    request(%{
-      action: :configure_index,
-      url_params: [index_name: index_name],
-      body: settings
-    })
-  end
-
-  @impl Algoliax.Client
-  def delete_index(index_name) do
-    Logger.debug("Deleting index = #{index_name}")
-
-    request(%{action: :delete_index, url_params: [index_name: index_name]})
-  end
-
-  @impl Algoliax.Client
-  def move_index(index_name, body) do
-    Logger.debug("Moving index = #{index_name}")
-
-    request(%{
-      action: :move_index,
-      url_params: [index_name: index_name],
-      body: body
-    })
+    Logger.debug(message)
   end
 end
