@@ -7,6 +7,8 @@ defmodule Algoliax.Routes do
   @host_retry ".algolianet.com/1/indexes"
 
   @paths %{
+    search_index: {"/{index_name}/query", :post},
+    search_facet: {"/{index_name}/facets/{facet_name}/query", :post},
     delete_index: {"/{index_name}", :delete},
     move_index: {"/{index_name}/operation", :post},
     get_settings: {"/{index_name}/settings", :get},

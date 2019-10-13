@@ -76,4 +76,16 @@ defmodule Algoliax.Utils do
       response
     end
   end
+
+  def camelize(params) when is_map(params) do
+    Enum.into(params, %{}, fn {k, v} ->
+      {camelize(k), v}
+    end)
+  end
+
+  def camelize(key) do
+    key
+    |> Atom.to_string()
+    |> Inflex.camelize(:lower)
+  end
 end

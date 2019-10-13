@@ -1,4 +1,6 @@
 defmodule Algoliax.Client do
+  @moduledoc false
+
   require Logger
 
   alias Algoliax.{Config, Routes}

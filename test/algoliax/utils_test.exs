@@ -37,4 +37,15 @@ defmodule Algoliax.UtilsTest do
       end)
     end
   end
+
+  describe "Camelize" do
+    test "an atom" do
+      assert Algoliax.Utils.camelize(:foo_bar) == "fooBar"
+    end
+
+    test "a map" do
+      a = %{foo_bar: "test", bar_foo: "test"}
+      assert Algoliax.Utils.camelize(a) == %{"fooBar" => "test", "barFoo" => "test"}
+    end
+  end
 end

@@ -1,4 +1,6 @@
 defmodule Algoliax.Settings do
+  @moduledoc false
+
   @algolia_settings [
     :searchable_attributes,
     :attributes_for_faceting,
@@ -54,11 +56,5 @@ defmodule Algoliax.Settings do
 
   def settings do
     @algolia_settings
-  end
-
-  def to_algolia_setting(setting) do
-    setting
-    |> Atom.to_string()
-    |> Inflex.camelize(:lower)
   end
 end

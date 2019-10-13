@@ -29,7 +29,7 @@ defmodule Algoliax.Resources.Index do
     algolia_settings =
       Settings.settings()
       |> Enum.into(%{}, fn setting ->
-        {Settings.to_algolia_setting(setting), Keyword.get(settings, setting)}
+        {Utils.camelize(setting), Keyword.get(settings, setting)}
       end)
 
     Config.requests().configure_index(index_name, algolia_settings)

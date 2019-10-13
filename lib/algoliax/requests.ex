@@ -29,6 +29,26 @@ defmodule Algoliax.Requests do
 
   @behaviour Algoliax.RequestsBehaviour
 
+  def search_index(index_name, body) do
+    Logger.debug("Searching object #{inspect(body)}")
+
+    request(%{
+      action: :search_index,
+      url_params: [index_name: index_name],
+      body: body
+    })
+  end
+
+  def search_facet(index_name, facet_name, body) do
+    Logger.debug("Searching object #{inspect(body)}")
+
+    request(%{
+      action: :search_facet,
+      url_params: [index_name: index_name, facet_name: facet_name],
+      body: body
+    })
+  end
+
   @impl Algoliax.RequestsBehaviour
   def get_object(index_name, %{objectID: object_id} = object) do
     Logger.debug("Getting object #{inspect(object)}")
