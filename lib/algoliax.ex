@@ -15,7 +15,7 @@ defmodule Algoliax do
   - `:index_name`, specificy the index where the object will be added on. **Required**
   - `:object_id`, specify the attribute used to as algolia objectID. Default `:id`.
 
-  Any valid Algolia settings, using snake case. Ex: Algolia `attributeForFaceting` will be configured with `:attribute_for_faceting`
+  Any valid Algolia settings, using snake case or camel case. Ex: Algolia `attributeForFaceting` can be configured with `:attribute_for_faceting`
 
   On first call to Algolia, we check that the settings on Algolia are up to date.
 
@@ -47,8 +47,92 @@ defmodule Algoliax do
         end
       end
   """
-  alias Algoliax.Resources.{Index, Object}
+  alias Algoliax.Resources.{Index, Object, Search}
   alias Algoliax.{Config, Utils}
+
+  @doc """
+  Search for index values
+
+  ## Example
+
+      iex> People.search_index("John")
+
+      {:ok,
+        %{
+          "exhaustiveNbHits" => true,
+          "hits" => [
+            %{
+              "_highlightResult" => %{
+                "full_name" => %{
+                  "fullyHighlighted" => false,
+                  "matchLevel" => "full",
+                  "matchedWords" => ["john"],
+                  "value" => "Pierre <em>Jon</em>es"
+                }
+              },
+              "age" => 69,
+              "first_name" => "Pierre",
+              "full_name" => "Pierre Jones",
+              "indexed_at" => 1570908223,
+              "last_name" => "Jones",
+              "objectID" => "b563deb6-2a06-4428-8e5a-ca1ecc08f4e2"
+            },
+            %{
+              "_highlightResult" => %{
+                "full_name" => %{
+                  "fullyHighlighted" => false,
+                  "matchLevel" => "full",
+                  "matchedWords" => ["john"],
+                  "value" => "Glennie <em>Jon</em>es"
+                }
+              },
+              "age" => 27,
+              "first_name" => "Glennie",
+              "full_name" => "Glennie Jones",
+              "indexed_at" => 1570908223,
+              "last_name" => "Jones",
+              "objectID" => "58e8ff8d-2794-41e1-a4ef-6f8db8d432b6"
+            },
+            ...
+          ],
+      "hitsPerPage" => 20,
+      "nbHits" => 16,
+      "nbPages" => 1,
+      "page" => 0,
+      "params" => "query=john",
+      "processingTimeMS" => 1,
+      "query" => "john"
+      }}
+  """
+
+  @callback search_index(query :: binary(), params :: map()) ::
+              {:ok, map()} | {:not_indexable, model :: map()}
+
+  @doc """
+  Search for facet values
+
+  ## Example
+      iex> People.search_facet("age")
+      {:ok,
+        %{
+          "exhaustiveFacetsCount" => true,
+          "facetHits" => [
+            %{"count" => 22, "highlighted" => "46", "value" => "46"},
+            %{"count" => 21, "highlighted" => "38", "value" => "38"},
+            %{"count" => 19, "highlighted" => "54", "value" => "54"},
+            %{"count" => 19, "highlighted" => "99", "value" => "99"},
+            %{"count" => 18, "highlighted" => "36", "value" => "36"},
+            %{"count" => 18, "highlighted" => "45", "value" => "45"},
+            %{"count" => 18, "highlighted" => "52", "value" => "52"},
+            %{"count" => 18, "highlighted" => "56", "value" => "56"},
+            %{"count" => 18, "highlighted" => "59", "value" => "59"},
+            %{"count" => 18, "highlighted" => "86", "value" => "86"}
+          ],
+          "processingTimeMS" => 1
+        }}
+  """
+  @callback search_facet(facet_name :: binary(), facet_query :: binary(), params :: map()) ::
+              {:ok, map()} | {:not_indexable, model :: map()}
 
   @doc """
   Add/update object. The object is added/updated to algolia with the object_id configured.
@@ -112,7 +196,7 @@ defmodule Algoliax do
   @callback reindex_atomic() :: {:ok, map()} | {:error, map()}
 
   @doc """
-  Check if current object can be indexed or not. By default it's always true. To override this behaviour overide this function in your model
+  Check if current object must be indexed or not. By default it's always true. To override this behaviour overide this function in your model
 
   ## Example
 
@@ -158,6 +242,16 @@ defmodule Algoliax do
       @settings settings
 
       @before_compile unquote(__MODULE__)
+
+      @impl Algoliax
+      def search_index(query, params \\ %{}) do
+        Search.search_index(@settings, query, params)
+      end
+
+      @impl Algoliax
+      def search_facet(facet_name, facet_query \\ nil, params \\ %{}) do
+        Search.search_facet(@settings, facet_name, facet_query, params)
+      end
 
       @impl Algoliax
       def get_settings do
