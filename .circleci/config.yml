@@ -1,0 +1,122 @@
+defaults: &defaults
+  working_directory: ~/algoliax
+
+version: 2.1
+jobs:
+  checkout:
+    <<: *defaults
+    docker:
+      - image: circleci/elixir:1.9.1
+    steps:
+      - checkout
+      - save_cache:
+          key: v1-algoliax-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - ~/algoliax
+
+  mix_deps_get:
+    <<: *defaults
+    docker:
+      - image: circleci/elixir:1.9.1
+    steps:
+      - run:
+          name: install hex & rebar
+          command: mix do local.hex --force, local.rebar --force
+      - restore_cache:
+          key: v1-algoliax-{{ .Environment.CIRCLE_SHA1 }}
+      - restore_cache:
+          keys:
+            - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+            - v1-mix-cache-{{ .Branch }}
+            - v1-mix-cache
+      - run:
+          name: gather dependencies
+          command: mix deps.get
+      - save_cache:
+          key: v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+          paths:
+            - deps
+      - save_cache:
+          key: v1-mix-cache-{{ .Branch }}
+          paths:
+            - deps
+      - save_cache:
+          key: v1-mix-cache
+          paths:
+            - deps
+
+  credo:
+    <<: *defaults
+    docker:
+      - image: circleci/elixir:1.9.1
+    steps:
+      - run:
+          name: install hex & rebar
+          command: mix do local.hex --force, local.rebar --force
+      - restore_cache:
+          key: v1-algoliax-{{ .Environment.CIRCLE_SHA1 }}
+      - restore_cache:
+          keys:
+            - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+            - v1-mix-cache-{{ .Branch }}
+            - v1-mix-cache
+      - run:
+          name: Run credo
+          command: mix credo
+
+  test:
+    <<: *defaults
+    docker:
+      - image: circleci/elixir:1.9.1
+        environment:
+          DB_USERNAME: algoliax
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+      - image: postgres:11.4-alpine
+        environment:
+          POSTGRES_USER: algoliax
+          POSTGRES_DB: algoliax_test
+    steps:
+      - run:
+          name: Install hex & rebar
+          command: mix do local.hex --force, local.rebar --force
+      - restore_cache:
+          key: v1-algoliax-{{ .Environment.CIRCLE_SHA1 }}
+      - restore_cache:
+          keys:
+            - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+            - v1-mix-cache-{{ .Branch }}
+            - v1-mix-cache
+      - run:
+          name: Apt update
+          command: sudo apt update
+      - run:
+          name: Install postgresql-client
+          command: sudo apt install postgresql-client
+      - run:
+          name: Wait for database
+          command: dockerize -wait tcp://localhost:5432 -timeout 1m
+      - run:
+          name: Compile app
+          command: mix compile
+      - run:
+          name: Create database
+          command: mix ecto.create
+      - run:
+          name: Launch tests
+          command: mix test
+
+workflows:
+  version: 2
+  btd:
+    jobs:
+      - checkout
+      - mix_deps_get:
+          requires:
+            - checkout
+      - test:
+          requires:
+            - mix_deps_get
+      - credo:
+          requires:
+            - mix_deps_get
