@@ -69,6 +69,7 @@ jobs:
     docker:
       - image: circleci/elixir:1.9.1
         environment:
+          MIX_ENV: test
           DB_USERNAME: algoliax
           POSTGRES_HOST: localhost
           POSTGRES_PORT: 5432
