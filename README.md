@@ -1,6 +1,6 @@
 # Algoliax
 
-![https://github.com/StephaneRob/algoliax/actions](https://github.com/StephaneRob/algoliax/workflows/mix%20test/badge.svg)
+[![CircleCI](https://circleci.com/gh/StephaneRob/algoliax/tree/master.svg?style=svg)](https://circleci.com/gh/StephaneRob/algoliax/tree/master)
 
 This package let you easily integrate Algolia to your elixir application. It can be used with built in elixir struct or with [ecto](https://github.com/elixir-ecto/ecto) schemas.
 
