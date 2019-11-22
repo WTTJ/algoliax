@@ -26,7 +26,11 @@ defmodule Algoliax.MixProject do
         # The main page in the docs
         main: "Algoliax",
         extras: ["README.md"]
-      ]
+      ],
+
+      # Hex
+      description: "AlgoliaSearch integration for Elixir app",
+      package: package()
     ]
   end
 
@@ -60,6 +64,14 @@ defmodule Algoliax.MixProject do
     [
       # Ensures database is reset before tests are run
       test: ["ecto.drop --quiet", "ecto.create --quiet", "ecto.migrate", "test"]
+    ]
+  end
+
+  defp package do
+    [
+      maintainers: ["Stéphane Robino"],
+      licenses: ["BSD-2-Clause"],
+      links: %{"GitHub" => "https://github.com/StephaneRob/algoliax"}
     ]
   end
 end
