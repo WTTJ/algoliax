@@ -86,7 +86,7 @@ defmodule Algoliax.Resources.Object do
     Index.ensure_settings(module, tmp_settings)
     Algoliax.Agent.start_reindexing(index_name)
 
-    reindex(tmp_settings, module, index_attributes, nil)
+    reindex(module, tmp_settings, index_attributes, nil)
 
     response =
       Config.requests().move_index(tmp_index_name, %{
