@@ -76,6 +76,25 @@ people1 = %People{reference: 10, last_name: "Doe", first_name: "John", age: 13}
 people2 = %People{reference: 87, last_name: "Fred", first_name: "Al", age: 70}
 ```
 
+#### Index name at runtime
+
+It's possible to define an index name at runtime, useful if index_name depends on environment or comes from an environment variable. To do this just define a function with an arity of 0 that will be used as `index_name`
+
+```elixir
+defmodulePeople do
+  use Algoliax,
+    index_name: :algoliax_people,
+    attributes_for_faceting: ["age"],
+    searchable_attributes: ["full_name"],
+    custom_ranking: ["desc(update_at)"],
+    object_id: :reference
+
+  def algoliax_people do
+    :algoliax_people_from_function
+  end
+end
+```
+
 #### Available functions
 
 ```elixir

@@ -2,8 +2,8 @@ defmodule Algoliax.Resources.Search do
   @moduledoc false
   alias Algoliax.{Utils, Config}
 
-  def search_index(settings, query, params) do
-    index_name = Utils.index_name(settings)
+  def search_index(module, settings, query, params) do
+    index_name = Utils.index_name(module, settings)
 
     body =
       %{
@@ -14,8 +14,8 @@ defmodule Algoliax.Resources.Search do
     Config.requests().search_index(index_name, body)
   end
 
-  def search_facet(settings, facet_name, facet_query, params) do
-    index_name = Utils.index_name(settings)
+  def search_facet(module, settings, facet_name, facet_query, params) do
+    index_name = Utils.index_name(module, settings)
 
     body =
       case facet_query do

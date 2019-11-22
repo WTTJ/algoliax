@@ -3,28 +3,28 @@ defmodule Algoliax.Resources.Index do
 
   alias Algoliax.{Agent, Settings, Utils, Config}
 
-  def ensure_settings(settings) do
-    index_name = Utils.index_name(settings)
+  def ensure_settings(module, settings) do
+    index_name = Utils.index_name(module, settings)
 
     case Agent.get_settings(index_name) do
       nil ->
-        configure_index(settings)
-        get_settings(settings)
+        configure_index(module, settings)
+        get_settings(module, settings)
 
       _ ->
         true
     end
   end
 
-  def get_settings(settings) do
-    index_name = Utils.index_name(settings)
+  def get_settings(module, settings) do
+    index_name = Utils.index_name(module, settings)
     algolia_remote_settings = Config.requests().get_settings(index_name)
     Agent.set_settings(index_name, algolia_remote_settings)
     algolia_remote_settings
   end
 
-  def configure_index(settings) do
-    index_name = Utils.index_name(settings)
+  def configure_index(module, settings) do
+    index_name = Utils.index_name(module, settings)
 
     algolia_settings =
       Settings.settings()
@@ -35,8 +35,8 @@ defmodule Algoliax.Resources.Index do
     Config.requests().configure_index(index_name, algolia_settings)
   end
 
-  def delete_index(settings) do
-    index_name = Utils.index_name(settings)
+  def delete_index(module, settings) do
+    index_name = Utils.index_name(module, settings)
     Config.requests().delete_index(index_name)
   end
 end

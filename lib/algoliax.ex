@@ -245,27 +245,27 @@ defmodule Algoliax do
 
       @impl Algoliax
       def search_index(query, params \\ %{}) do
-        Search.search_index(@settings, query, params)
+        Search.search_index(__MODULE__, @settings, query, params)
       end
 
       @impl Algoliax
       def search_facet(facet_name, facet_query \\ nil, params \\ %{}) do
-        Search.search_facet(@settings, facet_name, facet_query, params)
+        Search.search_facet(__MODULE__, @settings, facet_name, facet_query, params)
       end
 
       @impl Algoliax
       def get_settings do
-        Index.get_settings(@settings)
+        Index.get_settings(__MODULE__, @settings)
       end
 
       @impl Algoliax
       def configure_index do
-        Index.configure_index(@settings)
+        Index.configure_index(__MODULE__, @settings)
       end
 
       @impl Algoliax
       def delete_index do
-        Index.delete_index(@settings)
+        Index.delete_index(__MODULE__, @settings)
       end
 
       @impl Algoliax
@@ -282,8 +282,8 @@ defmodule Algoliax do
       @impl Algoliax
       def save_objects(models, opts \\ []) do
         Object.save_objects(
-          @settings,
           __MODULE__,
+          @settings,
           models,
           @index_attributes,
           opts
@@ -292,28 +292,27 @@ defmodule Algoliax do
 
       @impl Algoliax
       def save_object(model) do
-        apply(__MODULE__, :to_be_indexed?, [model])
-        Object.save_object(@settings, __MODULE__, model, @index_attributes)
+        Object.save_object(__MODULE__, @settings, model, @index_attributes)
       end
 
       @impl Algoliax
       def delete_object(model) do
-        Object.delete_object(@settings, __MODULE__, model, @index_attributes)
+        Object.delete_object(__MODULE__, @settings, model, @index_attributes)
       end
 
       @impl Algoliax
       def get_object(model) do
-        Object.get_object(@settings, __MODULE__, model, @index_attributes)
+        Object.get_object(__MODULE__, @settings, model, @index_attributes)
       end
 
       @impl Algoliax
       def reindex(query \\ nil) do
-        Object.reindex(@settings, __MODULE__, @index_attributes, query)
+        Object.reindex(__MODULE__, @settings, @index_attributes, query)
       end
 
       @impl Algoliax
       def reindex_atomic do
-        Object.reindex_atomic(@settings, __MODULE__, @index_attributes)
+        Object.reindex_atomic(__MODULE__, @settings, @index_attributes)
       end
     end
   end

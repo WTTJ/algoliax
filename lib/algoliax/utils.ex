@@ -35,11 +35,16 @@ defmodule Algoliax.Utils do
     |> String.to_atom()
   end
 
-  def index_name(settings) do
+  def index_name(module, settings) do
     index_name = Keyword.get(settings, :index_name)
 
     if index_name do
-      index_name
+      if module.__info__(:functions)
+         |> Keyword.get(index_name) == 0 do
+        apply(module, index_name, [])
+      else
+        index_name
+      end
     else
       raise Algoliax.MissingIndexNameError
     end
