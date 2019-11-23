@@ -76,7 +76,7 @@ people1 = %People{reference: 10, last_name: "Doe", first_name: "John", age: 13}
 people2 = %People{reference: 87, last_name: "Fred", first_name: "Al", age: 70}
 ```
 
-#### Index name at runtime
+#### Configure index at runtime
 
 It's possible to define an index name at runtime, useful if index_name depends on environment or comes from an environment variable. To do this just define a function with an arity of 0 that will be used as `index_name`
 
@@ -95,20 +95,23 @@ defmodulePeople do
 end
 ```
 
-#### Available functions
+#### Index functinons
 
 ```elixir
-people1 = %People{reference: 10, last_name: "Doe", first_name: "John", age: 20}
-
-people2 = %People{reference: 87, last_name: "Fred", first_name: "Al", age: 70}
-
 # Get people index settings
 People.get_settings()
 
 # Delete index
 People.delete_index()
 
-# Save one object
+# Configure index
+People.configure_index()
+```
+
+#### Object functions
+
+```elixir
+# Save a single object
 People.save_object(people1)
 
 # Save multiple objects
@@ -124,7 +127,21 @@ People.get_object(people1)
 People.delete_object(people1)
 ```
 
-Ecto specific functions:
+#### Search functions
+
+```elixir
+# search in index
+People.search("john")
+
+# search facet
+People.search_facet("age")
+```
+
+#### Ecto specific
+
+If using Agoliax with an Ecto schema it is possible to use `reindex` functions. Reindex will go through all entries in the corresponding table (or part if query is provided). Algoliax will save_objects by batch of 500.
+
+**_Important_**: Algoliax use the `id` column to order and go through the table.
 
 ```elixir
 import Ecto.Query

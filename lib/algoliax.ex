@@ -55,7 +55,7 @@ defmodule Algoliax do
 
   ## Example
 
-      iex> People.search_index("John")
+      iex> People.search("John")
 
       {:ok,
         %{
@@ -105,7 +105,7 @@ defmodule Algoliax do
       }}
   """
 
-  @callback search_index(query :: binary(), params :: map()) ::
+  @callback search(query :: binary(), params :: map()) ::
               {:ok, map()} | {:not_indexable, model :: map()}
 
   @doc """
@@ -244,8 +244,8 @@ defmodule Algoliax do
       @before_compile unquote(__MODULE__)
 
       @impl Algoliax
-      def search_index(query, params \\ %{}) do
-        Search.search_index(__MODULE__, @settings, query, params)
+      def search(query, params \\ %{}) do
+        Search.search(__MODULE__, @settings, query, params)
       end
 
       @impl Algoliax

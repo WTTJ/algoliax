@@ -30,6 +30,15 @@ defmodule AlgoliaxTest.Struct do
     end
   end
 
+  test "configure index" do
+    Algoliax.RequestsMock
+    |> expect(:configure_index, fn _, _ ->
+      %{}
+    end)
+
+    assert People.configure_index()
+  end
+
   test "save_object" do
     Algoliax.RequestsMock
     |> expect(:save_object, fn _, _ ->
@@ -77,5 +86,41 @@ defmodule AlgoliaxTest.Struct do
 
   test "reindex" do
     assert_raise(Algoliax.MissingRepoError, fn -> People.reindex() end)
+  end
+
+  test "delete index" do
+    Algoliax.RequestsMock
+    |> expect(:delete_index, fn _ ->
+      %{}
+    end)
+
+    assert People.delete_index()
+  end
+
+  test "get index settings" do
+    Algoliax.RequestsMock
+    |> expect(:get_settings, fn _ ->
+      %{}
+    end)
+
+    assert People.get_settings()
+  end
+
+  test "search in index" do
+    Algoliax.RequestsMock
+    |> expect(:search, fn _, _ ->
+      %{}
+    end)
+
+    assert People.search("john")
+  end
+
+  test "search facet" do
+    Algoliax.RequestsMock
+    |> expect(:search_facet, fn _, _, _ ->
+      %{}
+    end)
+
+    assert People.search_facet("age")
   end
 end
