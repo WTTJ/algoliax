@@ -9,6 +9,8 @@ defmodule AlgoliaxTest.Schema do
 
   setup do
     Algoliax.Agent.set_settings(:algoliax_people, %{})
+    Algoliax.Agent.set_settings(:"algoliax_people.tmp", %{})
+
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(Repo)
 
     [
@@ -34,5 +36,23 @@ defmodule AlgoliaxTest.Schema do
     end)
 
     PeopleEcto.reindex()
+  end
+
+  test "reindex atomic" do
+    Algoliax.RequestsMock
+    |> expect(:save_objects, fn :"algoliax_people.tmp", _ ->
+      %{
+        "taskID" => 792,
+        "objectIDs" => [@ref2, @ref1]
+      }
+    end)
+    |> expect(:move_index, fn :"algoliax_people.tmp", _ ->
+      %{
+        "taskID" => 792,
+        "objectIDs" => [@ref2, @ref1]
+      }
+    end)
+
+    PeopleEcto.reindex_atomic()
   end
 end
