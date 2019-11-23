@@ -105,4 +105,22 @@ defmodule AlgoliaxTest.Struct do
 
     assert People.get_settings()
   end
+
+  test "search in index" do
+    Algoliax.RequestsMock
+    |> expect(:search_index, fn _, _ ->
+      %{}
+    end)
+
+    assert People.search_index("john")
+  end
+
+  test "search facet" do
+    Algoliax.RequestsMock
+    |> expect(:search_facet, fn _, _, _ ->
+      %{}
+    end)
+
+    assert People.search_facet("age")
+  end
 end
