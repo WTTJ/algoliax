@@ -4,17 +4,17 @@ defmodule Algoliax.RequestsTest do
 
   test_with_mock "search index", Algoliax.Client,
     request: fn %{
-                  action: :search_index,
+                  action: :search,
                   url_params: [index_name: :index_name],
                   body: %{}
                 } ->
       %{}
     end do
-    Algoliax.Requests.search_index(:index_name, %{})
+    Algoliax.Requests.search(:index_name, %{})
 
     assert_called(
       Algoliax.Client.request(%{
-        action: :search_index,
+        action: :search,
         body: %{},
         url_params: [index_name: :index_name]
       })

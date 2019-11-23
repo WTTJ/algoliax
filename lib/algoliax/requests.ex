@@ -1,6 +1,6 @@
 defmodule Algoliax.RequestsBehaviour do
   @moduledoc false
-  @callback search_index(index_name :: binary(), object :: map()) ::
+  @callback search(index_name :: binary(), object :: map()) ::
               {:ok, map()} | {:error, any()}
 
   @callback search_facet(index_name :: binary(), facet_name :: binary(), object :: map()) ::
@@ -35,11 +35,11 @@ defmodule Algoliax.Requests do
   @behaviour Algoliax.RequestsBehaviour
 
   @impl Algoliax.RequestsBehaviour
-  def search_index(index_name, body) do
+  def search(index_name, body) do
     Logger.debug("Searching object #{inspect(body)}")
 
     request(%{
-      action: :search_index,
+      action: :search,
       url_params: [index_name: index_name],
       body: body
     })

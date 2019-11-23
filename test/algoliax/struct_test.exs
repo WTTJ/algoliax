@@ -108,11 +108,11 @@ defmodule AlgoliaxTest.Struct do
 
   test "search in index" do
     Algoliax.RequestsMock
-    |> expect(:search_index, fn _, _ ->
+    |> expect(:search, fn _, _ ->
       %{}
     end)
 
-    assert People.search_index("john")
+    assert People.search("john")
   end
 
   test "search facet" do
