@@ -160,6 +160,11 @@ People.reindex()
 query = from(p in People, where: p.age > 20)
 People.reindex(query)
 
+# Reindex can also `force_delete`
+query = from(p in People, where: p.age > 20)
+People.reindex(query, force_delete: true)
+People.reindex(force_delete: true)
+
 # Reindex atomicly (create a temporary index and move it to initial index)
 People.reindex_atomic()
 ```
