@@ -21,11 +21,9 @@ defmodule Algoliax.PeopleEcto do
     timestamps()
   end
 
-  # defstruct reference: nil, last_name: nil, first_name: nil, age: nil
+  attributes([:id, :first_name, :last_name, :age, :gender])
 
-  attributes([:first_name, :last_name, :age, :gender])
-
-  attribute(:updated_at, DateTime.utc_now() |> DateTime.to_unix())
+  attribute(:updated_at, ~U[2019-01-01 00:00:00Z] |> DateTime.to_unix())
 
   attribute :full_name do
     Map.get(model, :first_name, "") <> " " <> Map.get(model, :last_name, "")
@@ -33,5 +31,9 @@ defmodule Algoliax.PeopleEcto do
 
   attribute :nickname do
     Map.get(model, :first_name, "") |> String.downcase()
+  end
+
+  def to_be_indexed?(people) do
+    people.age > 10
   end
 end

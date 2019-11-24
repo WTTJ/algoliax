@@ -20,7 +20,7 @@ defmodule Algoliax.Utils do
   @moduledoc false
 
   @attribute_prefix "algoliax_attr_"
-  @batch_size 500
+  @batch_size Application.get_env(:algoliax, :batch_size, 500)
 
   import Ecto.Query
 

@@ -188,7 +188,11 @@ defmodule Algoliax do
   @doc """
   Reindex [Ecto](https://hexdocs.pm/ecto/Ecto.html) specific
   """
-  @callback reindex(query :: Ecto.Query.t()) :: {:ok, map()} | {:error, map()}
+  @callback reindex(query :: Ecto.Query.t(), opts :: Keyword.t()) ::
+              {:ok, map()} | {:error, map()}
+
+  @callback reindex(opts :: Keyword.t()) ::
+              {:ok, map()} | {:error, map()}
 
   @doc """
   Reindex atomicly [Ecto](https://hexdocs.pm/ecto/Ecto.html) specific
@@ -306,8 +310,13 @@ defmodule Algoliax do
       end
 
       @impl Algoliax
-      def reindex(query \\ nil) do
-        Object.reindex(__MODULE__, @settings, @index_attributes, query)
+      def reindex(opts) when is_list(opts) do
+        Object.reindex(__MODULE__, @settings, @index_attributes, nil, opts)
+      end
+
+      @impl Algoliax
+      def reindex(query \\ nil, opts \\ []) do
+        Object.reindex(__MODULE__, @settings, @index_attributes, query, opts)
       end
 
       @impl Algoliax

@@ -5,7 +5,7 @@ defmodule AlgoliaxTest.Struct do
 
   defmodule People do
     use Algoliax,
-      index_name: :algoliax_people,
+      index_name: :algoliax_people_struct,
       attributes_for_faceting: ["age"],
       searchable_attributes: ["full_name"],
       custom_ranking: ["desc(update_at)"],
@@ -15,7 +15,7 @@ defmodule AlgoliaxTest.Struct do
 
     attributes([:first_name, :last_name, :age])
 
-    attribute(:updated_at, DateTime.utc_now() |> DateTime.to_unix())
+    attribute(:updated_at, ~U[2019-01-01 00:00:00Z] |> DateTime.to_unix())
 
     attribute :full_name do
       Map.get(model, :first_name, "") <> " " <> Map.get(model, :last_name, "")
@@ -30,9 +30,14 @@ defmodule AlgoliaxTest.Struct do
     end
   end
 
+  setup do
+    Algoliax.Agent.set_settings(:algoliax_people_struct, %{})
+    :ok
+  end
+
   test "configure index" do
     Algoliax.RequestsMock
-    |> expect(:configure_index, fn _, _ ->
+    |> expect(:configure_index, fn :algoliax_people_struct, _ ->
       %{}
     end)
 
@@ -41,7 +46,16 @@ defmodule AlgoliaxTest.Struct do
 
   test "save_object" do
     Algoliax.RequestsMock
-    |> expect(:save_object, fn _, _ ->
+    |> expect(:save_object, fn :algoliax_people_struct,
+                               %{
+                                 age: 77,
+                                 first_name: "John",
+                                 full_name: "John Doe",
+                                 last_name: "Doe",
+                                 nickname: "john",
+                                 objectID: 10,
+                                 updated_at: 1_546_300_800
+                               } ->
       %{}
     end)
 
@@ -52,7 +66,23 @@ defmodule AlgoliaxTest.Struct do
 
   test "save_objects" do
     Algoliax.RequestsMock
-    |> expect(:save_objects, fn _, _ ->
+    |> expect(:save_objects, fn :algoliax_people_struct,
+                                %{
+                                  requests: [
+                                    %{
+                                      action: "updateObject",
+                                      body: %{
+                                        age: 77,
+                                        first_name: "John",
+                                        full_name: "John Doe",
+                                        last_name: "Doe",
+                                        nickname: "john",
+                                        objectID: 10,
+                                        updated_at: 1_546_300_800
+                                      }
+                                    }
+                                  ]
+                                } ->
       %{}
     end)
 
@@ -64,9 +94,54 @@ defmodule AlgoliaxTest.Struct do
     assert People.save_objects(people)
   end
 
+  test "save_objects with force delete" do
+    Algoliax.RequestsMock
+    |> expect(:save_objects, fn :algoliax_people_struct,
+                                %{
+                                  requests: [
+                                    %{
+                                      action: "updateObject",
+                                      body: %{
+                                        age: 77,
+                                        first_name: "John",
+                                        full_name: "John Doe",
+                                        last_name: "Doe",
+                                        nickname: "john",
+                                        objectID: 10,
+                                        updated_at: 1_546_300_800
+                                      }
+                                    },
+                                    %{
+                                      action: "deleteObject",
+                                      body: %{
+                                        age: 35,
+                                        first_name: "bert",
+                                        full_name: "bert al",
+                                        last_name: "al",
+                                        nickname: "bert",
+                                        objectID: 87,
+                                        updated_at: 1_546_300_800
+                                      }
+                                    }
+                                  ]
+                                } ->
+      %{}
+    end)
+
+    people = [
+      %People{reference: 10, last_name: "Doe", first_name: "John", age: 77},
+      %People{reference: 87, last_name: "al", first_name: "bert", age: 35}
+    ]
+
+    assert People.save_objects(people, force_delete: true)
+  end
+
   test "get_object" do
     Algoliax.RequestsMock
-    |> expect(:get_object, fn _, _ ->
+    |> expect(:get_object, fn :algoliax_people_struct,
+                              %{
+                                objectID: 10
+                              } ->
       %{}
     end)
 
@@ -76,7 +151,10 @@ defmodule AlgoliaxTest.Struct do
 
   test "delete_object" do
     Algoliax.RequestsMock
-    |> expect(:delete_object, fn _, _ ->
+    |> expect(:delete_object, fn :algoliax_people_struct,
+                                 %{
+                                   objectID: 10
+                                 } ->
       %{}
     end)
 
@@ -90,7 +168,7 @@ defmodule AlgoliaxTest.Struct do
 
   test "delete index" do
     Algoliax.RequestsMock
-    |> expect(:delete_index, fn _ ->
+    |> expect(:delete_index, fn :algoliax_people_struct ->
       %{}
     end)
 
@@ -99,7 +177,7 @@ defmodule AlgoliaxTest.Struct do
 
   test "get index settings" do
     Algoliax.RequestsMock
-    |> expect(:get_settings, fn _ ->
+    |> expect(:get_settings, fn :algoliax_people_struct ->
       %{}
     end)
 
@@ -108,7 +186,7 @@ defmodule AlgoliaxTest.Struct do
 
   test "search in index" do
     Algoliax.RequestsMock
-    |> expect(:search, fn _, _ ->
+    |> expect(:search, fn :algoliax_people_struct, %{query: "john"} ->
       %{}
     end)
 
@@ -117,7 +195,7 @@ defmodule AlgoliaxTest.Struct do
 
   test "search facet" do
     Algoliax.RequestsMock
-    |> expect(:search_facet, fn _, _, _ ->
+    |> expect(:search_facet, fn :algoliax_people_struct, "age", %{} ->
       %{}
     end)
 

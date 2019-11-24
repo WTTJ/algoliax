@@ -1,11 +1,13 @@
 defmodule AlgoliaxTest.Schema do
   use ExUnit.Case, async: true
   import Mox
+  import Ecto.Query
 
   alias Algoliax.{Repo, PeopleEcto}
 
   @ref1 Ecto.UUID.generate()
   @ref2 Ecto.UUID.generate()
+  @ref3 Ecto.UUID.generate()
 
   setup do
     Algoliax.Agent.set_settings(:algoliax_people, %{})
@@ -15,7 +17,8 @@ defmodule AlgoliaxTest.Schema do
 
     [
       %PeopleEcto{reference: @ref1, last_name: "Doe", first_name: "John", age: 77},
-      %PeopleEcto{reference: @ref2, last_name: "al", first_name: "bert", age: 35}
+      %PeopleEcto{reference: @ref2, last_name: "al", first_name: "bert", age: 35},
+      %PeopleEcto{reference: @ref3, last_name: "Vador", first_name: "Dark", age: 9}
     ]
     |> Enum.each(fn p ->
       p
@@ -28,7 +31,39 @@ defmodule AlgoliaxTest.Schema do
 
   test "reindex" do
     Algoliax.RequestsMock
-    |> expect(:save_objects, fn :algoliax_people, _ ->
+    |> expect(:save_objects, fn :algoliax_people,
+                                %{
+                                  requests: [
+                                    %{
+                                      action: "updateObject",
+                                      body: %{
+                                        age: 77,
+                                        first_name: "John",
+                                        full_name: "John Doe",
+                                        gender: nil,
+                                        id: _,
+                                        last_name: "Doe",
+                                        nickname: "john",
+                                        objectID: @ref1,
+                                        updated_at: 1_546_300_800
+                                      }
+                                    },
+                                    %{
+                                      action: "updateObject",
+                                      body: %{
+                                        age: 35,
+                                        first_name: "bert",
+                                        full_name: "bert al",
+                                        gender: nil,
+                                        id: _,
+                                        last_name: "al",
+                                        nickname: "bert",
+                                        objectID: @ref2,
+                                        updated_at: 1_546_300_800
+                                      }
+                                    }
+                                  ]
+                                } ->
       %{
         "taskID" => 792,
         "objectIDs" => [@ref2, @ref1]
@@ -38,9 +73,183 @@ defmodule AlgoliaxTest.Schema do
     PeopleEcto.reindex()
   end
 
+  test "reindex with force delete" do
+    Algoliax.RequestsMock
+    |> expect(:save_objects, fn :algoliax_people,
+                                %{
+                                  requests: [
+                                    %{
+                                      action: "updateObject",
+                                      body: %{
+                                        age: 77,
+                                        first_name: "John",
+                                        full_name: "John Doe",
+                                        gender: nil,
+                                        id: _,
+                                        last_name: "Doe",
+                                        nickname: "john",
+                                        objectID: @ref1,
+                                        updated_at: 1_546_300_800
+                                      }
+                                    },
+                                    %{
+                                      action: "updateObject",
+                                      body: %{
+                                        age: 35,
+                                        first_name: "bert",
+                                        full_name: "bert al",
+                                        gender: nil,
+                                        id: _,
+                                        last_name: "al",
+                                        nickname: "bert",
+                                        objectID: @ref2,
+                                        updated_at: 1_546_300_800
+                                      }
+                                    },
+                                    %{
+                                      action: "deleteObject",
+                                      body: %{
+                                        age: 9,
+                                        first_name: "Dark",
+                                        full_name: "Dark Vador",
+                                        gender: nil,
+                                        id: _,
+                                        last_name: "Vador",
+                                        nickname: "dark",
+                                        objectID: @ref3,
+                                        updated_at: 1_546_300_800
+                                      }
+                                    }
+                                  ]
+                                } ->
+      %{
+        "taskID" => 792,
+        "objectIDs" => [@ref2, @ref1]
+      }
+    end)
+
+    PeopleEcto.reindex(force_delete: true)
+  end
+
+  test "reindex with query" do
+    Algoliax.RequestsMock
+    |> expect(:save_objects, fn :algoliax_people,
+                                %{
+                                  requests: [
+                                    %{
+                                      action: "updateObject",
+                                      body: %{
+                                        age: 35,
+                                        first_name: "bert",
+                                        full_name: "bert al",
+                                        gender: nil,
+                                        id: _,
+                                        last_name: "al",
+                                        nickname: "bert",
+                                        objectID: @ref2,
+                                        updated_at: 1_546_300_800
+                                      }
+                                    }
+                                  ]
+                                } ->
+      %{
+        "taskID" => 792,
+        "objectIDs" => [@ref2, @ref1]
+      }
+    end)
+
+    query =
+      from(p in PeopleEcto,
+        where: p.age == 35
+      )
+
+    PeopleEcto.reindex(query)
+  end
+
+  test "reindex with query and force delete" do
+    Algoliax.RequestsMock
+    |> expect(:save_objects, fn :algoliax_people,
+                                %{
+                                  requests: [
+                                    %{
+                                      action: "updateObject",
+                                      body: %{
+                                        age: 35,
+                                        first_name: "bert",
+                                        full_name: "bert al",
+                                        gender: nil,
+                                        id: _,
+                                        last_name: "al",
+                                        nickname: "bert",
+                                        objectID: @ref2,
+                                        updated_at: 1_546_300_800
+                                      }
+                                    },
+                                    %{
+                                      action: "deleteObject",
+                                      body: %{
+                                        age: 9,
+                                        first_name: "Dark",
+                                        full_name: "Dark Vador",
+                                        gender: nil,
+                                        id: _,
+                                        last_name: "Vador",
+                                        nickname: "dark",
+                                        objectID: @ref3,
+                                        updated_at: 1_546_300_800
+                                      }
+                                    }
+                                  ]
+                                } ->
+      %{
+        "taskID" => 792,
+        "objectIDs" => [@ref2, @ref1]
+      }
+    end)
+
+    query =
+      from(p in PeopleEcto,
+        where: p.age == 35 or p.first_name == "Dark"
+      )
+
+    PeopleEcto.reindex(query, force_delete: true)
+  end
+
   test "reindex atomic" do
     Algoliax.RequestsMock
-    |> expect(:save_objects, fn :"algoliax_people.tmp", _ ->
+    |> expect(:save_objects, fn :"algoliax_people.tmp",
+                                %{
+                                  requests: [
+                                    %{
+                                      action: "updateObject",
+                                      body: %{
+                                        age: 77,
+                                        first_name: "John",
+                                        full_name: "John Doe",
+                                        gender: nil,
+                                        id: _,
+                                        last_name: "Doe",
+                                        nickname: "john",
+                                        objectID: @ref1,
+                                        updated_at: 1_546_300_800
+                                      }
+                                    },
+                                    %{
+                                      action: "updateObject",
+                                      body: %{
+                                        age: 35,
+                                        first_name: "bert",
+                                        full_name: "bert al",
+                                        gender: nil,
+                                        id: _,
+                                        last_name: "al",
+                                        nickname: "bert",
+                                        objectID: @ref2,
+                                        updated_at: 1_546_300_800
+                                      }
+                                    }
+                                  ]
+                                } ->
       %{
         "taskID" => 792,
         "objectIDs" => [@ref2, @ref1]

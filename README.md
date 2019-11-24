@@ -25,7 +25,8 @@ Algoliax needs only `:api_key` and `application_id` config. These configs can ei
 ```elixir
 config :algoliax,
   api_key: "<API_KEY>",
-  application_id: "<APPLICATION_ID>"
+  application_id: "<APPLICATION_ID>",
+  batch_size: 500
 ```
 
 ## Usage
@@ -140,6 +141,12 @@ People.search_facet("age")
 #### Ecto specific
 
 If using Agoliax with an Ecto schema it is possible to use `reindex` functions. Reindex will go through all entries in the corresponding table (or part if query is provided). Algoliax will save_objects by batch of 500.
+`batch_size` can be configured
+
+```elixir
+config :algoliax,
+  batch_size: 250
+```
 
 **_Important_**: Algoliax use the `id` column to order and go through the table.
 
