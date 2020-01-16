@@ -6,7 +6,7 @@ defmodule Algoliax.UtilsTest do
       index_name: :algoliax_people,
       attributes_for_faceting: ["age"],
       searchable_attributes: ["full_name"],
-      custom_ranking: ["desc(update_at)"],
+      custom_ranking: ["desc(updated_at)"],
       object_id: :reference
   end
 
@@ -15,7 +15,7 @@ defmodule Algoliax.UtilsTest do
       index_name: :algoliax_people,
       attributes_for_faceting: ["age"],
       searchable_attributes: ["full_name"],
-      custom_ranking: ["desc(update_at)"],
+      custom_ranking: ["desc(updated_at)"],
       object_id: :reference
 
     def algoliax_people do
@@ -27,11 +27,11 @@ defmodule Algoliax.UtilsTest do
     use Algoliax,
       attributes_for_faceting: ["age"],
       searchable_attributes: ["full_name"],
-      custom_ranking: ["desc(update_at)"],
+      custom_ranking: ["desc(updated_at)"],
       object_id: :reference
   end
 
-  describe "Raise execption if trying Ecto specific methods" do
+  describe "Raise exception if trying Ecto specific methods" do
     test "Algoliax.MissingRepoError" do
       assert_raise(Algoliax.MissingRepoError, fn ->
         Algoliax.UtilsTest.NoRepo.reindex()
@@ -43,7 +43,7 @@ defmodule Algoliax.UtilsTest do
     end
   end
 
-  describe "Raise execption if index_name missing" do
+  describe "Raise exception if index_name missing" do
     test "Algoliax.MissingRepoError" do
       assert_raise(Algoliax.MissingIndexNameError, fn ->
         Algoliax.UtilsTest.NoIndexName.get_settings()

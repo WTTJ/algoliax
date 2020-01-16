@@ -69,7 +69,7 @@ defmodule Algoliax.Resources.Object do
           from(m in module)
       end
 
-    Utils.find_in_batches(repo, query, 0, fn batch ->
+    Utils.find_in_batches(repo, query, 0, settings, fn batch ->
       save_objects(module, settings, batch, index_attributes, opts)
     end)
   end

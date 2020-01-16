@@ -7,7 +7,7 @@ defmodule Algoliax.PeopleEcto do
     index_name: :algoliax_people,
     attributes_for_faceting: ["age", "gender"],
     searchable_attributes: ["full_name", "gender"],
-    custom_ranking: ["desc(update_at)"],
+    custom_ranking: ["desc(updated_at)"],
     repo: Algoliax.Repo,
     object_id: :reference
 
