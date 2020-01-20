@@ -3,7 +3,7 @@ defmodule AlgoliaxTest.Schema do
   import Mox
   import Ecto.Query
 
-  alias Algoliax.{Repo, PeopleEcto, PeopleWithoutIdEcto}
+  alias Algoliax.{Animal, Repo, PeopleEcto, PeopleWithoutIdEcto, PeopleEctoWithAssociation}
 
   @ref1 Ecto.UUID.generate()
   @ref2 Ecto.UUID.generate()
@@ -15,6 +15,9 @@ defmodule AlgoliaxTest.Schema do
 
     Algoliax.Agent.set_settings(:algoliax_people_without_id, %{})
     Algoliax.Agent.set_settings(:"algoliax_people_without_id.tmp", %{})
+
+    Algoliax.Agent.set_settings(:algoliax_people_ecto_with_association, %{})
+    Algoliax.Agent.set_settings(:"algoliax_people_ecto_with_association.tmp", %{})
 
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(Repo)
 
@@ -33,6 +36,29 @@ defmodule AlgoliaxTest.Schema do
       %PeopleWithoutIdEcto{reference: @ref1, last_name: "Doe", first_name: "John", age: 77},
       %PeopleWithoutIdEcto{reference: @ref2, last_name: "al", first_name: "bert", age: 35},
       %PeopleWithoutIdEcto{reference: @ref3, last_name: "Vador", first_name: "Dark", age: 9}
+    ]
+    |> Enum.each(fn p ->
+      p
+      |> Ecto.Changeset.change()
+      |> Algoliax.Repo.insert()
+    end)
+
+    [
+      %PeopleEctoWithAssociation{
+        reference: @ref1,
+        last_name: "Doe",
+        first_name: "John",
+        age: 77,
+        animals: [%Animal{kind: "cat"}, %Animal{kind: "snake"}]
+      },
+      %PeopleEctoWithAssociation{reference: @ref2, last_name: "al", first_name: "bert", age: 35},
+      %PeopleEctoWithAssociation{
+        reference: @ref3,
+        last_name: "Vador",
+        first_name: "Dark",
+        age: 9,
+        animals: [%Animal{kind: "dog"}]
+      }
     ]
     |> Enum.each(fn p ->
       p
@@ -329,5 +355,60 @@ defmodule AlgoliaxTest.Schema do
     end)
 
     PeopleWithoutIdEcto.reindex()
+  end
+
+  test "reindex with association" do
+    Algoliax.RequestsMock
+    |> expect(:save_objects, fn :algoliax_people_ecto_with_association,
+                                %{
+                                  requests: [
+                                    %{
+                                      action: "updateObject",
+                                      body: %{
+                                        age: 77,
+                                        first_name: "John",
+                                        gender: nil,
+                                        id: _,
+                                        last_name: "Doe",
+                                        objectID: @ref1,
+                                        updated_at: 1_546_300_800,
+                                        animals: ["cat", "snake"]
+                                      }
+                                    },
+                                    %{
+                                      action: "updateObject",
+                                      body: %{
+                                        age: 35,
+                                        first_name: "bert",
+                                        gender: nil,
+                                        id: _,
+                                        last_name: "al",
+                                        objectID: @ref2,
+                                        updated_at: 1_546_300_800,
+                                        animals: []
+                                      }
+                                    },
+                                    %{
+                                      action: "updateObject",
+                                      body: %{
+                                        age: 9,
+                                        first_name: "Dark",
+                                        gender: nil,
+                                        id: _,
+                                        last_name: "Vador",
+                                        objectID: @ref3,
+                                        updated_at: 1_546_300_800,
+                                        animals: ["dog"]
+                                      }
+                                    }
+                                  ]
+                                } ->
+      %{
+        "taskID" => 792,
+        "objectIDs" => [@ref2, @ref1]
+      }
+    end)
+
+    PeopleEctoWithAssociation.reindex()
   end
 end

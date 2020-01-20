@@ -208,3 +208,37 @@ defmodulePeople do
     cursor_field: :reference
 end
 ```
+
+##### Preloads (`reindex` and `reindex_atomic`)
+
+If you attribute need association, you can add preloads to your schema settings.
+**Associations need to be defined in your Ecto Schema**
+
+```elixir
+defmodulePeople do
+  use Algoliax,
+    index_name: :algoliax_people,
+    attributes_for_faceting: ["age"],
+    searchable_attributes: ["full_name"],
+    custom_ranking: ["desc(updated_at)"],
+    object_id: :reference,
+    preloads: [:animals]
+
+  attribute(:animals) do
+    Enum.map(model.animals, fn a ->
+      a.kind
+    end)
+  end
+
+  schema "peoples" do
+    field(:reference, Ecto.UUID)
+    field(:last_name)
+    field(:first_name)
+    field(:age, :integer)
+    field(:gender, :string)
+    has_many(:animals, Animal)
+
+    timestamps()
+  end
+end
+```
