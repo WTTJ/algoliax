@@ -22,6 +22,8 @@ defmodule Algoliax.Utils do
   @attribute_prefix "algoliax_attr_"
   @batch_size Application.get_env(:algoliax, :batch_size, 500)
 
+  alias Algoliax.Config
+
   import Ecto.Query
 
   def prefix_attribute(attribute) do
@@ -61,12 +63,18 @@ defmodule Algoliax.Utils do
     end
   end
 
-  def find_in_batches(repo, query, id, execute) do
+  def find_in_batches(repo, query, id, settings, execute) do
+    cursor_field = Keyword.get(settings, :cursor_field, Config.cursor_field()) || :id
+
     q =
       if id > 0 do
-        from(q in query, limit: ^@batch_size, where: q.id > ^id, order_by: q.id)
+        from(q in query,
+          limit: ^@batch_size,
+          where: field(q, ^cursor_field) > ^id,
+          order_by: field(q, ^cursor_field)
+        )
       else
-        from(q in query, limit: ^@batch_size, order_by: q.id)
+        from(q in query, limit: ^@batch_size, order_by: field(q, ^cursor_field))
       end
 
     results = repo.all(q)
@@ -76,7 +84,7 @@ defmodule Algoliax.Utils do
     if length(results) == @batch_size do
       last_id = results |> List.last() |> Map.get(:id)
 
-      find_in_batches(repo, query, last_id, execute)
+      find_in_batches(repo, query, last_id, settings, execute)
     else
       response
     end

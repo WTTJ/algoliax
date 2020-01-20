@@ -16,4 +16,8 @@ defmodule Algoliax.Config do
   def application_id do
     System.get_env("ALGOLIA_APPLICATION_ID") || Application.get_env(:algoliax, :application_id)
   end
+
+  def cursor_field do
+    Application.get_env(:algoliax, :cursor_field)
+  end
 end

@@ -160,7 +160,7 @@ config :algoliax,
   batch_size: 250
 ```
 
-**_Important_**: Algoliax use the `id` column to order and go through the table.
+**_Important_**: Algoliax use by default the `id` column to order and go through the table.
 
 ```elixir
 import Ecto.Query
@@ -179,4 +179,32 @@ People.reindex(force_delete: true)
 
 # Reindex atomicly (create a temporary index and move it to initial index)
 People.reindex_atomic()
+```
+
+##### Custom order column
+
+If you don't have an `id` column, you can customize the
+column to order records using the option `cursor_field`. Make sure this
+column ensure a consistent order even when new records are created.
+
+Using the global config:
+
+```elixir
+config :algoliax,
+  batch_size: 250,
+  cursor_field: :reference
+```
+
+Schema specific:
+
+```elixir
+defmodulePeople do
+  use Algoliax,
+    index_name: :algoliax_people,
+    attributes_for_faceting: ["age"],
+    searchable_attributes: ["full_name"],
+    custom_ranking: ["desc(updated_at)"],
+    object_id: :reference,
+    cursor_field: :reference
+end
 ```

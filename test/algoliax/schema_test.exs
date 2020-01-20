@@ -3,7 +3,7 @@ defmodule AlgoliaxTest.Schema do
   import Mox
   import Ecto.Query
 
-  alias Algoliax.{Repo, PeopleEcto}
+  alias Algoliax.{Repo, PeopleEcto, PeopleWithoutIdEcto}
 
   @ref1 Ecto.UUID.generate()
   @ref2 Ecto.UUID.generate()
@@ -13,12 +13,26 @@ defmodule AlgoliaxTest.Schema do
     Algoliax.Agent.set_settings(:algoliax_people, %{})
     Algoliax.Agent.set_settings(:"algoliax_people.tmp", %{})
 
+    Algoliax.Agent.set_settings(:algoliax_people_without_id, %{})
+    Algoliax.Agent.set_settings(:"algoliax_people_without_id.tmp", %{})
+
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(Repo)
 
     [
       %PeopleEcto{reference: @ref1, last_name: "Doe", first_name: "John", age: 77},
       %PeopleEcto{reference: @ref2, last_name: "al", first_name: "bert", age: 35},
       %PeopleEcto{reference: @ref3, last_name: "Vador", first_name: "Dark", age: 9}
+    ]
+    |> Enum.each(fn p ->
+      p
+      |> Ecto.Changeset.change()
+      |> Algoliax.Repo.insert()
+    end)
+
+    [
+      %PeopleWithoutIdEcto{reference: @ref1, last_name: "Doe", first_name: "John", age: 77},
+      %PeopleWithoutIdEcto{reference: @ref2, last_name: "al", first_name: "bert", age: 35},
+      %PeopleWithoutIdEcto{reference: @ref3, last_name: "Vador", first_name: "Dark", age: 9}
     ]
     |> Enum.each(fn p ->
       p
@@ -263,5 +277,57 @@ defmodule AlgoliaxTest.Schema do
     end)
 
     PeopleEcto.reindex_atomic()
+  end
+
+  test "reindex without an id column" do
+    Algoliax.RequestsMock
+    |> expect(:save_objects, fn :algoliax_people_without_id,
+                                %{
+                                  requests: [
+                                    %{
+                                      action: "updateObject",
+                                      body: %{
+                                        age: 77,
+                                        first_name: "John",
+                                        gender: nil,
+                                        id: _,
+                                        last_name: "Doe",
+                                        objectID: @ref1,
+                                        updated_at: 1_546_300_800
+                                      }
+                                    },
+                                    %{
+                                      action: "updateObject",
+                                      body: %{
+                                        age: 35,
+                                        first_name: "bert",
+                                        gender: nil,
+                                        id: _,
+                                        last_name: "al",
+                                        objectID: @ref2,
+                                        updated_at: 1_546_300_800
+                                      }
+                                    },
+                                    %{
+                                      action: "updateObject",
+                                      body: %{
+                                        age: 9,
+                                        first_name: "Dark",
+                                        gender: nil,
+                                        id: _,
+                                        last_name: "Vador",
+                                        objectID: @ref3,
+                                        updated_at: 1_546_300_800
+                                      }
+                                    }
+                                  ]
+                                } ->
+      %{
+        "taskID" => 792,
+        "objectIDs" => [@ref2, @ref1]
+      }
+    end)
+
+    PeopleWithoutIdEcto.reindex()
   end
 end
