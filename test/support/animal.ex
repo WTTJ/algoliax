@@ -1,4 +1,6 @@
 defmodule Algoliax.Animal do
+  @moduledoc false
+
   use Ecto.Schema
 
   schema "animals" do

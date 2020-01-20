@@ -1,5 +1,5 @@
 defmodule Algoliax.UtilsTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   defmodule NoRepo do
     use Algoliax,
