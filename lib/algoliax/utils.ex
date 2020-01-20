@@ -65,6 +65,7 @@ defmodule Algoliax.Utils do
 
   def find_in_batches(repo, query, id, settings, execute) do
     cursor_field = Keyword.get(settings, :cursor_field, Config.cursor_field()) || :id
+    preloads = Keyword.get(settings, :preloads, [])
 
     q =
       if id > 0 do
@@ -77,7 +78,7 @@ defmodule Algoliax.Utils do
         from(q in query, limit: ^@batch_size, order_by: field(q, ^cursor_field))
       end
 
-    results = repo.all(q)
+    results = repo.all(q) |> repo.preload(preloads)
 
     response = execute.(results)
 
