@@ -1,10 +1,12 @@
 defmodule Algoliax.Config do
   @moduledoc false
 
-  def requests do
-    if Mix.env() == :test do
+  if Mix.env() == :test do
+    def requests do
       Algoliax.RequestsMock
-    else
+    end
+  else
+    def requests do
       Algoliax.Requests
     end
   end
