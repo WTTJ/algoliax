@@ -1,4 +1,4 @@
-Copyright (c) 2019, Stéphane Robino
+Copyright (c) 2020, Stéphane Robino
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

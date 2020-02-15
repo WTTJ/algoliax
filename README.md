@@ -11,7 +11,7 @@ The package can be installed by adding `algoliax` to your list of dependencies i
 ```elixir
 def deps do
   [
-    {:algoliax, "~> 0.1.0"}
+    {:algoliax, "~> 0.2.0"}
   ]
 end
 ```
@@ -20,7 +20,7 @@ The docs can be found at [https://hexdocs.pm/algoliax](https://hexdocs.pm/algoli
 
 ## Configuration
 
-Algoliax needs only `:api_key` and `application_id` config. These configs can either be on config files or using environment varialble `"ALGOLIA_API_KEY"` and `"ALGOLIA_APPLICATION_ID"`.
+Algoliax needs only `:api_key` and `:application_id` config. These configs can either be on config files or using environment variables `ALGOLIA_API_KEY` and `ALGOLIA_APPLICATION_ID`.
 
 ```elixir
 config :algoliax,
@@ -56,7 +56,7 @@ defmodule People do
 end
 ```
 
-By default all object are indexed, but it's possible to override this behaviour by overriding the function `to_be_indexed?`
+By default all object are indexed, but it's possible to change this behaviour by overriding the function `to_be_indexed?`
 
 ```elixir
 defmodule People do
@@ -77,9 +77,11 @@ people1 = %People{reference: 10, last_name: "Doe", first_name: "John", age: 13}
 people2 = %People{reference: 87, last_name: "Fred", first_name: "Al", age: 70}
 ```
 
-#### Configure index at runtime
+#### Index name at runtime
 
-It's possible to define an index name at runtime, useful if index_name depends on environment or comes from an environment variable. To do this just define a function with an arity of 0 that will be used as `index_name`
+It's possible to define an index name at runtime, useful if `index_name` depends on environment or comes from an environment variable.
+
+To do this just define a function with an arity of 0 that will be used as `index_name`
 
 ```elixir
 defmodule People do
@@ -91,12 +93,12 @@ defmodule People do
     object_id: :reference
 
   def algoliax_people do
-    :algoliax_people_from_function
+    System.get_env("PEOPLE_INDEX_NAME")
   end
 end
 ```
 
-#### Index functinons
+#### Index functions
 
 ```elixir
 # Get people index settings
@@ -112,19 +114,19 @@ People.configure_index()
 #### Object functions
 
 ```elixir
-# Save a single object
+# Save object
 People.save_object(people1)
 
 # Save multiple objects
 People.save_objects([people1, people2])
 
-# Save multiple objects, and ensure object that they can't be indexed are deleted
+# Save multiple objects, and ensure object that they can't be indexed anymore are deleted from the index
 People.save_objects([people1, people2], force_delete: true)
 
-# Get on object
+# Get object
 People.get_object(people1)
 
-# Delete one object
+# Delete object
 People.delete_object(people1)
 ```
 
@@ -160,7 +162,7 @@ config :algoliax,
   batch_size: 250
 ```
 
-**_Important_**: Algoliax use by default the `id` column to order and go through the table.
+** ⚠️ _Important_**: Algoliax use by default the `id` column to order and go through the table. (cf [Custom order column](#custom-order-column))
 
 ```elixir
 import Ecto.Query
@@ -181,11 +183,11 @@ People.reindex(force_delete: true)
 People.reindex_atomic()
 ```
 
-##### Custom order column
+##### Custom cursor column
 
-If you don't have an `id` column, you can customize the
-column to order records using the option `cursor_field`. Make sure this
-column ensure a consistent order even when new records are created.
+If you don't have an `id` column, you can change it by setting the `cursor_field` option either in the global settings or in schema specific settings.
+
+Make sure this column ensure a consistent order even when new records are created.
 
 Using the global config:
 
@@ -205,14 +207,16 @@ defmodulePeople do
     searchable_attributes: ["full_name"],
     custom_ranking: ["desc(updated_at)"],
     object_id: :reference,
-    cursor_field: :reference
+    repo: MyApp.Repo,
+    cursor_field: :inserted_at
 end
 ```
 
 ##### Preloads (`reindex` and `reindex_atomic`)
 
-If you attribute need association, you can add preloads to your schema settings.
-**Associations need to be defined in your Ecto Schema**
+Sometimes indexed attributes depend on association. To allow reindexing functions to work, you can add `preloads` to your schema settings.
+
+**Associations need to be defined in your Ecto Schema as well**
 
 ```elixir
 defmodulePeople do

@@ -12,8 +12,11 @@ defmodule Algoliax do
 
   ### Usage
 
-  - `:index_name`, specificy the index where the object will be added on. **Required**
-  - `:object_id`, specify the attribute used to as algolia objectID. Default `:id`.
+  - `:index_name`: specificy the index where the object will be added on. **Required**
+  - `:object_id`: specify the attribute used to as algolia objectID. Default `:id`.
+  - `:repo`: Specify an Ecto repo to be use to fecth records. Default `nil`
+  - `:preloads`: Specify preloads for a given schema. Default `[]`
+  - `:cursor_field`: specify the column to be used to order and go through a given table. Default `:id`
 
   Any valid Algolia settings, using snake case or camel case. Ex: Algolia `attributeForFaceting` can be configured with `:attribute_for_faceting`
 
@@ -169,7 +172,7 @@ defmodule Algoliax do
   Fetch object from algolia. By passing the model, the object is retreived using the object_id configured
 
   ## Example
-      people = %People{reference: 10, last_name: "Doe", first_name: "John", age: 20},
+      people = %People{reference: 10, last_name: "Doe", first_name: "John", age: 20}
 
       People.get_object(people)
   """
@@ -179,23 +182,48 @@ defmodule Algoliax do
   Delete object from algolia. By passing the model, the object is retreived using the object_id configured
 
   ## Example
-      people = %People{reference: 10, last_name: "Doe", first_name: "John", age: 20},
+      people = %People{reference: 10, last_name: "Doe", first_name: "John", age: 20}
 
       People.delete_object(people)
   """
   @callback delete_object(model :: map() | struct()) :: {:ok, map()} | {:error, map()}
 
   @doc """
-  Reindex [Ecto](https://hexdocs.pm/ecto/Ecto.html) specific
+  Reindex a part of object by providing an Ecto query ([Ecto](https://hexdocs.pm/ecto/Ecto.html) specific)
+
+  ## Example
+      import Ecto.Query
+
+      query = from(
+        p in People,
+        where: p.age > 45
+      )
+
+      People.reindex(query)
+
+  Available options:
+
+  - `:force_delete`: delete objects that are in query and where `to_be_indexed?` is false
   """
   @callback reindex(query :: Ecto.Query.t(), opts :: Keyword.t()) ::
               {:ok, map()} | {:error, map()}
 
+  @doc """
+  Reindex all objects ([Ecto](https://hexdocs.pm/ecto/Ecto.html) specific)
+
+  ## Example
+
+      People.reindex(query)
+
+  Available options:
+
+  - `:force_delete`: delete objects where `to_be_indexed?` is `false`
+  """
   @callback reindex(opts :: Keyword.t()) ::
               {:ok, map()} | {:error, map()}
 
   @doc """
-  Reindex atomicly [Ecto](https://hexdocs.pm/ecto/Ecto.html) specific
+  Reindex atomicly ([Ecto](https://hexdocs.pm/ecto/Ecto.html) specific)
   """
   @callback reindex_atomic() :: {:ok, map()} | {:error, map()}
 

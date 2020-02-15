@@ -1,6 +1,5 @@
 defmodule AlgoliaxTest.Struct do
   use ExUnit.Case, async: true
-  doctest Algoliax
   import Mox
 
   defmodule People do

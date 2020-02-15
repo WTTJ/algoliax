@@ -1,4 +1,6 @@
 defmodule Algoliax.MissingRepoError do
+  @moduledoc false
+
   defexception [:message]
 
   @impl true
@@ -8,6 +10,8 @@ defmodule Algoliax.MissingRepoError do
 end
 
 defmodule Algoliax.MissingIndexNameError do
+  @moduledoc false
+
   defexception [:message]
 
   @impl true
