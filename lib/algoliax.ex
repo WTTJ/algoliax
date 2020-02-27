@@ -276,6 +276,10 @@ defmodule Algoliax do
 
       @before_compile unquote(__MODULE__)
 
+      def algoliax_settings do
+        @settings
+      end
+
       @impl Algoliax
       def search(query, params \\ %{}) do
         Search.search(__MODULE__, @settings, query, params)

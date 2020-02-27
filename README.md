@@ -118,6 +118,37 @@ defmodule People do
 end
 ```
 
+#### Secondary indexes
+
+A schema can be indexed in temporary indexes. To do so, set `secondary_indexes` option
+
+```elixir
+defmodule MyApp.GlobalIndex do
+  use Algoliax,
+    index_name: :algoliax_global_index,
+    attributes_for_faceting: ["resource_type"],
+    searchable_attributes: ["resource.full_name"],
+    custom_ranking: ["desc(updated_at)"],
+    object_id: :reference
+
+  ...
+end
+
+defmodule MyApp.People do
+  use Algoliax,
+    index_name: :algoliax_people_struct,
+    attributes_for_faceting: ["age"],
+    searchable_attributes: ["full_name"],
+    custom_ranking: ["desc(update_at)"],
+    object_id: :reference,
+    secondary_indexes: [
+      MyApp.GlobalIndex
+    ]
+end
+```
+
+When an object is saved/removed from primary index `:algoliax_people_struct` it will also be added to `:algoliax_global_index`. The object saved into `:algoliax_global_index` is generated from primary attributes and can be overriden with `prepare_object` option
+
 #### Index functions
 
 ```elixir
