@@ -17,6 +17,7 @@ defmodule Algoliax do
   - `:repo`: Specify an Ecto repo to be use to fecth records. Default `nil`
   - `:preloads`: Specify preloads for a given schema. Default `[]`
   - `:cursor_field`: specify the column to be used to order and go through a given table. Default `:id`
+  - `:prepare_object`: Specify a function of arity 2 to call after building the object. Default `nil`
 
   Any valid Algolia settings, using snake case or camel case. Ex: Algolia `attributeForFaceting` can be configured with `:attribute_for_faceting`
 

@@ -1,4 +1,4 @@
-defmodule AlgoliaxTest.Struct do
+defmodule AlgoliaxTest.StructTest do
   use ExUnit.Case, async: true
   import Mox
 

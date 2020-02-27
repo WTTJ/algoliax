@@ -137,7 +137,21 @@ defmodule Algoliax.Resources.Object do
     Enum.into(attributes, %{}, fn a ->
       {Utils.unprefix_attribute(a), apply(module, a, [model])}
     end)
+    |> prepare_object(model, settings)
     |> Map.put(:objectID, get_object_id(module, settings, model, attributes))
+  end
+
+  defp prepare_object(object, model, settings) do
+    do_prepare_object(object, model, Keyword.get(settings, :prepare_object))
+  end
+
+  defp do_prepare_object(object, model, prepare_object_fn)
+       when is_function(prepare_object_fn, 2) do
+    prepare_object_fn.(object, model)
+  end
+
+  defp do_prepare_object(object, _, _) do
+    object
   end
 
   defp get_object_id(module, settings, model, attributes) do
