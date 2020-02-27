@@ -98,6 +98,26 @@ defmodule People do
 end
 ```
 
+#### After build object callback
+
+To modify object before send to algolia, add `prepare_object` option. Must be a function of arity two and must return a `Map`
+
+```elixir
+defmodule People do
+  use Algoliax,
+    index_name: :algoliax_people,
+    attributes_for_faceting: ["age"],
+    searchable_attributes: ["full_name"],
+    custom_ranking: ["desc(updated_at)"],
+    object_id: :reference,
+    prepare_object: &__MODULE__.prepare/2
+
+  def prepare(object, model) do
+    object |> Map.put(:after_build_attribute, "test")
+  end
+end
+```
+
 #### Index functions
 
 ```elixir
