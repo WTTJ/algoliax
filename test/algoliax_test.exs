@@ -2,7 +2,7 @@ defmodule AlgoliaxTest do
   use ExUnit.Case, async: true
 
   import Mox
-  alias Algoliax.People
+  alias Algoliax.{People, SettingsStore}
 
   defmodule People do
     @moduledoc false
@@ -66,7 +66,7 @@ defmodule AlgoliaxTest do
   setup :verify_on_exit!
 
   setup do
-    Algoliax.Agent.set_settings(:algoliax_people, %{})
+    SettingsStore.set_settings(:algoliax_people, %{})
   end
 
   test "People has algoliax_attr_ functions" do

@@ -2,6 +2,8 @@ defmodule AlgoliaxTest.StructWithPrepareTest do
   use ExUnit.Case, async: true
   import Mox
 
+  alias Algoliax.SettingsStore
+
   defmodule PeopleWithPrepareObject do
     use Algoliax,
       index_name: :algoliax_people_with_prepare_object_struct,
@@ -36,7 +38,7 @@ defmodule AlgoliaxTest.StructWithPrepareTest do
   end
 
   setup do
-    Algoliax.Agent.set_settings(:algoliax_people_with_prepare_object_struct, %{})
+    SettingsStore.set_settings(:algoliax_people_with_prepare_object_struct, %{})
     :ok
   end
 

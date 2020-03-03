@@ -3,34 +3,41 @@ defmodule Algoliax.SecondaryIndexer do
   Execute save_object(s) on secondary indexes
   """
 
+  import Algoliax.Utils, only: [secondary_indexes: 1, index_name: 2]
+  alias Algoliax.SettingsStore
   alias Algoliax.Resources.Object
 
-  if Mix.env() == :test do
-    def run(action, module, settings, models, attributes, opts \\ []) do
-      do_run(action, module, settings, models, attributes, opts)
-    end
-  else
-    def run(action, module, settings, models, attributes, opts \\ []) do
-      Task.Supervisor.start_child(Algoliax.TaskSupervisor, fn ->
-        do_run(action, module, settings, models, attributes, opts)
-      end)
-    end
+  def run(action, module, settings, models, attributes, opts \\ []) do
+    do_run(action, module, settings, models, attributes, opts)
   end
 
   defp do_run(action, module, settings, models, attributes, opts) do
-    secondary_indexes = Keyword.get(settings, :secondary_indexes, [])
+    opts = Keyword.delete(opts, :secondary_indexes_only)
+    secondary_indexes = secondary_indexes(settings)
 
     secondary_indexes
     |> Enum.each(fn secondary_index_module ->
       execute(
         action,
         module,
-        apply(secondary_index_module, :algoliax_settings, []),
+        secondary_index_settings(secondary_index_module),
         models,
         attributes,
         opts
       )
     end)
+  end
+
+  defp secondary_index_settings(module) do
+    settings = apply(module, :algoliax_settings, [])
+    index_name = index_name(module, settings)
+
+    if SettingsStore.reindexing?(index_name) do
+      index_name = :"#{index_name}.tmp"
+      settings |> Keyword.put(:index_name, index_name)
+    else
+      settings
+    end
   end
 
   defp execute(:save_objects, module, settings, models, attributes, opts)

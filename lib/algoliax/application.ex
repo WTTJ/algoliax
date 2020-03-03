@@ -5,7 +5,7 @@ defmodule Algoliax.Application do
 
   def start(_type, _args) do
     children = [
-      Algoliax.Agent,
+      Algoliax.SettingsStore,
       {Task.Supervisor, name: Algoliax.TaskSupervisor}
     ]
 

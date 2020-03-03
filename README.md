@@ -120,6 +120,15 @@ end
 
 #### Secondary indexes
 
+primary_indexes
+secondary_indexes
+
+reindex optsion
+
+- force_delete
+- secondary_indexes_only
+- temporary_index_only
+
 A schema can be indexed in temporary indexes. To do so, set `secondary_indexes` option
 
 ```elixir
@@ -148,6 +157,24 @@ end
 ```
 
 When an object is saved/removed from primary index `:algoliax_people_struct` it will also be added to `:algoliax_global_index`. The object saved into `:algoliax_global_index` is generated from primary attributes and can be overriden with `prepare_object` option
+
+The global index can also use `primary_indexes` to reverse index to use `reindex` and `reindex_atomic`
+
+```elixir
+defmodule MyApp.GlobalIndex do
+  use Algoliax,
+    index_name: :algoliax_global_index,
+    attributes_for_faceting: ["resource_type"],
+    searchable_attributes: ["resource.full_name"],
+    custom_ranking: ["desc(updated_at)"],
+    object_id: :reference,
+    primary_indexes: [
+      MyApp.People
+    ]
+
+  ...
+end
+```
 
 #### Index functions
 

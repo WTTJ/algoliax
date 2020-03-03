@@ -3,21 +3,28 @@ defmodule AlgoliaxTest.Schema do
   import Mox
   import Ecto.Query
 
-  alias Algoliax.{Animal, Repo, PeopleEcto, PeopleWithoutIdEcto, PeopleEctoWithAssociation}
+  alias Algoliax.{
+    Animal,
+    Repo,
+    PeopleEcto,
+    PeopleWithoutIdEcto,
+    PeopleEctoWithAssociation,
+    SettingsStore
+  }
 
   @ref1 Ecto.UUID.generate()
   @ref2 Ecto.UUID.generate()
   @ref3 Ecto.UUID.generate()
 
   setup do
-    Algoliax.Agent.set_settings(:algoliax_people, %{})
-    Algoliax.Agent.set_settings(:"algoliax_people.tmp", %{})
+    SettingsStore.set_settings(:algoliax_people, %{})
+    SettingsStore.set_settings(:"algoliax_people.tmp", %{})
 
-    Algoliax.Agent.set_settings(:algoliax_people_without_id, %{})
-    Algoliax.Agent.set_settings(:"algoliax_people_without_id.tmp", %{})
+    SettingsStore.set_settings(:algoliax_people_without_id, %{})
+    SettingsStore.set_settings(:"algoliax_people_without_id.tmp", %{})
 
-    Algoliax.Agent.set_settings(:algoliax_people_ecto_with_association, %{})
-    Algoliax.Agent.set_settings(:"algoliax_people_ecto_with_association.tmp", %{})
+    SettingsStore.set_settings(:algoliax_people_ecto_with_association, %{})
+    SettingsStore.set_settings(:"algoliax_people_ecto_with_association.tmp", %{})
 
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(Repo)
 

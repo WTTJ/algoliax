@@ -4,8 +4,8 @@ defmodule Algoliax.MissingRepoError do
   defexception [:message]
 
   @impl true
-  def exception(index_name) do
-    %__MODULE__{message: "No repo configured for index #{index_name}"}
+  def exception(%{module: module, index_name: index_name}) do
+    %__MODULE__{message: "No repo configured for module #{module} and index #{index_name}"}
   end
 end
 
@@ -56,14 +56,22 @@ defmodule Algoliax.Utils do
     end
   end
 
-  def repo(settings) do
+  def secondary_indexes(settings, default \\ []) do
+    Keyword.get(settings, :secondary_indexes, default)
+  end
+
+  def primary_indexes(settings, default \\ nil) do
+    Keyword.get(settings, :primary_indexes, default)
+  end
+
+  def repo!(module, settings) do
     index_name = Keyword.get(settings, :index_name)
     repo = Keyword.get(settings, :repo)
 
     if repo do
       repo
     else
-      raise Algoliax.MissingRepoError, index_name
+      raise(Algoliax.MissingRepoError, %{index_name: index_name, module: module})
     end
   end
 

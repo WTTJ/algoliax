@@ -2,6 +2,8 @@ defmodule AlgoliaxTest.StructWithSecondaryIndexTest do
   use ExUnit.Case, async: true
   import Mox
 
+  alias Algoliax.SettingsStore
+
   defmodule GlobalIndex do
     use Algoliax,
       index_name: :algoliax_global_index,
@@ -42,8 +44,8 @@ defmodule AlgoliaxTest.StructWithSecondaryIndexTest do
   end
 
   setup do
-    Algoliax.Agent.set_settings(:algoliax_people_struct, %{})
-    Algoliax.Agent.set_settings(:algoliax_global_index, %{})
+    SettingsStore.set_settings(:algoliax_people_struct, %{})
+    SettingsStore.set_settings(:algoliax_global_index, %{})
     :ok
   end
 

@@ -51,6 +51,6 @@ defmodule Algoliax.Client do
         message
       end
 
-    Logger.debug(message)
+    Logger.error(message)
   end
 end

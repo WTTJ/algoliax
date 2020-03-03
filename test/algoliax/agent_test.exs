@@ -1,7 +1,7 @@
-defmodule Algoliax.AgentTest do
+defmodule Algoliax.SettingsStoreTest do
   use ExUnit.Case, async: false
 
-  alias Algoliax.Agent, as: Agent
+  alias Algoliax.SettingsStore, as: Agent
 
   @index_name :algoliax_people
 

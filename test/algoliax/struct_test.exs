@@ -2,6 +2,8 @@ defmodule AlgoliaxTest.StructTest do
   use ExUnit.Case, async: true
   import Mox
 
+  alias Algoliax.SettingsStore
+
   defmodule People do
     use Algoliax,
       index_name: :algoliax_people_struct,
@@ -30,7 +32,7 @@ defmodule AlgoliaxTest.StructTest do
   end
 
   setup do
-    Algoliax.Agent.set_settings(:algoliax_people_struct, %{})
+    SettingsStore.set_settings(:algoliax_people_struct, %{})
     :ok
   end
 

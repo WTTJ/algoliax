@@ -1,7 +1,17 @@
 defmodule Algoliax.Resources.Object do
   @moduledoc false
 
-  alias Algoliax.{Config, SecondaryIndexer, TemporaryIndexer, Utils}
+  import Algoliax.Utils,
+    only: [
+      index_name: 2,
+      repo!: 2,
+      find_in_batches: 5,
+      prefix_attribute: 1,
+      unprefix_attribute: 1,
+      primary_indexes: 1
+    ]
+
+  alias Algoliax.{Config, SecondaryIndexer, SettingsStore, TemporaryIndexer}
   alias Algoliax.Resources.Index
 
   import Ecto.Query
@@ -10,39 +20,42 @@ defmodule Algoliax.Resources.Object do
     Index.ensure_settings(module, settings)
 
     object_id = get_object_id(module, settings, model, attributes)
-    Config.requests().get_object(Utils.index_name(module, settings), %{objectID: object_id})
+    Config.requests().get_object(index_name(module, settings), %{objectID: object_id})
   end
 
   def save_objects(module, settings, models, attributes, opts) do
-    Index.ensure_settings(module, settings)
+    response =
+      if !Keyword.get(opts, :secondary_indexes_only) && !Keyword.get(opts, :temporary_index_only) do
+        Index.ensure_settings(module, settings)
+        index_name = index_name(module, settings)
+
+        objects =
+          models
+          |> Enum.map(fn model ->
+            action = get_action(module, model, opts)
+
+            if action do
+              build_batch_object(module, settings, model, attributes, action)
+            end
+          end)
+          |> Enum.reject(&is_nil/1)
+
+        Config.requests().save_objects(index_name, %{requests: objects})
+      end
 
     call_indexer(:save_objects, module, settings, models, attributes, opts)
-
-    index_name = Utils.index_name(module, settings)
-
-    objects =
-      models
-      |> Enum.map(fn model ->
-        action = get_action(module, model, opts)
-
-        if action do
-          build_batch_object(module, settings, model, attributes, action)
-        end
-      end)
-      |> Enum.reject(&is_nil/1)
-
-    Config.requests().save_objects(index_name, %{requests: objects})
+    response
   end
 
   def save_object(module, settings, model, attributes) do
     Index.ensure_settings(module, settings)
 
-    call_indexer(:save_object, module, settings, model, attributes)
-
     if apply(module, :to_be_indexed?, [model]) do
       object = build_object(module, settings, model, attributes)
-      index_name = Utils.index_name(module, settings)
-      Config.requests().save_object(index_name, object)
+      index_name = index_name(module, settings)
+      response = Config.requests().save_object(index_name, object)
+      call_indexer(:save_object, module, settings, model, attributes)
+      response
     else
       {:not_indexable, model}
     end
@@ -51,43 +64,47 @@ defmodule Algoliax.Resources.Object do
   def delete_object(module, settings, model, attributes) do
     Index.ensure_settings(module, settings)
     call_indexer(:delete_object, module, settings, model, attributes)
-
     object = build_object(module, settings, model, attributes)
-    index_name = Utils.index_name(module, settings)
+    index_name = index_name(module, settings)
     Config.requests().delete_object(index_name, object)
   end
 
   def reindex(module, settings, index_attributes, query, opts \\ []) do
-    Index.ensure_settings(module, settings)
+    case primary_indexes(settings) do
+      primary_indexes when is_list(primary_indexes) ->
+        opts = opts |> Keyword.put(:secondary_indexes_only, true)
 
-    repo = Utils.repo(settings)
+        Enum.each(primary_indexes, fn primary_index ->
+          apply(primary_index, :reindex, [opts])
+        end)
+
+      nil ->
+        do_reindex(module, settings, index_attributes, query, opts)
+    end
+  end
+
+  defp do_reindex(module, settings, index_attributes, query, opts) do
+    Index.ensure_settings(module, settings)
+    repo = repo!(module, settings)
 
     query =
       case query do
-        %Ecto.Query{} = query ->
-          query
-
-        _ ->
-          from(m in module)
+        %Ecto.Query{} = query -> query
+        _ -> from(m in module)
       end
 
-    Utils.find_in_batches(repo, query, 0, settings, fn batch ->
+    find_in_batches(repo, query, 0, settings, fn batch ->
       save_objects(module, settings, batch, index_attributes, opts)
     end)
   end
 
   def reindex_atomic(module, settings, index_attributes) do
-    Utils.repo(settings)
-
-    Index.ensure_settings(module, settings)
-
-    index_name = Utils.index_name(module, settings)
+    index_name = index_name(module, settings)
     tmp_index_name = :"#{index_name}.tmp"
     tmp_settings = Keyword.put(settings, :index_name, tmp_index_name)
 
     Index.ensure_settings(module, tmp_settings)
-    Algoliax.Agent.start_reindexing(index_name)
-
+    SettingsStore.start_reindexing(index_name)
     reindex(module, tmp_settings, index_attributes, nil)
 
     response =
@@ -96,8 +113,8 @@ defmodule Algoliax.Resources.Object do
         destination: "#{index_name}"
       })
 
-    Algoliax.Agent.delete_settings(tmp_index_name)
-    Algoliax.Agent.stop_reindexing(index_name)
+    SettingsStore.delete_settings(tmp_index_name)
+    SettingsStore.stop_reindexing(index_name)
 
     response
   end
@@ -111,7 +128,7 @@ defmodule Algoliax.Resources.Object do
 
   defp build_object(module, settings, model, attributes) do
     Enum.into(attributes, %{}, fn a ->
-      {Utils.unprefix_attribute(a), apply(module, a, [model])}
+      {unprefix_attribute(a), apply(module, a, [model])}
     end)
     |> prepare_object(model, settings)
     |> Map.put(:objectID, get_object_id(module, settings, model, attributes))
@@ -133,7 +150,7 @@ defmodule Algoliax.Resources.Object do
   defp get_object_id(module, settings, model, attributes) do
     object_id_attribute = Keyword.get(settings, :object_id)
 
-    case Enum.find(attributes, fn a -> a == Utils.prefix_attribute(object_id_attribute) end) do
+    case Enum.find(attributes, fn a -> a == prefix_attribute(object_id_attribute) end) do
       nil ->
         Map.get(model, object_id_attribute)
 
