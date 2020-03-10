@@ -1,6 +1,6 @@
 defmodule Algoliax.Resources.Search do
   @moduledoc false
-  alias Algoliax.{Utils, Config}
+  alias Algoliax.{Utils, Requests}
 
   def search(module, settings, query, params) do
     index_name = Utils.index_name(module, settings)
@@ -11,7 +11,7 @@ defmodule Algoliax.Resources.Search do
       }
       |> Map.merge(Utils.camelize(params))
 
-    Config.requests().search(index_name, body)
+    Requests.search(index_name, body)
   end
 
   def search_facet(module, settings, facet_name, facet_query, params) do
@@ -27,6 +27,6 @@ defmodule Algoliax.Resources.Search do
       end
       |> Map.merge(Utils.camelize(params))
 
-    Config.requests().search_facet(index_name, facet_name, body)
+    Requests.search_facet(index_name, facet_name, body)
   end
 end

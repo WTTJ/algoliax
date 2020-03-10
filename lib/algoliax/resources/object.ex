@@ -1,7 +1,7 @@
 defmodule Algoliax.Resources.Object do
   @moduledoc false
 
-  alias Algoliax.{Config, Utils}
+  alias Algoliax.{Config, Utils, Requests}
   alias Algoliax.Resources.Index
 
   import Ecto.Query
@@ -10,7 +10,7 @@ defmodule Algoliax.Resources.Object do
     Index.ensure_settings(module, settings)
 
     object_id = get_object_id(module, settings, model, attributes)
-    Config.requests().get_object(Utils.index_name(module, settings), %{objectID: object_id})
+    Requests.get_object(Utils.index_name(module, settings), %{objectID: object_id})
   end
 
   def save_objects(module, settings, models, attributes, opts) do
@@ -30,7 +30,7 @@ defmodule Algoliax.Resources.Object do
       end)
       |> Enum.reject(&is_nil/1)
 
-    Config.requests().save_objects(index_name, %{requests: objects})
+    Requests.save_objects(index_name, %{requests: objects})
   end
 
   def save_object(module, settings, model, attributes) do
@@ -41,7 +41,7 @@ defmodule Algoliax.Resources.Object do
     if apply(module, :to_be_indexed?, [model]) do
       object = build_object(module, settings, model, attributes)
       index_name = Utils.index_name(module, settings)
-      Config.requests().save_object(index_name, object)
+      Requests.save_object(index_name, object)
     else
       {:not_indexable, model}
     end
@@ -52,7 +52,7 @@ defmodule Algoliax.Resources.Object do
 
     object = build_object(module, settings, model, attributes)
     index_name = Utils.index_name(module, settings)
-    Config.requests().delete_object(index_name, object)
+    Requests.delete_object(index_name, object)
   end
 
   def reindex(module, settings, index_attributes, query, opts \\ []) do
@@ -89,7 +89,7 @@ defmodule Algoliax.Resources.Object do
     reindex(module, tmp_settings, index_attributes, nil)
 
     response =
-      Config.requests().move_index(tmp_index_name, %{
+      Requests.move_index(tmp_index_name, %{
         operation: "move",
         destination: "#{index_name}"
       })

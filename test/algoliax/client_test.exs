@@ -1,53 +1,17 @@
 defmodule Algoliax.ClientTest do
-  use ExUnit.Case, async: false
-  import Mock
+  use Algoliax.RequestCase
 
-  test_with_mock "test retries", :hackney, request: fn _, _, _, _, _ -> {:error, %{}} end do
+  test "test retries" do
     Application.put_env(:algoliax, :api_key, "api_key")
 
     Algoliax.Client.request(
-      %{action: :get_object, url_params: [index_name: :index_name, object_id: 10]},
+      %{action: :get_object, url_params: [index_name: :index_name, object_id: "error"]},
       0
     )
 
-    assert_called(
-      :hackney.request(
-        :get,
-        "https://APPLICATION_ID-dsn.algolia.net/1/indexes/index_name/10",
-        [{"X-Algolia-API-Key", "api_key"}, {"X-Algolia-Application-Id", "APPLICATION_ID"}],
-        "null",
-        [:with_body]
-      )
-    )
-
-    assert_called(
-      :hackney.request(
-        :get,
-        "https://APPLICATION_ID-1.algolianet.com/1/indexes/index_name/10",
-        [{"X-Algolia-API-Key", "api_key"}, {"X-Algolia-Application-Id", "APPLICATION_ID"}],
-        "null",
-        [:with_body]
-      )
-    )
-
-    assert_called(
-      :hackney.request(
-        :get,
-        "https://APPLICATION_ID-2.algolianet.com/1/indexes/index_name/10",
-        [{"X-Algolia-API-Key", "api_key"}, {"X-Algolia-Application-Id", "APPLICATION_ID"}],
-        "null",
-        [:with_body]
-      )
-    )
-
-    assert_called(
-      :hackney.request(
-        :get,
-        "https://APPLICATION_ID-3.algolianet.com/1/indexes/index_name/10",
-        [{"X-Algolia-API-Key", "api_key"}, {"X-Algolia-Application-Id", "APPLICATION_ID"}],
-        "null",
-        [:with_body]
-      )
-    )
+    assert_request("GET", "/APPLICATION_ID/read/index_name/error", %{})
+    assert_request("GET", "/APPLICATION_ID/retry/1/index_name/error", %{})
+    assert_request("GET", "/APPLICATION_ID/retry/2/index_name/error", %{})
+    assert_request("GET", "/APPLICATION_ID/retry/3/index_name/error", %{})
   end
 end

@@ -1,16 +1,6 @@
 defmodule Algoliax.Config do
   @moduledoc false
 
-  if Mix.env() == :test do
-    def requests do
-      Algoliax.RequestsMock
-    end
-  else
-    def requests do
-      Algoliax.Requests
-    end
-  end
-
   def api_key do
     System.get_env("ALGOLIA_API_KEY") || Application.get_env(:algoliax, :api_key)
   end

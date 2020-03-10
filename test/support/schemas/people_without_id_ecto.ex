@@ -1,4 +1,4 @@
-defmodule Algoliax.PeopleWithoutIdEcto do
+defmodule Algoliax.Schemas.PeopleWithoutIdEcto do
   @moduledoc false
 
   use Ecto.Schema

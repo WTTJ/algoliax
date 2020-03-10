@@ -2,10 +2,6 @@ defmodule Algoliax.Routes do
   @moduledoc false
   alias Algoliax.Config
 
-  @host_read "-dsn.algolia.net/1/indexes"
-  @host_write ".algolia.net/1/indexes"
-  @host_retry ".algolianet.com/1/indexes"
-
   @paths %{
     search: {"/{index_name}/query", :post},
     search_facet: {"/{index_name}/facets/{facet_name}/query", :post},
@@ -41,18 +37,51 @@ defmodule Algoliax.Routes do
     end)
   end
 
-  defp build_url(path, method, 0) do
-    host =
-      if method == :get do
-        @host_read
-      else
-        @host_write
-      end
+  defp build_url(path, :get, 0) do
+    url_read()
+    |> String.replace(~r/{{application_id}}/, Config.application_id())
+    |> Kernel.<>(path)
+  end
 
-    "https://" <> Config.application_id() <> host <> path
+  defp build_url(path, _method, 0) do
+    url_write()
+    |> String.replace(~r/{{application_id}}/, Config.application_id())
+    |> Kernel.<>(path)
   end
 
   defp build_url(path, _method, retry) do
-    "https://" <> Config.application_id() <> "-" <> "#{retry}" <> @host_retry <> path
+    url_retry()
+    |> String.replace(~r/{{application_id}}/, Config.application_id())
+    |> String.replace(~r/{{retry}}/, to_string(retry))
+    |> Kernel.<>(path)
+  end
+
+  if Mix.env() == :test do
+    defp url_read do
+      port = System.get_env("SLACK_MOCK_API_PORT", "8002")
+      "http://localhost:#{port}/{{application_id}}/read"
+    end
+
+    defp url_write do
+      port = System.get_env("SLACK_MOCK_API_PORT", "8002")
+      "http://localhost:#{port}/{{application_id}}/write"
+    end
+
+    defp url_retry do
+      port = System.get_env("SLACK_MOCK_API_PORT", "8002")
+      "http://localhost:#{port}/{{application_id}}/retry/{{retry}}"
+    end
+  else
+    defp url_read do
+      "https://{{application_id}}-dsn.algolia.net/1/indexes"
+    end
+
+    defp url_write do
+      "https://{{application_id}}.algolia.net/1/indexes"
+    end
+
+    defp url_retry do
+      "https://{{application_id}}-{{retry}}.algolianet.com/1/indexes"
+    end
   end
 end
