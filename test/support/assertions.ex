@@ -42,10 +42,11 @@ defmodule Algoliax.Assertions do
 
           flunk(
             "No request found for method=#{method}, path=#{path}, body=#{inspect(body)}\n\n Found:\n" <>
-              message
+              if(message == "", do: "None", else: message)
           )
 
         _ ->
+          RequestsStore.remove(request)
           assert request
       end
     end
@@ -53,5 +54,11 @@ defmodule Algoliax.Assertions do
 
   def equal_path?(nil, _), do: true
 
-  def equal_path?(path, request_path), do: path == request_path
+  def equal_path?(path, request_path) do
+    if Regex.regex?(path) do
+      Regex.match?(path, request_path)
+    else
+      path == request_path
+    end
+  end
 end

@@ -6,8 +6,7 @@
 # end
 
 defmodule AlgoliaxTest.Schema do
-  use ExUnit.Case, async: true
-  import Mox
+  use Algoliax.RequestCase
   import Ecto.Query
 
   alias Algoliax.Repo
@@ -41,9 +40,27 @@ defmodule AlgoliaxTest.Schema do
     end)
 
     [
-      %PeopleWithoutIdEcto{reference: @ref1, last_name: "Doe", first_name: "John", age: 77},
-      %PeopleWithoutIdEcto{reference: @ref2, last_name: "al", first_name: "bert", age: 35},
-      %PeopleWithoutIdEcto{reference: @ref3, last_name: "Vador", first_name: "Dark", age: 9}
+      %PeopleWithoutIdEcto{
+        reference: @ref1,
+        last_name: "Doe",
+        first_name: "John",
+        age: 77,
+        inserted_at: ~N[2020-03-10 17:05:20]
+      },
+      %PeopleWithoutIdEcto{
+        reference: @ref2,
+        last_name: "al",
+        first_name: "bert",
+        age: 35,
+        inserted_at: ~N[2020-03-10 17:05:27]
+      },
+      %PeopleWithoutIdEcto{
+        reference: @ref3,
+        last_name: "Vador",
+        first_name: "Dark",
+        age: 9,
+        inserted_at: ~N[2020-03-10 17:05:32]
+      }
     ]
     |> Enum.each(fn p ->
       p
@@ -77,353 +94,142 @@ defmodule AlgoliaxTest.Schema do
     :ok
   end
 
-  @tag skip: true
   test "reindex" do
-    Algoliax.RequestsMock
-    |> expect(:save_objects, fn :algoliax_people,
-                                %{
-                                  requests: [
-                                    %{
-                                      action: "updateObject",
-                                      body: %{
-                                        age: 77,
-                                        first_name: "John",
-                                        full_name: "John Doe",
-                                        gender: nil,
-                                        id: _,
-                                        last_name: "Doe",
-                                        nickname: "john",
-                                        objectID: @ref1,
-                                        updated_at: 1_546_300_800
-                                      }
-                                    },
-                                    %{
-                                      action: "updateObject",
-                                      body: %{
-                                        age: 35,
-                                        first_name: "bert",
-                                        full_name: "bert al",
-                                        gender: nil,
-                                        id: _,
-                                        last_name: "al",
-                                        nickname: "bert",
-                                        objectID: @ref2,
-                                        updated_at: 1_546_300_800
-                                      }
-                                    }
-                                  ]
-                                } ->
-      %{
-        "taskID" => 792,
-        "objectIDs" => [@ref2, @ref1]
-      }
-    end)
+    assert {:ok, res} = PeopleEcto.reindex()
 
-    PeopleEcto.reindex()
+    assert_request("POST", %{
+      "requests" => [
+        %{"action" => "updateObject", "body" => %{"objectID" => @ref1}}
+      ]
+    })
+
+    assert_request("POST", %{
+      "requests" => [
+        %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
+      ]
+    })
   end
 
-  @tag skip: true
   test "reindex with force delete" do
-    Algoliax.RequestsMock
-    |> expect(:save_objects, fn :algoliax_people,
-                                %{
-                                  requests: [
-                                    %{
-                                      action: "updateObject",
-                                      body: %{
-                                        age: 77,
-                                        first_name: "John",
-                                        full_name: "John Doe",
-                                        gender: nil,
-                                        id: _,
-                                        last_name: "Doe",
-                                        nickname: "john",
-                                        objectID: @ref1,
-                                        updated_at: 1_546_300_800
-                                      }
-                                    },
-                                    %{
-                                      action: "updateObject",
-                                      body: %{
-                                        age: 35,
-                                        first_name: "bert",
-                                        full_name: "bert al",
-                                        gender: nil,
-                                        id: _,
-                                        last_name: "al",
-                                        nickname: "bert",
-                                        objectID: @ref2,
-                                        updated_at: 1_546_300_800
-                                      }
-                                    },
-                                    %{
-                                      action: "deleteObject",
-                                      body: %{
-                                        age: 9,
-                                        first_name: "Dark",
-                                        full_name: "Dark Vador",
-                                        gender: nil,
-                                        id: _,
-                                        last_name: "Vador",
-                                        nickname: "dark",
-                                        objectID: @ref3,
-                                        updated_at: 1_546_300_800
-                                      }
-                                    }
-                                  ]
-                                } ->
-      %{
-        "taskID" => 792,
-        "objectIDs" => [@ref2, @ref1]
-      }
-    end)
+    assert {:ok, res} = PeopleEcto.reindex(force_delete: true)
 
-    PeopleEcto.reindex(force_delete: true)
+    assert_request("POST", %{
+      "requests" => [
+        %{"action" => "updateObject", "body" => %{"objectID" => @ref1}}
+      ]
+    })
+
+    assert_request("POST", %{
+      "requests" => [
+        %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
+      ]
+    })
+
+    assert_request("POST", %{
+      "requests" => [
+        %{"action" => "deleteObject", "body" => %{"objectID" => @ref3}}
+      ]
+    })
   end
 
-  @tag skip: true
   test "reindex with query" do
-    Algoliax.RequestsMock
-    |> expect(:save_objects, fn :algoliax_people,
-                                %{
-                                  requests: [
-                                    %{
-                                      action: "updateObject",
-                                      body: %{
-                                        age: 35,
-                                        first_name: "bert",
-                                        full_name: "bert al",
-                                        gender: nil,
-                                        id: _,
-                                        last_name: "al",
-                                        nickname: "bert",
-                                        objectID: @ref2,
-                                        updated_at: 1_546_300_800
-                                      }
-                                    }
-                                  ]
-                                } ->
-      %{
-        "taskID" => 792,
-        "objectIDs" => [@ref2, @ref1]
-      }
-    end)
-
     query =
       from(p in PeopleEcto,
         where: p.age == 35
       )
 
-    PeopleEcto.reindex(query)
+    assert {:ok, res} = PeopleEcto.reindex(query)
+
+    assert_request("POST", %{
+      "requests" => [
+        %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
+      ]
+    })
   end
 
-  @tag skip: true
   test "reindex with query and force delete" do
-    Algoliax.RequestsMock
-    |> expect(:save_objects, fn :algoliax_people,
-                                %{
-                                  requests: [
-                                    %{
-                                      action: "updateObject",
-                                      body: %{
-                                        age: 35,
-                                        first_name: "bert",
-                                        full_name: "bert al",
-                                        gender: nil,
-                                        id: _,
-                                        last_name: "al",
-                                        nickname: "bert",
-                                        objectID: @ref2,
-                                        updated_at: 1_546_300_800
-                                      }
-                                    },
-                                    %{
-                                      action: "deleteObject",
-                                      body: %{
-                                        age: 9,
-                                        first_name: "Dark",
-                                        full_name: "Dark Vador",
-                                        gender: nil,
-                                        id: _,
-                                        last_name: "Vador",
-                                        nickname: "dark",
-                                        objectID: @ref3,
-                                        updated_at: 1_546_300_800
-                                      }
-                                    }
-                                  ]
-                                } ->
-      %{
-        "taskID" => 792,
-        "objectIDs" => [@ref2, @ref1]
-      }
-    end)
-
     query =
       from(p in PeopleEcto,
         where: p.age == 35 or p.first_name == "Dark"
       )
 
-    PeopleEcto.reindex(query, force_delete: true)
+    assert {:ok, res} = PeopleEcto.reindex(query, force_delete: true)
+
+    assert_request("POST", %{
+      "requests" => [
+        %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
+      ]
+    })
+
+    assert_request("POST", %{
+      "requests" => [
+        %{"action" => "deleteObject", "body" => %{"objectID" => @ref3}}
+      ]
+    })
   end
 
-  @tag skip: true
   test "reindex atomic" do
-    Algoliax.RequestsMock
-    |> expect(:save_objects, fn :"algoliax_people.tmp",
-                                %{
-                                  requests: [
-                                    %{
-                                      action: "updateObject",
-                                      body: %{
-                                        age: 77,
-                                        first_name: "John",
-                                        full_name: "John Doe",
-                                        gender: nil,
-                                        id: _,
-                                        last_name: "Doe",
-                                        nickname: "john",
-                                        objectID: @ref1,
-                                        updated_at: 1_546_300_800
-                                      }
-                                    },
-                                    %{
-                                      action: "updateObject",
-                                      body: %{
-                                        age: 35,
-                                        first_name: "bert",
-                                        full_name: "bert al",
-                                        gender: nil,
-                                        id: _,
-                                        last_name: "al",
-                                        nickname: "bert",
-                                        objectID: @ref2,
-                                        updated_at: 1_546_300_800
-                                      }
-                                    }
-                                  ]
-                                } ->
-      %{
-        "taskID" => 792,
-        "objectIDs" => [@ref2, @ref1]
-      }
-    end)
-    |> expect(:move_index, fn :"algoliax_people.tmp", _ ->
-      %{
-        "taskID" => 792,
-        "objectIDs" => [@ref2, @ref1]
-      }
-    end)
+    assert {:ok, res} = PeopleEcto.reindex_atomic()
 
-    PeopleEcto.reindex_atomic()
+    assert_request("POST", %{
+      "requests" => [
+        %{"action" => "updateObject", "body" => %{"objectID" => @ref1}}
+      ]
+    })
+
+    assert_request("POST", %{
+      "requests" => [
+        %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
+      ]
+    })
+
+    assert_request("POST", ~r/algoliax_people\.tmp/, %{
+      "destination" => "algoliax_people",
+      "operation" => "move"
+    })
   end
 
-  @tag skip: true
   test "reindex without an id column" do
-    Algoliax.RequestsMock
-    |> expect(:save_objects, fn :algoliax_people_without_id,
-                                %{
-                                  requests: [
-                                    %{
-                                      action: "updateObject",
-                                      body: %{
-                                        age: 77,
-                                        first_name: "John",
-                                        gender: nil,
-                                        id: _,
-                                        last_name: "Doe",
-                                        objectID: @ref1,
-                                        updated_at: 1_546_300_800
-                                      }
-                                    },
-                                    %{
-                                      action: "updateObject",
-                                      body: %{
-                                        age: 35,
-                                        first_name: "bert",
-                                        gender: nil,
-                                        id: _,
-                                        last_name: "al",
-                                        objectID: @ref2,
-                                        updated_at: 1_546_300_800
-                                      }
-                                    },
-                                    %{
-                                      action: "updateObject",
-                                      body: %{
-                                        age: 9,
-                                        first_name: "Dark",
-                                        gender: nil,
-                                        id: _,
-                                        last_name: "Vador",
-                                        objectID: @ref3,
-                                        updated_at: 1_546_300_800
-                                      }
-                                    }
-                                  ]
-                                } ->
-      %{
-        "taskID" => 792,
-        "objectIDs" => [@ref2, @ref1]
-      }
-    end)
+    assert {:ok, res} = PeopleWithoutIdEcto.reindex()
 
-    PeopleWithoutIdEcto.reindex()
+    assert_request("POST", %{
+      "requests" => [
+        %{"action" => "updateObject", "body" => %{"objectID" => @ref1}}
+      ]
+    })
+
+    assert_request("POST", %{
+      "requests" => [
+        %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
+      ]
+    })
+
+    assert_request("POST", %{
+      "requests" => [
+        %{"action" => "updateObject", "body" => %{"objectID" => @ref3}}
+      ]
+    })
   end
 
-  @tag skip: true
   test "reindex with association" do
-    Algoliax.RequestsMock
-    |> expect(:save_objects, fn :algoliax_people_ecto_with_association,
-                                %{
-                                  requests: [
-                                    %{
-                                      action: "updateObject",
-                                      body: %{
-                                        age: 77,
-                                        first_name: "John",
-                                        gender: nil,
-                                        id: _,
-                                        last_name: "Doe",
-                                        objectID: @ref1,
-                                        updated_at: 1_546_300_800,
-                                        animals: ["cat", "snake"]
-                                      }
-                                    },
-                                    %{
-                                      action: "updateObject",
-                                      body: %{
-                                        age: 35,
-                                        first_name: "bert",
-                                        gender: nil,
-                                        id: _,
-                                        last_name: "al",
-                                        objectID: @ref2,
-                                        updated_at: 1_546_300_800,
-                                        animals: []
-                                      }
-                                    },
-                                    %{
-                                      action: "updateObject",
-                                      body: %{
-                                        age: 9,
-                                        first_name: "Dark",
-                                        gender: nil,
-                                        id: _,
-                                        last_name: "Vador",
-                                        objectID: @ref3,
-                                        updated_at: 1_546_300_800,
-                                        animals: ["dog"]
-                                      }
-                                    }
-                                  ]
-                                } ->
-      %{
-        "taskID" => 792,
-        "objectIDs" => [@ref2, @ref1]
-      }
-    end)
+    assert {:ok, res} = PeopleEctoWithAssociation.reindex()
 
-    PeopleEctoWithAssociation.reindex()
+    assert_request("POST", %{
+      "requests" => [
+        %{"action" => "updateObject", "body" => %{"objectID" => @ref1}}
+      ]
+    })
+
+    assert_request("POST", %{
+      "requests" => [
+        %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
+      ]
+    })
+
+    assert_request("POST", %{
+      "requests" => [
+        %{"action" => "updateObject", "body" => %{"objectID" => @ref3}}
+      ]
+    })
   end
 end

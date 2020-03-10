@@ -79,6 +79,16 @@ defmodule Algoliax.ApiMockServer do
     send_resp(conn, 200, Jason.encode!(response))
   end
 
+  # Copy/move index: https://www.algolia.com/doc/rest-api/search/#copymove-index
+  post "/:application_id/:mode/:index_name/operation" do
+    response = %{
+      updatedAt: "2013-01-18T15:33:13.556Z",
+      taskID: 681
+    }
+
+    send_resp(conn, 200, Jason.encode!(response))
+  end
+
   # Get object: https://www.algolia.com/doc/rest-api/search/#get-object
   get "/:application_id/:mode/:count/:index_name/:object_id" do
     case Map.get(conn.params, "object_id") do
@@ -142,7 +152,13 @@ defmodule Algoliax.ApiMockServer do
   end
 
   defp save_request(conn, _) do
-    RequestsStore.save(%{method: conn.method, path: conn.request_path, body: conn.body_params})
+    RequestsStore.save(%{
+      id: :rand.uniform(100_000),
+      method: conn.method,
+      path: conn.request_path,
+      body: conn.body_params
+    })
+
     conn
   end
 

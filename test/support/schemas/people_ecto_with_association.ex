@@ -18,7 +18,7 @@ defmodule Algoliax.Schemas.PeopleEctoWithAssociation do
     field(:first_name)
     field(:age, :integer)
     field(:gender, :string)
-    has_many(:animals, Algoliax.Animal)
+    has_many(:animals, Algoliax.Schemas.Animal)
 
     timestamps()
   end

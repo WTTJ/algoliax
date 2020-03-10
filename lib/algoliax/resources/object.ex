@@ -1,7 +1,7 @@
 defmodule Algoliax.Resources.Object do
   @moduledoc false
 
-  alias Algoliax.{Config, Utils, Requests}
+  alias Algoliax.{Utils, Requests}
   alias Algoliax.Resources.Index
 
   import Ecto.Query

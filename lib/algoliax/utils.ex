@@ -67,31 +67,34 @@ defmodule Algoliax.Utils do
     end
   end
 
-  def find_in_batches(repo, query, id, settings, execute) do
+  def find_in_batches(repo, query, cursor, settings, execute) do
     cursor_field = Keyword.get(settings, :cursor_field, Config.cursor_field()) || :id
     preloads = Keyword.get(settings, :preloads, [])
 
     q =
-      if id > 0 do
+      if cursor == 0 do
+        from(q in query, limit: ^@batch_size, order_by: field(q, ^cursor_field))
+      else
         from(q in query,
           limit: ^@batch_size,
-          where: field(q, ^cursor_field) > ^id,
+          where: field(q, ^cursor_field) > ^cursor,
           order_by: field(q, ^cursor_field)
         )
-      else
-        from(q in query, limit: ^@batch_size, order_by: field(q, ^cursor_field))
       end
 
-    results = repo.all(q) |> repo.preload(preloads)
+    results =
+      repo.all(q)
+      |> repo.preload(preloads)
 
-    response = execute.(results)
+    if Enum.any?(results) do
+      execute.(results)
+    end
 
     if length(results) == @batch_size do
-      last_id = results |> List.last() |> Map.get(:id)
-
-      find_in_batches(repo, query, last_id, settings, execute)
+      last_cursor = results |> List.last() |> Map.get(cursor_field)
+      find_in_batches(repo, query, last_cursor, settings, execute)
     else
-      response
+      {:ok, :completed}
     end
   end
 

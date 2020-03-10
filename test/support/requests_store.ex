@@ -20,4 +20,11 @@ defmodule Algoliax.RequestsStore do
   def get do
     Agent.get(__MODULE__, fn state -> state end)
   end
+
+  def remove(request) do
+    Agent.update(__MODULE__, fn state ->
+      state
+      |> Enum.reject(fn r -> r.id == request.id end)
+    end)
+  end
 end
