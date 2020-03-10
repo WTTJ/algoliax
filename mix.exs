@@ -56,7 +56,8 @@ defmodule Algoliax.MixProject do
       {:mock, "~> 0.3.0", only: :test},
       {:credo, "~> 1.1.2", only: [:dev, :test], runtime: false},
       {:faker, "~> 0.12", only: :test},
-      {:excoveralls, "~> 0.10", only: :test}
+      {:excoveralls, "~> 0.10", only: :test},
+      {:plug_cowboy, "~> 2.0", only: :test}
     ]
   end
 

@@ -21,9 +21,9 @@ defmodule Algoliax.Client do
     |> :hackney.request(url, request_headers(), Jason.encode!(body), [:with_body])
     |> case do
       {:ok, code, _headers, response} when code in 200..299 ->
-        {:ok, Jason.decode!(response)}
+        Jason.decode(response)
 
-      {:ok, code, _, response} ->
+      {:ok, code, _, response} when code in 300..499 ->
         {:error, code, response}
 
       error ->
@@ -34,6 +34,7 @@ defmodule Algoliax.Client do
 
   defp request_headers do
     [
+      {"Content-type", "application/json"},
       {"X-Algolia-API-Key", Config.api_key()},
       {"X-Algolia-Application-Id", Config.application_id()}
     ]

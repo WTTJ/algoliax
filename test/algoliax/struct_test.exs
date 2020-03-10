@@ -1,203 +1,142 @@
 defmodule AlgoliaxTest.StructTest do
-  use ExUnit.Case, async: true
-  import Mox
+  use Algoliax.RequestCase
 
-  defmodule People do
-    use Algoliax,
-      index_name: :algoliax_people_struct,
-      attributes_for_faceting: ["age"],
-      searchable_attributes: ["full_name"],
-      custom_ranking: ["desc(update_at)"],
-      object_id: :reference
-
-    defstruct reference: nil, last_name: nil, first_name: nil, age: nil
-
-    attributes([:first_name, :last_name, :age])
-
-    attribute(:updated_at, ~U[2019-01-01 00:00:00Z] |> DateTime.to_unix())
-
-    attribute :full_name do
-      Map.get(model, :first_name, "") <> " " <> Map.get(model, :last_name, "")
-    end
-
-    attribute :nickname do
-      Map.get(model, :first_name, "") |> String.downcase()
-    end
-
-    def to_be_indexed?(model) do
-      model.age > 50
-    end
-  end
+  alias Algoliax.Schemas.{PeopleStruct, PeopleStructWithPrepareObject}
 
   setup do
     Algoliax.Agent.set_settings(:algoliax_people_struct, %{})
+    Algoliax.Agent.set_settings(:algoliax_people_with_prepare_object_struct, %{})
     :ok
   end
 
-  test "configure index" do
-    Algoliax.RequestsMock
-    |> expect(:configure_index, fn :algoliax_people_struct, _ ->
-      %{}
-    end)
+  describe "basic struct" do
+    test "configure_index/0" do
+      assert {:ok, res} = PeopleStruct.configure_index()
+      assert %{"taskID" => _, "updatedAt" => _} = res
+    end
 
-    assert People.configure_index()
+    test "save_object/1" do
+      reference = :random.uniform(1_000_000) |> to_string()
+      person = %PeopleStruct{reference: reference, last_name: "Doe", first_name: "John", age: 77}
+      assert {:ok, res} = PeopleStruct.save_object(person)
+      assert %{"taskID" => _, "updatedAt" => _, "objectID" => ^reference} = res
+
+      assert_request("PUT", %{
+        "age" => 77,
+        "first_name" => "John",
+        "full_name" => "John Doe",
+        "last_name" => "Doe",
+        "nickname" => "john",
+        "objectID" => reference,
+        "updated_at" => 1_546_300_800
+      })
+    end
+
+    test "save_objects/1" do
+      reference1 = :random.uniform(1_000_000) |> to_string()
+      reference2 = :random.uniform(1_000_000) |> to_string()
+
+      people = [
+        %PeopleStruct{reference: reference1, last_name: "Doe", first_name: "John", age: 77},
+        %PeopleStruct{reference: reference2, last_name: "al", first_name: "bert", age: 35}
+      ]
+
+      assert {:ok, res} = PeopleStruct.save_objects(people)
+      assert %{"taskID" => _, "objectIDs" => [reference1]} = res
+
+      assert_request("POST", %{
+        "requests" => [%{"action" => "updateObject", "body" => %{"objectID" => reference1}}]
+      })
+    end
+
+    test "save_objects/1 w/ force_delete: true" do
+      reference1 = :random.uniform(1_000_000) |> to_string()
+      reference2 = :random.uniform(1_000_000) |> to_string()
+
+      people = [
+        %PeopleStruct{reference: reference1, last_name: "Doe", first_name: "John", age: 77},
+        %PeopleStruct{reference: reference2, last_name: "al", first_name: "bert", age: 35}
+      ]
+
+      assert {:ok, res} = PeopleStruct.save_objects(people, force_delete: true)
+      assert %{"taskID" => _, "objectIDs" => [reference1, reference2]} = res
+
+      assert_request("POST", %{
+        "requests" => [
+          %{"action" => "updateObject", "body" => %{"objectID" => reference1}},
+          %{"action" => "deleteObject", "body" => %{"objectID" => reference2}}
+        ]
+      })
+    end
+
+    test "get_object/1" do
+      person = %PeopleStruct{reference: "known", last_name: "Doe", first_name: "John", age: 77}
+      assert {:ok, res} = PeopleStruct.get_object(person)
+      assert %{"objectID" => "known"} = res
+      assert_request("GET", %{})
+    end
+
+    test "get_object/1 w/ unknown" do
+      person = %PeopleStruct{reference: "unknown", last_name: "Doe", first_name: "John", age: 77}
+      assert {:error, 404, _} = PeopleStruct.get_object(person)
+    end
+
+    test "delete_object/1" do
+      person = %PeopleStruct{reference: "unknown", last_name: "Doe", first_name: "John", age: 77}
+      assert {:ok, res} = PeopleStruct.delete_object(person)
+      assert_request("DELETE", %{})
+    end
+
+    test "reindex/0" do
+      assert_raise(Algoliax.MissingRepoError, fn -> PeopleStruct.reindex() end)
+    end
+
+    test "delete_index/0" do
+      assert {:ok, res} = PeopleStruct.delete_index()
+      assert_request("DELETE", %{})
+    end
+
+    test "get_settings/0" do
+      assert {:ok, res} = PeopleStruct.get_settings()
+      assert %{"searchableAttributes" => ["test"]} = res
+      assert_request("GET", %{})
+    end
+
+    test "search/2" do
+      assert {:ok, res} = PeopleStruct.search("john", %{hitsPerPage: 10})
+      assert_request("POST", %{"query" => "john", "hitsPerPage" => 10})
+    end
+
+    test "search_facet/2" do
+      assert {:ok, res} = PeopleStruct.search_facet("age", "2")
+      assert_request("POST", %{"facetQuery" => "2"})
+    end
   end
 
-  test "save_object" do
-    Algoliax.RequestsMock
-    |> expect(:save_object, fn :algoliax_people_struct,
-                               %{
-                                 age: 77,
-                                 first_name: "John",
-                                 full_name: "John Doe",
-                                 last_name: "Doe",
-                                 nickname: "john",
-                                 objectID: 10,
-                                 updated_at: 1_546_300_800
-                               } ->
-      %{}
-    end)
+  describe "struct with prepare_object option" do
+    test "save_object/1" do
+      reference = :random.uniform(1_000_000) |> to_string()
 
-    person = %People{reference: 10, last_name: "Doe", first_name: "John", age: 77}
+      person = %PeopleStructWithPrepareObject{
+        reference: reference,
+        last_name: "Doe",
+        first_name: "John",
+        age: 77
+      }
 
-    assert People.save_object(person)
-  end
+      assert {:ok, res} = PeopleStructWithPrepareObject.save_object(person)
+      assert %{"taskID" => _, "updatedAt" => _, "objectID" => ^reference} = res
 
-  test "save_objects" do
-    Algoliax.RequestsMock
-    |> expect(:save_objects, fn :algoliax_people_struct,
-                                %{
-                                  requests: [
-                                    %{
-                                      action: "updateObject",
-                                      body: %{
-                                        age: 77,
-                                        first_name: "John",
-                                        full_name: "John Doe",
-                                        last_name: "Doe",
-                                        nickname: "john",
-                                        objectID: 10,
-                                        updated_at: 1_546_300_800
-                                      }
-                                    }
-                                  ]
-                                } ->
-      %{}
-    end)
-
-    people = [
-      %People{reference: 10, last_name: "Doe", first_name: "John", age: 77},
-      %People{reference: 87, last_name: "al", first_name: "bert", age: 35}
-    ]
-
-    assert People.save_objects(people)
-  end
-
-  test "save_objects with force delete" do
-    Algoliax.RequestsMock
-    |> expect(:save_objects, fn :algoliax_people_struct,
-                                %{
-                                  requests: [
-                                    %{
-                                      action: "updateObject",
-                                      body: %{
-                                        age: 77,
-                                        first_name: "John",
-                                        full_name: "John Doe",
-                                        last_name: "Doe",
-                                        nickname: "john",
-                                        objectID: 10,
-                                        updated_at: 1_546_300_800
-                                      }
-                                    },
-                                    %{
-                                      action: "deleteObject",
-                                      body: %{
-                                        age: 35,
-                                        first_name: "bert",
-                                        full_name: "bert al",
-                                        last_name: "al",
-                                        nickname: "bert",
-                                        objectID: 87,
-                                        updated_at: 1_546_300_800
-                                      }
-                                    }
-                                  ]
-                                } ->
-      %{}
-    end)
-
-    people = [
-      %People{reference: 10, last_name: "Doe", first_name: "John", age: 77},
-      %People{reference: 87, last_name: "al", first_name: "bert", age: 35}
-    ]
-
-    assert People.save_objects(people, force_delete: true)
-  end
-
-  test "get_object" do
-    Algoliax.RequestsMock
-    |> expect(:get_object, fn :algoliax_people_struct,
-                              %{
-                                objectID: 10
-                              } ->
-      %{}
-    end)
-
-    p = %People{reference: 10, last_name: "Doe", first_name: "John", age: 77}
-    assert People.get_object(p)
-  end
-
-  test "delete_object" do
-    Algoliax.RequestsMock
-    |> expect(:delete_object, fn :algoliax_people_struct,
-                                 %{
-                                   objectID: 10
-                                 } ->
-      %{}
-    end)
-
-    p = %People{reference: 10, last_name: "Doe", first_name: "John", age: 77}
-    assert People.delete_object(p)
-  end
-
-  test "reindex" do
-    assert_raise(Algoliax.MissingRepoError, fn -> People.reindex() end)
-  end
-
-  test "delete index" do
-    Algoliax.RequestsMock
-    |> expect(:delete_index, fn :algoliax_people_struct ->
-      %{}
-    end)
-
-    assert People.delete_index()
-  end
-
-  test "get index settings" do
-    Algoliax.RequestsMock
-    |> expect(:get_settings, fn :algoliax_people_struct ->
-      %{}
-    end)
-
-    assert People.get_settings()
-  end
-
-  test "search in index" do
-    Algoliax.RequestsMock
-    |> expect(:search, fn :algoliax_people_struct, %{query: "john"} ->
-      %{}
-    end)
-
-    assert People.search("john")
-  end
-
-  test "search facet" do
-    Algoliax.RequestsMock
-    |> expect(:search_facet, fn :algoliax_people_struct, "age", %{} ->
-      %{}
-    end)
-
-    assert People.search_facet("age")
+      assert_request("PUT", %{
+        "age" => 77,
+        "first_name" => "John",
+        "full_name" => "John Doe",
+        "last_name" => "Doe",
+        "nickname" => "john",
+        "objectID" => reference,
+        "updated_at" => 1_546_300_800,
+        "prepared" => true
+      })
+    end
   end
 end
