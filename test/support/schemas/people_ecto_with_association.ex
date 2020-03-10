@@ -3,7 +3,7 @@ defmodule Algoliax.Schemas.PeopleEctoWithAssociation do
 
   use Ecto.Schema
 
-  use Algoliax,
+  use Algoliax.Indexer,
     index_name: :algoliax_people_ecto_with_association,
     attributes_for_faceting: ["age", "gender"],
     searchable_attributes: ["full_name", "gender"],

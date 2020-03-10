@@ -1,7 +1,7 @@
 defmodule Algoliax.Schemas.PeopleStruct do
   @moduledoc false
 
-  use Algoliax,
+  use Algoliax.Indexer,
     index_name: :algoliax_people_struct,
     attributes_for_faceting: ["age"],
     searchable_attributes: ["full_name"],

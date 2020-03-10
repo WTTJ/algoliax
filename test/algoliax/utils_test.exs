@@ -2,7 +2,7 @@ defmodule Algoliax.UtilsTest do
   use ExUnit.Case, async: false
 
   defmodule NoRepo do
-    use Algoliax,
+    use Algoliax.Indexer,
       index_name: :algoliax_people,
       attributes_for_faceting: ["age"],
       searchable_attributes: ["full_name"],
@@ -11,7 +11,7 @@ defmodule Algoliax.UtilsTest do
   end
 
   defmodule IndexNameFromFunction do
-    use Algoliax,
+    use Algoliax.Indexer,
       index_name: :algoliax_people,
       attributes_for_faceting: ["age"],
       searchable_attributes: ["full_name"],
@@ -24,7 +24,7 @@ defmodule Algoliax.UtilsTest do
   end
 
   defmodule NoIndexName do
-    use Algoliax,
+    use Algoliax.Indexer,
       attributes_for_faceting: ["age"],
       searchable_attributes: ["full_name"],
       custom_ranking: ["desc(updated_at)"],

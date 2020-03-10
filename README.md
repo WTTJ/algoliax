@@ -33,7 +33,7 @@ config :algoliax,
 
 ```elixir
 defmodule People do
-  use Algoliax,
+  use Algoliax.Indexer,
     index_name: :algoliax_people,
     attributes_for_faceting: ["age"],
     searchable_attributes: ["full_name"],
@@ -85,7 +85,7 @@ To do this just define a function with an arity of 0 that will be used as `index
 
 ```elixir
 defmodule People do
-  use Algoliax,
+  use Algoliax.Indexer,
     index_name: :algoliax_people,
     attributes_for_faceting: ["age"],
     searchable_attributes: ["full_name"],
@@ -104,7 +104,7 @@ To modify object before send to algolia, add `prepare_object` option. Must be a 
 
 ```elixir
 defmodule People do
-  use Algoliax,
+  use Algoliax.Indexer,
     index_name: :algoliax_people,
     attributes_for_faceting: ["age"],
     searchable_attributes: ["full_name"],
@@ -165,7 +165,7 @@ People.search_facet("age")
 First you will need to add the Repo to the algoliax config:
 
 ```elixir
-use Algoliax,
+use Algoliax.Indexer,
   index_name: :algoliax_people,
   attributes_for_faceting: ["age"],
   searchable_attributes: ["full_name"],
@@ -221,7 +221,7 @@ Schema specific:
 
 ```elixir
 defmodulePeople do
-  use Algoliax,
+  use Algoliax.Indexer,
     index_name: :algoliax_people,
     attributes_for_faceting: ["age"],
     searchable_attributes: ["full_name"],
@@ -240,7 +240,7 @@ Sometimes indexed attributes depend on association. To allow reindexing function
 
 ```elixir
 defmodulePeople do
-  use Algoliax,
+  use Algoliax.Indexer,
     index_name: :algoliax_people,
     attributes_for_faceting: ["age"],
     searchable_attributes: ["full_name"],

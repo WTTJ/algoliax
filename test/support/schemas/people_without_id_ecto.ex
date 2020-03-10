@@ -3,7 +3,7 @@ defmodule Algoliax.Schemas.PeopleWithoutIdEcto do
 
   use Ecto.Schema
 
-  use Algoliax,
+  use Algoliax.Indexer,
     index_name: :algoliax_people_without_id,
     attributes_for_faceting: ["age", "gender"],
     searchable_attributes: ["firstname", "lastname"],
