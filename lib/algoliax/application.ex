@@ -9,7 +9,7 @@ defmodule Algoliax.Application do
     children = [
       # Starts a worker by calling: Algoliax.Worker.start_link(arg)
       # {Algoliax.Worker, arg}
-      Algoliax.Agent
+      Algoliax.SettingsStore
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

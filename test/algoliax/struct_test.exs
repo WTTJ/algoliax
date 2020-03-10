@@ -4,8 +4,8 @@ defmodule AlgoliaxTest.StructTest do
   alias Algoliax.Schemas.{PeopleStruct, PeopleStructWithPrepareObject}
 
   setup do
-    Algoliax.Agent.set_settings(:algoliax_people_struct, %{})
-    Algoliax.Agent.set_settings(:algoliax_people_with_prepare_object_struct, %{})
+    Algoliax.SettingsStore.set_settings(:algoliax_people_struct, %{})
+    Algoliax.SettingsStore.set_settings(:algoliax_people_with_prepare_object_struct, %{})
     :ok
   end
 

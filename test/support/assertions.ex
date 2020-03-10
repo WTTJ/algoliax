@@ -1,4 +1,6 @@
 defmodule Algoliax.Assertions do
+  @moduledoc false
+
   alias Algoliax.RequestsStore
 
   defmacro assert_request(method, path, body) do

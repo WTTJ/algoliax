@@ -1,4 +1,6 @@
 defmodule Algoliax.RequestsStore do
+  @moduledoc false
+
   use Agent
 
   def start_link(state \\ []) do

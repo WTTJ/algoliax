@@ -1,4 +1,6 @@
 defmodule Algoliax.Schemas.PeopleStruct do
+  @moduledoc false
+
   use Algoliax,
     index_name: :algoliax_people_struct,
     attributes_for_faceting: ["age"],

@@ -1,52 +1,52 @@
-defmodule Algoliax.AgentTest do
+defmodule Algoliax.SettingsStoreTest do
   use ExUnit.Case, async: false
 
-  alias Algoliax.Agent, as: Agent
+  alias Algoliax.SettingsStore
 
   @index_name :algoliax_people
 
   setup do
-    pid = Process.whereis(Agent)
+    pid = Process.whereis(SettingsStore)
 
-    Agent.reset()
+    SettingsStore.reset()
     %{agent_pid: pid}
   end
 
   test "set index settings", %{agent_pid: agent_pid} do
-    Agent.set_settings(@index_name, foo: :bar)
+    SettingsStore.set_settings(@index_name, foo: :bar)
     assert :sys.get_state(agent_pid) == %{@index_name => [foo: :bar]}
   end
 
   test "get index settings", %{agent_pid: agent_pid} do
-    Agent.set_settings(@index_name, foo: :bar)
-    settings = Agent.get_settings(@index_name)
+    SettingsStore.set_settings(@index_name, foo: :bar)
+    settings = SettingsStore.get_settings(@index_name)
     assert :sys.get_state(agent_pid) == %{@index_name => [foo: :bar]}
     assert settings == [foo: :bar]
   end
 
   test "delete index settings", %{agent_pid: agent_pid} do
-    Agent.delete_settings(@index_name)
-    settings = Agent.get_settings(@index_name)
+    SettingsStore.delete_settings(@index_name)
+    settings = SettingsStore.get_settings(@index_name)
     assert :sys.get_state(agent_pid) == %{}
     refute settings
   end
 
   test "start reindexing", %{agent_pid: agent_pid} do
-    Agent.start_reindexing(@index_name)
+    SettingsStore.start_reindexing(@index_name)
     assert :sys.get_state(agent_pid) == %{reindexing: %{algoliax_people: "working"}}
   end
 
   test "stop reindexing", %{agent_pid: agent_pid} do
-    Agent.start_reindexing(@index_name)
+    SettingsStore.start_reindexing(@index_name)
     assert :sys.get_state(agent_pid) == %{reindexing: %{algoliax_people: "working"}}
-    Agent.stop_reindexing(@index_name)
+    SettingsStore.stop_reindexing(@index_name)
     assert :sys.get_state(agent_pid) == %{reindexing: %{}}
   end
 
   test "reindexing?" do
-    Agent.start_reindexing(@index_name)
-    assert Agent.reindexing?(@index_name) == true
-    Agent.stop_reindexing(@index_name)
-    assert Agent.reindexing?(@index_name) == false
+    SettingsStore.start_reindexing(@index_name)
+    assert SettingsStore.reindexing?(@index_name) == true
+    SettingsStore.stop_reindexing(@index_name)
+    assert SettingsStore.reindexing?(@index_name) == false
   end
 end
