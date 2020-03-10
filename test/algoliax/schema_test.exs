@@ -17,14 +17,14 @@ defmodule AlgoliaxTest.Schema do
   @ref3 Ecto.UUID.generate()
 
   setup do
-    Algoliax.Agent.set_settings(:algoliax_people, %{})
-    Algoliax.Agent.set_settings(:"algoliax_people.tmp", %{})
+    Algoliax.SettingsStore.set_settings(:algoliax_people, %{})
+    Algoliax.SettingsStore.set_settings(:"algoliax_people.tmp", %{})
 
-    Algoliax.Agent.set_settings(:algoliax_people_without_id, %{})
-    Algoliax.Agent.set_settings(:"algoliax_people_without_id.tmp", %{})
+    Algoliax.SettingsStore.set_settings(:algoliax_people_without_id, %{})
+    Algoliax.SettingsStore.set_settings(:"algoliax_people_without_id.tmp", %{})
 
-    Algoliax.Agent.set_settings(:algoliax_people_ecto_with_association, %{})
-    Algoliax.Agent.set_settings(:"algoliax_people_ecto_with_association.tmp", %{})
+    Algoliax.SettingsStore.set_settings(:algoliax_people_ecto_with_association, %{})
+    Algoliax.SettingsStore.set_settings(:"algoliax_people_ecto_with_association.tmp", %{})
 
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(Repo)
 

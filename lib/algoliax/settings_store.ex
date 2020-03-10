@@ -1,4 +1,4 @@
-defmodule Algoliax.Agent do
+defmodule Algoliax.SettingsStore do
   @moduledoc false
 
   use Agent

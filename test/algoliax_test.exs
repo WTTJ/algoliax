@@ -7,7 +7,7 @@ defmodule AlgoliaxTest do
   setup :verify_on_exit!
 
   setup do
-    Algoliax.Agent.set_settings(:algoliax_people, %{})
+    Algoliax.SettingsStore.set_settings(:algoliax_people, %{})
     :ok
   end
 

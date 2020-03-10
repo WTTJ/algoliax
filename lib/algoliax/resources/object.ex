@@ -1,7 +1,7 @@
 defmodule Algoliax.Resources.Object do
   @moduledoc false
 
-  alias Algoliax.{Utils, Requests}
+  alias Algoliax.{Requests, SettingsStore, TemporaryIndexer, Utils}
   alias Algoliax.Resources.Index
 
   import Ecto.Query
@@ -16,8 +16,6 @@ defmodule Algoliax.Resources.Object do
   def save_objects(module, settings, models, attributes, opts) do
     Index.ensure_settings(module, settings)
 
-    save_objects_tmp(module, settings, models, attributes, opts)
-
     index_name = Utils.index_name(module, settings)
 
     objects =
@@ -30,18 +28,20 @@ defmodule Algoliax.Resources.Object do
       end)
       |> Enum.reject(&is_nil/1)
 
-    Requests.save_objects(index_name, %{requests: objects})
+    response = Requests.save_objects(index_name, %{requests: objects})
+    call_indexer(:save_objects, module, settings, models, attributes, opts)
+    response
   end
 
   def save_object(module, settings, model, attributes) do
     Index.ensure_settings(module, settings)
 
-    save_object_tmp(module, settings, model, attributes)
-
     if apply(module, :to_be_indexed?, [model]) do
       object = build_object(module, settings, model, attributes)
       index_name = Utils.index_name(module, settings)
-      Requests.save_object(index_name, object)
+      response = Requests.save_object(index_name, object)
+      call_indexer(:save_object, module, settings, model, attributes)
+      response
     else
       {:not_indexable, model}
     end
@@ -49,7 +49,7 @@ defmodule Algoliax.Resources.Object do
 
   def delete_object(module, settings, model, attributes) do
     Index.ensure_settings(module, settings)
-
+    call_indexer(:delete_object, module, settings, model, attributes)
     object = build_object(module, settings, model, attributes)
     index_name = Utils.index_name(module, settings)
     Requests.delete_object(index_name, object)
@@ -84,7 +84,7 @@ defmodule Algoliax.Resources.Object do
     tmp_settings = Keyword.put(settings, :index_name, tmp_index_name)
 
     Index.ensure_settings(module, tmp_settings)
-    Algoliax.Agent.start_reindexing(index_name)
+    SettingsStore.start_reindexing(index_name)
 
     reindex(module, tmp_settings, index_attributes, nil)
 
@@ -94,36 +94,10 @@ defmodule Algoliax.Resources.Object do
         destination: "#{index_name}"
       })
 
-    Algoliax.Agent.delete_settings(tmp_index_name)
-    Algoliax.Agent.stop_reindexing(index_name)
+    Algoliax.SettingsStore.delete_settings(tmp_index_name)
+    Algoliax.SettingsStore.stop_reindexing(index_name)
 
     response
-  end
-
-  def save_object_tmp(module, settings, model, attributes) do
-    Task.async(fn ->
-      index_name = Utils.index_name(module, settings)
-
-      if Algoliax.Agent.reindexing?(index_name) do
-        tmp_index_name = :"#{index_name}.tmp"
-        tmp_settings = Algoliax.Agent.get_settings(tmp_index_name)
-
-        save_object(module, tmp_settings, model, attributes)
-      end
-    end)
-  end
-
-  def save_objects_tmp(module, settings, models, attributes, opts) do
-    Task.async(fn ->
-      index_name = Utils.index_name(module, settings)
-
-      if Algoliax.Agent.reindexing?(index_name) do
-        tmp_index_name = :"#{index_name}.tmp"
-        tmp_settings = Algoliax.Agent.get_settings(tmp_index_name)
-
-        save_objects(module, tmp_settings, models, attributes, opts)
-      end
-    end)
   end
 
   defp build_batch_object(module, settings, model, attributes, action) do
@@ -174,5 +148,9 @@ defmodule Algoliax.Resources.Object do
         "deleteObject"
       end
     end
+  end
+
+  defp call_indexer(action, module, settings, models, attributes, opts \\ []) do
+    TemporaryIndexer.run(action, module, settings, models, attributes, opts)
   end
 end
