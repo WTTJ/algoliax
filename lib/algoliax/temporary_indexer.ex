@@ -4,6 +4,7 @@ defmodule Algoliax.TemporaryIndexer do
   """
 
   import Algoliax.Utils, only: [index_name: 2]
+
   alias Algoliax.SettingsStore
   alias Algoliax.Resources.Object
 

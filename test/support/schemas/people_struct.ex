@@ -3,10 +3,12 @@ defmodule Algoliax.Schemas.PeopleStruct do
 
   use Algoliax.Indexer,
     index_name: :algoliax_people_struct,
-    attributes_for_faceting: ["age"],
-    searchable_attributes: ["full_name"],
-    custom_ranking: ["desc(update_at)"],
-    object_id: :reference
+    object_id: :reference,
+    algolia: [
+      attributes_for_faceting: ["age"],
+      searchable_attributes: ["full_name"],
+      custom_ranking: ["desc(update_at)"]
+    ]
 
   defstruct reference: nil, last_name: nil, first_name: nil, age: nil
 

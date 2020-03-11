@@ -13,6 +13,11 @@ defmodule AlgoliaxTest.StructTest do
     test "configure_index/0" do
       assert {:ok, res} = PeopleStruct.configure_index()
       assert %{"taskID" => _, "updatedAt" => _} = res
+
+      assert_request("PUT", %{
+        "searchableAttributes" => ["full_name"],
+        "attributesForFaceting" => ["age"]
+      })
     end
 
     test "save_object/1" do

@@ -54,7 +54,7 @@ defmodule Algoliax.MixProject do
       {:inflex, "~> 2.0.0"},
       {:mox, "~> 0.5", only: :test},
       {:mock, "~> 0.3.0", only: :test},
-      {:credo, "~> 1.1.2", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.3.0", only: [:dev, :test], runtime: false},
       {:faker, "~> 0.12", only: :test},
       {:excoveralls, "~> 0.10", only: :test},
       {:plug_cowboy, "~> 2.0", only: :test}
@@ -64,7 +64,7 @@ defmodule Algoliax.MixProject do
   defp aliases do
     [
       # Ensures database is reset before tests are run
-      test: ["ecto.drop --quiet", "ecto.create --quiet", "ecto.migrate", "test"]
+      test: ["ecto.drop --quiet", "ecto.create --quiet", "ecto.migrate --quiet", "test"]
     ]
   end
 

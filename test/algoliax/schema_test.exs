@@ -10,7 +10,15 @@ defmodule AlgoliaxTest.Schema do
   import Ecto.Query
 
   alias Algoliax.Repo
-  alias Algoliax.Schemas.{Animal, PeopleEcto, PeopleWithoutIdEcto, PeopleEctoWithAssociation}
+
+  alias Algoliax.Schemas.{
+    Animal,
+    Beer,
+    PeopleEcto,
+    PeopleWithoutIdEcto,
+    PeopleWithSchemas,
+    PeopleEctoWithAssociation
+  }
 
   @ref1 Ecto.UUID.generate()
   @ref2 Ecto.UUID.generate()
@@ -25,6 +33,9 @@ defmodule AlgoliaxTest.Schema do
 
     Algoliax.SettingsStore.set_settings(:algoliax_people_ecto_with_association, %{})
     Algoliax.SettingsStore.set_settings(:"algoliax_people_ecto_with_association.tmp", %{})
+
+    Algoliax.SettingsStore.set_settings(:algoliax_with_schemas, %{})
+    Algoliax.SettingsStore.set_settings(:"algoliax_with_schemas.tmp", %{})
 
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(Repo)
 
@@ -91,11 +102,21 @@ defmodule AlgoliaxTest.Schema do
       |> Algoliax.Repo.insert()
     end)
 
+    [
+      %Beer{kind: "brune", name: "chimay", id: 1},
+      %Beer{kind: "blonde", name: "jupiler", id: 2}
+    ]
+    |> Enum.each(fn b ->
+      b
+      |> Ecto.Changeset.change()
+      |> Algoliax.Repo.insert()
+    end)
+
     :ok
   end
 
   test "reindex" do
-    assert {:ok, res} = PeopleEcto.reindex()
+    assert {:ok, :completed} = PeopleEcto.reindex()
 
     assert_request("POST", %{
       "requests" => [
@@ -111,7 +132,7 @@ defmodule AlgoliaxTest.Schema do
   end
 
   test "reindex with force delete" do
-    assert {:ok, res} = PeopleEcto.reindex(force_delete: true)
+    assert {:ok, :completed} = PeopleEcto.reindex(force_delete: true)
 
     assert_request("POST", %{
       "requests" => [
@@ -138,7 +159,7 @@ defmodule AlgoliaxTest.Schema do
         where: p.age == 35
       )
 
-    assert {:ok, res} = PeopleEcto.reindex(query)
+    assert {:ok, :completed} = PeopleEcto.reindex(query)
 
     assert_request("POST", %{
       "requests" => [
@@ -153,7 +174,7 @@ defmodule AlgoliaxTest.Schema do
         where: p.age == 35 or p.first_name == "Dark"
       )
 
-    assert {:ok, res} = PeopleEcto.reindex(query, force_delete: true)
+    assert {:ok, :completed} = PeopleEcto.reindex(query, force_delete: true)
 
     assert_request("POST", %{
       "requests" => [
@@ -169,7 +190,7 @@ defmodule AlgoliaxTest.Schema do
   end
 
   test "reindex atomic" do
-    assert {:ok, res} = PeopleEcto.reindex_atomic()
+    assert {:ok, :completed} = PeopleEcto.reindex_atomic()
 
     assert_request("POST", %{
       "requests" => [
@@ -190,7 +211,7 @@ defmodule AlgoliaxTest.Schema do
   end
 
   test "reindex without an id column" do
-    assert {:ok, res} = PeopleWithoutIdEcto.reindex()
+    assert {:ok, :completed} = PeopleWithoutIdEcto.reindex()
 
     assert_request("POST", %{
       "requests" => [
@@ -212,7 +233,7 @@ defmodule AlgoliaxTest.Schema do
   end
 
   test "reindex with association" do
-    assert {:ok, res} = PeopleEctoWithAssociation.reindex()
+    assert {:ok, :completed} = PeopleEctoWithAssociation.reindex()
 
     assert_request("POST", %{
       "requests" => [
@@ -229,6 +250,46 @@ defmodule AlgoliaxTest.Schema do
     assert_request("POST", %{
       "requests" => [
         %{"action" => "updateObject", "body" => %{"objectID" => @ref3}}
+      ]
+    })
+  end
+
+  test "save_object/1 without attribute(s)" do
+    assert {:ok, res} = PeopleWithSchemas.save_object(%Beer{kind: "brune", name: "chimay", id: 1})
+
+    assert_request("PUT", %{
+      "name" => "chimay",
+      "objectID" => 1
+    })
+  end
+
+  test "reindex/1 with schemas" do
+    assert res = PeopleWithSchemas.reindex()
+
+    assert_request("POST", %{
+      "requests" => [
+        %{"action" => "updateObject", "body" => %{"name" => "chimay", "objectID" => 1}}
+      ]
+    })
+
+    assert_request("POST", %{
+      "requests" => [
+        %{"action" => "updateObject", "body" => %{"name" => "jupiler", "objectID" => 2}}
+      ]
+    })
+  end
+
+  test "reindex/1 with schemas and query" do
+    query =
+      from(b in Beer,
+        where: b.name == "chimay"
+      )
+
+    assert {:ok, res} = PeopleWithSchemas.reindex(query)
+
+    assert_request("POST", %{
+      "requests" => [
+        %{"action" => "updateObject", "body" => %{"name" => "chimay", "objectID" => 1}}
       ]
     })
   end
