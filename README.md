@@ -35,10 +35,12 @@ config :algoliax,
 defmodule People do
   use Algoliax.Indexer,
     index_name: :algoliax_people,
-    attributes_for_faceting: ["age"],
-    searchable_attributes: ["full_name"],
-    custom_ranking: ["desc(updated_at)"],
-    object_id: :reference
+    object_id: :reference,
+    algolia: [
+      attributes_for_faceting: ["age"],
+      searchable_attributes: ["full_name"],
+      custom_ranking: ["desc(updated_at)"]
+    ]
 
   defstruct reference: nil, last_name: nil, first_name: nil, age: nil
 
@@ -87,10 +89,8 @@ To do this just define a function with an arity of 0 that will be used as `index
 defmodule People do
   use Algoliax.Indexer,
     index_name: :algoliax_people,
-    attributes_for_faceting: ["age"],
-    searchable_attributes: ["full_name"],
-    custom_ranking: ["desc(updated_at)"],
-    object_id: :reference
+    object_id: :reference,
+    algolia: [...]
 
   def algoliax_people do
     System.get_env("PEOPLE_INDEX_NAME")
@@ -106,11 +106,9 @@ To modify object before send to algolia, add `prepare_object` option. Must be a 
 defmodule People do
   use Algoliax.Indexer,
     index_name: :algoliax_people,
-    attributes_for_faceting: ["age"],
-    searchable_attributes: ["full_name"],
-    custom_ranking: ["desc(updated_at)"],
     object_id: :reference,
-    prepare_object: &__MODULE__.prepare/2
+    prepare_object: &__MODULE__.prepare/2,
+    algolia: [...]
 
   def prepare(object, model) do
     object |> Map.put(:after_build_attribute, "test")
@@ -167,11 +165,9 @@ First you will need to add the Repo to the algoliax config:
 ```elixir
 use Algoliax.Indexer,
   index_name: :algoliax_people,
-  attributes_for_faceting: ["age"],
-  searchable_attributes: ["full_name"],
-  custom_ranking: ["desc(updated_at)"],
   object_id: :reference
-  repo: MyApp.Repo
+  repo: MyApp.Repo,
+  algolia: [...]
 ```
 
 If using Agoliax with an Ecto schema it is possible to use `reindex` functions. Reindex will go through all entries in the corresponding table (or part if query is provided). Algoliax will save_objects by batch of 500.
@@ -223,12 +219,10 @@ Schema specific:
 defmodulePeople do
   use Algoliax.Indexer,
     index_name: :algoliax_people,
-    attributes_for_faceting: ["age"],
-    searchable_attributes: ["full_name"],
-    custom_ranking: ["desc(updated_at)"],
     object_id: :reference,
     repo: MyApp.Repo,
-    cursor_field: :inserted_at
+    cursor_field: :inserted_at,
+    algolia: [...]
 end
 ```
 
@@ -242,11 +236,10 @@ Sometimes indexed attributes depend on association. To allow reindexing function
 defmodulePeople do
   use Algoliax.Indexer,
     index_name: :algoliax_people,
-    attributes_for_faceting: ["age"],
-    searchable_attributes: ["full_name"],
-    custom_ranking: ["desc(updated_at)"],
     object_id: :reference,
-    preloads: [:animals]
+    preloads: [:animals],
+    algolia: [...]
+
 
   attribute(:animals) do
     Enum.map(model.animals, fn a ->

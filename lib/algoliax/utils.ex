@@ -56,6 +56,14 @@ defmodule Algoliax.Utils do
     end
   end
 
+  def algolia_settings(settings) do
+    Keyword.get(settings, :algolia, [])
+  end
+
+  def object_id_attribute(settings) do
+    Keyword.get(settings, :object_id, :id)
+  end
+
   def repo(settings) do
     index_name = Keyword.get(settings, :index_name)
     repo = Keyword.get(settings, :repo)

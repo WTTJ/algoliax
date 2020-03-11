@@ -1,7 +1,17 @@
 defmodule Algoliax.Resources.Object do
   @moduledoc false
 
-  alias Algoliax.{Requests, SettingsStore, TemporaryIndexer, Utils}
+  import Algoliax.Utils,
+    only: [
+      index_name: 2,
+      repo: 1,
+      find_in_batches: 5,
+      unprefix_attribute: 1,
+      prefix_attribute: 1,
+      object_id_attribute: 1
+    ]
+
+  alias Algoliax.{Requests, SettingsStore, TemporaryIndexer}
   alias Algoliax.Resources.Index
 
   import Ecto.Query
@@ -10,13 +20,13 @@ defmodule Algoliax.Resources.Object do
     Index.ensure_settings(module, settings)
 
     object_id = get_object_id(module, settings, model, attributes)
-    Requests.get_object(Utils.index_name(module, settings), %{objectID: object_id})
+    Requests.get_object(index_name(module, settings), %{objectID: object_id})
   end
 
   def save_objects(module, settings, models, attributes, opts) do
     Index.ensure_settings(module, settings)
 
-    index_name = Utils.index_name(module, settings)
+    index_name = index_name(module, settings)
 
     objects =
       Enum.map(models, fn model ->
@@ -38,7 +48,7 @@ defmodule Algoliax.Resources.Object do
 
     if apply(module, :to_be_indexed?, [model]) do
       object = build_object(module, settings, model, attributes)
-      index_name = Utils.index_name(module, settings)
+      index_name = index_name(module, settings)
       response = Requests.save_object(index_name, object)
       call_indexer(:save_object, module, settings, model, attributes)
       response
@@ -51,14 +61,16 @@ defmodule Algoliax.Resources.Object do
     Index.ensure_settings(module, settings)
     call_indexer(:delete_object, module, settings, model, attributes)
     object = build_object(module, settings, model, attributes)
-    index_name = Utils.index_name(module, settings)
-    Requests.delete_object(index_name, object)
+
+    module
+    |> index_name(settings)
+    |> Requests.delete_object(object)
   end
 
   def reindex(module, settings, index_attributes, query, opts \\ []) do
     Index.ensure_settings(module, settings)
 
-    repo = Utils.repo(settings)
+    repo = repo(settings)
 
     query =
       case query do
@@ -69,17 +81,17 @@ defmodule Algoliax.Resources.Object do
           from(m in module)
       end
 
-    Utils.find_in_batches(repo, query, 0, settings, fn batch ->
+    find_in_batches(repo, query, 0, settings, fn batch ->
       save_objects(module, settings, batch, index_attributes, opts)
     end)
   end
 
   def reindex_atomic(module, settings, index_attributes) do
-    Utils.repo(settings)
+    repo(settings)
 
     Index.ensure_settings(module, settings)
 
-    index_name = Utils.index_name(module, settings)
+    index_name = index_name(module, settings)
     tmp_index_name = :"#{index_name}.tmp"
     tmp_settings = Keyword.put(settings, :index_name, tmp_index_name)
 
@@ -94,8 +106,8 @@ defmodule Algoliax.Resources.Object do
         destination: "#{index_name}"
       })
 
-    Algoliax.SettingsStore.delete_settings(tmp_index_name)
-    Algoliax.SettingsStore.stop_reindexing(index_name)
+    SettingsStore.delete_settings(tmp_index_name)
+    SettingsStore.stop_reindexing(index_name)
 
     response
   end
@@ -109,7 +121,7 @@ defmodule Algoliax.Resources.Object do
 
   defp build_object(module, settings, model, attributes) do
     Enum.into(attributes, %{}, fn a ->
-      {Utils.unprefix_attribute(a), apply(module, a, [model])}
+      {unprefix_attribute(a), apply(module, a, [model])}
     end)
     |> prepare_object(model, settings)
     |> Map.put(:objectID, get_object_id(module, settings, model, attributes))
@@ -129,11 +141,9 @@ defmodule Algoliax.Resources.Object do
   end
 
   defp get_object_id(module, settings, model, attributes) do
-    object_id_attribute = Keyword.get(settings, :object_id)
-
-    case Enum.find(attributes, fn a -> a == Utils.prefix_attribute(object_id_attribute) end) do
+    case Enum.find(attributes, fn a -> a == prefix_attribute(object_id_attribute(settings)) end) do
       nil ->
-        Map.get(model, object_id_attribute)
+        Map.get(model, object_id_attribute(settings))
 
       a ->
         apply(module, a, [model])

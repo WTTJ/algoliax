@@ -11,14 +11,38 @@
 #### breaking changes
 
 - Move algoliax to algoliax/indexer.
-  change
 
 ```elixir
+# old
 use Algoliax,
   ...
-# to
+
+# New
 use Algoliax.Indexer,
   ...
+```
+
+- Move algolia specific settings into `:algolia` option
+
+```elixir
+# old
+use Algoliax.Indexer,
+  index_name: :test,
+  attributes_for_faceting: ["age"],
+  searchable_attributes: ["full_name"],
+  custom_ranking: ["desc(updated_at)"],
+  ...
+
+# New
+use Algoliax.Indexer,
+  index_name: :test,
+  algolia: [
+    attributes_for_faceting: ["age"],
+    searchable_attributes: ["full_name"],
+    custom_ranking: ["desc(updated_at)"]
+  ],
+  ...
+
 ```
 
 ## v0.2.0 (2020-01-27)

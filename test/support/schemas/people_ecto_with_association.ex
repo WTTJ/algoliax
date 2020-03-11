@@ -5,12 +5,14 @@ defmodule Algoliax.Schemas.PeopleEctoWithAssociation do
 
   use Algoliax.Indexer,
     index_name: :algoliax_people_ecto_with_association,
-    attributes_for_faceting: ["age", "gender"],
-    searchable_attributes: ["full_name", "gender"],
-    custom_ranking: ["desc(updated_at)"],
     repo: Algoliax.Repo,
     object_id: :reference,
-    preloads: [:animals]
+    preloads: [:animals],
+    algolia: [
+      attributes_for_faceting: ["age", "gender"],
+      searchable_attributes: ["full_name", "gender"],
+      custom_ranking: ["desc(updated_at)"]
+    ]
 
   schema "peoples_ecto_with_association" do
     field(:reference, Ecto.UUID)

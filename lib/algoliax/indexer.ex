@@ -9,8 +9,7 @@ defmodule Algoliax.Indexer do
   - `:preloads`: Specify preloads for a given schema. Default `[]`
   - `:cursor_field`: specify the column to be used to order and go through a given table. Default `:id`
   - `:prepare_object`: Specify a function of arity 2 to call after building the object. Default `nil`
-
-  Any valid Algolia settings, using snake case or camel case. Ex: Algolia `attributeForFaceting` can be configured with `:attribute_for_faceting`
+  - `:algolia`: Any valid Algolia settings, using snake case or camel case. Ex: Algolia `attributeForFaceting` can be configured with `:attribute_for_faceting`
 
   On first call to Algolia, we check that the settings on Algolia are up to date.
 
@@ -24,8 +23,10 @@ defmodule Algoliax.Indexer do
         use Algoliax.Indexer,
           index_name: :people,
           object_id: :reference,
-          attribute_for_faceting: ["age"],
-          custom_ranking: ["desc(update_at)"]
+          algolia: [
+            attribute_for_faceting: ["age"],
+            custom_ranking: ["desc(updated_at)"]
+          ]
 
         defstruct reference: nil, last_name: nil, first_name: nil, age: nil
 
@@ -228,9 +229,11 @@ defmodule Algoliax.Indexer do
       defmodule People do
         use Algoliax.Indexer,
           index_name: :people,
-          attribute_for_faceting: ["age"],
-          custom_ranking: ["desc(update_at)"],
-          object_id: :reference
+          object_id: :reference,
+          algolia: [
+            attribute_for_faceting: ["age"],
+            custom_ranking: ["desc(update_at)"]
+          ]
 
         #....
 

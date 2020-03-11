@@ -3,11 +3,13 @@ defmodule Algoliax.Schemas.PeopleStructWithPrepareObject do
 
   use Algoliax.Indexer,
     index_name: :algoliax_people_with_prepare_object_struct,
-    attributes_for_faceting: ["age"],
-    searchable_attributes: ["full_name"],
-    custom_ranking: ["desc(update_at)"],
     object_id: :reference,
-    prepare_object: &__MODULE__.prepare/2
+    prepare_object: &__MODULE__.prepare/2,
+    algolia: [
+      attributes_for_faceting: ["age"],
+      searchable_attributes: ["full_name"],
+      custom_ranking: ["desc(update_at)"]
+    ]
 
   defstruct reference: nil, last_name: nil, first_name: nil, age: nil
 
