@@ -64,6 +64,10 @@ defmodule Algoliax.Utils do
     Keyword.get(settings, :object_id, :id)
   end
 
+  def schemas(settings) do
+    Keyword.get(settings, :schemas, [])
+  end
+
   def repo(settings) do
     index_name = Keyword.get(settings, :index_name)
     repo = Keyword.get(settings, :repo)

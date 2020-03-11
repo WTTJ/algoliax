@@ -64,7 +64,7 @@ defmodule Algoliax.MixProject do
   defp aliases do
     [
       # Ensures database is reset before tests are run
-      test: ["ecto.drop --quiet", "ecto.create --quiet", "ecto.migrate", "test"]
+      test: ["ecto.drop --quiet", "ecto.create --quiet", "ecto.migrate --quiet", "test"]
     ]
   end
 
