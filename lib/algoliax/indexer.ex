@@ -214,13 +214,12 @@ defmodule Algoliax.Indexer do
 
   - `:force_delete`: delete objects where `to_be_indexed?` is `false`
   """
-  @callback reindex(opts :: Keyword.t()) ::
-              {:ok, map()} | {:error, map()}
+  @callback reindex(opts :: Keyword.t()) :: {:ok, :completed}
 
   @doc """
   Reindex atomicly ([Ecto](https://hexdocs.pm/ecto/Ecto.html) specific)
   """
-  @callback reindex_atomic() :: {:ok, map()} | {:error, map()}
+  @callback reindex_atomic() :: {:ok, :completed}
 
   @doc """
   Check if current object must be indexed or not. By default it's always true. To override this behaviour overide this function in your model
