@@ -200,8 +200,7 @@ defmodule Algoliax.Indexer do
 
   - `:force_delete`: delete objects that are in query and where `to_be_indexed?` is false
   """
-  @callback reindex(query :: Ecto.Query.t(), opts :: Keyword.t()) ::
-              {:ok, map()} | {:error, map()}
+  @callback reindex(query :: Ecto.Query.t(), opts :: Keyword.t()) :: {:ok, :completed}
 
   @doc """
   Reindex all objects ([Ecto](https://hexdocs.pm/ecto/Ecto.html) specific)

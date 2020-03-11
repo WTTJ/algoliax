@@ -3,6 +3,8 @@
 #### New
 
 - add `prepare_object` to modify object before send to algolia
+- add ability to provide `build_object/1` instead of attributes
+- add `schemas` option to override caller
 
 #### Bug fix
 
