@@ -61,7 +61,7 @@ defmodule Algoliax.Resources.Object do
   def delete_object(module, settings, model, attributes) do
     Index.ensure_settings(module, settings)
     call_indexer(:delete_object, module, settings, model, attributes)
-    object = build_object(module, settings, model, attributes)
+    object = %{objectID: get_object_id(module, settings, model, attributes)}
 
     module
     |> index_name(settings)
@@ -124,6 +124,13 @@ defmodule Algoliax.Resources.Object do
     SettingsStore.stop_reindexing(index_name)
 
     {:ok, :completed}
+  end
+
+  defp build_batch_object(module, settings, model, attributes, "deleteObject" = action) do
+    %{
+      action: action,
+      body: %{objectID: get_object_id(module, settings, model, attributes)}
+    }
   end
 
   defp build_batch_object(module, settings, model, attributes, action) do

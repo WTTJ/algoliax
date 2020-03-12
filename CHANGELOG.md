@@ -9,6 +9,7 @@
 #### Bug fix
 
 - Fix pagination when `cursor_field` different than `:id`
+- `delete_object/1` and `reindex` w/ `force_delete: true` don't need to build entire object
 
 #### breaking changes
 
