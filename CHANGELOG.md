@@ -1,5 +1,7 @@
 ## v0.3.0 (dev)
 
+## v0.3.0-alpha
+
 #### New
 
 - add `prepare_object` to modify object before send to algolia

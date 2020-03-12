@@ -11,7 +11,7 @@ The package can be installed by adding `algoliax` to your list of dependencies i
 ```elixir
 def deps do
   [
-    {:algoliax, "~> 0.2.0"}
+    {:algoliax, "~> 0.3.0-alpha"}
   ]
 end
 ```
