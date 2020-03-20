@@ -337,14 +337,16 @@ defmodule Algoliax.Indexer do
         Object.reindex(__MODULE__, @settings, @index_attributes, nil, opts)
       end
 
-      @impl Algoliax.Indexer
-      def reindex(query \\ nil, opts \\ []) do
-        Object.reindex(__MODULE__, @settings, @index_attributes, query, opts)
-      end
+      if Code.ensure_loaded?(Ecto) do
+        @impl Algoliax.Indexer
+        def reindex(query \\ nil, opts \\ []) do
+          Object.reindex(__MODULE__, @settings, @index_attributes, query, opts)
+        end
 
-      @impl Algoliax.Indexer
-      def reindex_atomic do
-        Object.reindex_atomic(__MODULE__, @settings, @index_attributes)
+        @impl Algoliax.Indexer
+        def reindex_atomic do
+          Object.reindex_atomic(__MODULE__, @settings, @index_attributes)
+        end
       end
     end
   end

@@ -16,6 +16,8 @@ def deps do
 end
 ```
 
+if using with ecto schemas Algoliax requires `ecto`.
+
 The docs can be found at [https://hexdocs.pm/algoliax](https://hexdocs.pm/algoliax).
 
 ## Configuration
