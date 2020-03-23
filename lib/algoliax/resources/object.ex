@@ -15,8 +15,6 @@ defmodule Algoliax.Resources.Object do
   alias Algoliax.{Requests, SettingsStore, TemporaryIndexer}
   alias Algoliax.Resources.Index
 
-  import Ecto.Query
-
   def get_object(module, settings, model, attributes) do
     Index.ensure_settings(module, settings)
 
@@ -68,62 +66,65 @@ defmodule Algoliax.Resources.Object do
     |> Requests.delete_object(object)
   end
 
-  def reindex(module, settings, index_attributes, query, opts \\ [])
+  if Code.ensure_loaded?(Ecto) do
+    import Ecto.Query
+    def reindex(module, settings, index_attributes, query, opts \\ [])
 
-  def reindex(module, settings, index_attributes, %Ecto.Query{} = query, opts) do
-    repo = repo(settings)
-
-    find_in_batches(repo, query, 0, settings, fn batch ->
-      save_objects(module, settings, batch, index_attributes, opts)
-    end)
-  end
-
-  def reindex(module, settings, index_attributes, _, opts) do
-    repo = repo(settings)
-
-    modules =
-      case schemas(settings) do
-        [_ | _] = schemas ->
-          schemas
-
-        _ ->
-          [module]
-      end
-
-    modules
-    |> Enum.each(fn mod ->
-      query = from(m in mod)
+    def reindex(module, settings, index_attributes, %Ecto.Query{} = query, opts) do
+      repo = repo(settings)
 
       find_in_batches(repo, query, 0, settings, fn batch ->
         save_objects(module, settings, batch, index_attributes, opts)
       end)
-    end)
+    end
 
-    {:ok, :completed}
-  end
+    def reindex(module, settings, index_attributes, _, opts) do
+      repo = repo(settings)
 
-  def reindex_atomic(module, settings, index_attributes) do
-    repo(settings)
+      modules =
+        case schemas(settings) do
+          [_ | _] = schemas ->
+            schemas
 
-    Index.ensure_settings(module, settings)
+          _ ->
+            [module]
+        end
 
-    index_name = index_name(module, settings)
-    tmp_index_name = :"#{index_name}.tmp"
-    tmp_settings = Keyword.put(settings, :index_name, tmp_index_name)
+      modules
+      |> Enum.each(fn mod ->
+        query = from(m in mod)
 
-    SettingsStore.start_reindexing(index_name)
+        find_in_batches(repo, query, 0, settings, fn batch ->
+          save_objects(module, settings, batch, index_attributes, opts)
+        end)
+      end)
 
-    reindex(module, tmp_settings, index_attributes, nil)
+      {:ok, :completed}
+    end
 
-    Requests.move_index(tmp_index_name, %{
-      operation: "move",
-      destination: "#{index_name}"
-    })
+    def reindex_atomic(module, settings, index_attributes) do
+      repo(settings)
 
-    SettingsStore.delete_settings(tmp_index_name)
-    SettingsStore.stop_reindexing(index_name)
+      Index.ensure_settings(module, settings)
 
-    {:ok, :completed}
+      index_name = index_name(module, settings)
+      tmp_index_name = :"#{index_name}.tmp"
+      tmp_settings = Keyword.put(settings, :index_name, tmp_index_name)
+
+      SettingsStore.start_reindexing(index_name)
+
+      reindex(module, tmp_settings, index_attributes, nil)
+
+      Requests.move_index(tmp_index_name, %{
+        operation: "move",
+        destination: "#{index_name}"
+      })
+
+      SettingsStore.delete_settings(tmp_index_name)
+      SettingsStore.stop_reindexing(index_name)
+
+      {:ok, :completed}
+    end
   end
 
   defp build_batch_object(module, settings, model, attributes, "deleteObject" = action) do
