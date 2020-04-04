@@ -34,15 +34,4 @@ defmodule Algoliax do
 
     Base.encode64(hmac <> query_string)
   end
-
-  @doc false
-  defmacro import_if_loaded?(module) do
-    module = Macro.expand(module, __ENV__)
-
-    if Code.ensure_loaded?(module) do
-      quote do
-        import unquote(module)
-      end
-    end
-  end
 end

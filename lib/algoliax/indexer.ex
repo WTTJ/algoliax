@@ -335,19 +335,21 @@ defmodule Algoliax.Indexer do
       end
 
       if Code.ensure_loaded?(Ecto) do
+        alias Algoliax.Resources.ObjectEcto
+
         @impl Algoliax.Indexer
         def reindex(opts) when is_list(opts) do
-          Object.reindex(__MODULE__, @settings, @index_attributes, nil, opts)
+          ObjectEcto.reindex(__MODULE__, @settings, @index_attributes, nil, opts)
         end
 
         @impl Algoliax.Indexer
         def reindex(query \\ nil, opts \\ []) do
-          Object.reindex(__MODULE__, @settings, @index_attributes, query, opts)
+          ObjectEcto.reindex(__MODULE__, @settings, @index_attributes, query, opts)
         end
 
         @impl Algoliax.Indexer
         def reindex_atomic do
-          Object.reindex_atomic(__MODULE__, @settings, @index_attributes)
+          ObjectEcto.reindex_atomic(__MODULE__, @settings, @index_attributes)
         end
       end
     end
