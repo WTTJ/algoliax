@@ -1,18 +1,18 @@
 defmodule Algoliax.Resources.Object do
   @moduledoc false
 
+  import Algoliax, only: [import_if_loaded?: 1]
+  import_if_loaded?(Ecto.Query)
+
   import Algoliax.Utils,
     only: [
       index_name: 2,
-      repo: 1,
-      find_in_batches: 5,
       unprefix_attribute: 1,
       prefix_attribute: 1,
-      object_id_attribute: 1,
-      schemas: 1
+      object_id_attribute: 1
     ]
 
-  alias Algoliax.{Requests, SettingsStore, TemporaryIndexer}
+  alias Algoliax.{Requests, TemporaryIndexer}
   alias Algoliax.Resources.Index
 
   def get_object(module, settings, model, attributes) do
@@ -67,22 +67,21 @@ defmodule Algoliax.Resources.Object do
   end
 
   if Code.ensure_loaded?(Ecto) do
-    import Ecto.Query
     def reindex(module, settings, index_attributes, query, opts \\ [])
 
     def reindex(module, settings, index_attributes, %Ecto.Query{} = query, opts) do
-      repo = repo(settings)
+      repo = Algoliax.Utils.repo(settings)
 
-      find_in_batches(repo, query, 0, settings, fn batch ->
+      Algoliax.Utils.find_in_batches(repo, query, 0, settings, fn batch ->
         save_objects(module, settings, batch, index_attributes, opts)
       end)
     end
 
     def reindex(module, settings, index_attributes, _, opts) do
-      repo = repo(settings)
+      repo = Algoliax.Utils.repo(settings)
 
       modules =
-        case schemas(settings) do
+        case Algoliax.Utils.schemas(settings) do
           [_ | _] = schemas ->
             schemas
 
@@ -94,7 +93,7 @@ defmodule Algoliax.Resources.Object do
       |> Enum.each(fn mod ->
         query = from(m in mod)
 
-        find_in_batches(repo, query, 0, settings, fn batch ->
+        Algoliax.Utils.find_in_batches(repo, query, 0, settings, fn batch ->
           save_objects(module, settings, batch, index_attributes, opts)
         end)
       end)
@@ -103,7 +102,7 @@ defmodule Algoliax.Resources.Object do
     end
 
     def reindex_atomic(module, settings, index_attributes) do
-      repo(settings)
+      Algoliax.Utils.repo(settings)
 
       Index.ensure_settings(module, settings)
 
@@ -111,7 +110,7 @@ defmodule Algoliax.Resources.Object do
       tmp_index_name = :"#{index_name}.tmp"
       tmp_settings = Keyword.put(settings, :index_name, tmp_index_name)
 
-      SettingsStore.start_reindexing(index_name)
+      Algoliax.SettingsStore.start_reindexing(index_name)
 
       reindex(module, tmp_settings, index_attributes, nil)
 
@@ -120,8 +119,8 @@ defmodule Algoliax.Resources.Object do
         destination: "#{index_name}"
       })
 
-      SettingsStore.delete_settings(tmp_index_name)
-      SettingsStore.stop_reindexing(index_name)
+      Algoliax.SettingsStore.delete_settings(tmp_index_name)
+      Algoliax.SettingsStore.stop_reindexing(index_name)
 
       {:ok, :completed}
     end

@@ -24,9 +24,9 @@ defmodule Algoliax.Utils do
   @moduledoc false
 
   @attribute_prefix "algoliax_attr_"
-  @batch_size Application.get_env(:algoliax, :batch_size, 500)
 
-  alias Algoliax.Config
+  import Algoliax, only: [import_if_loaded?: 1]
+  import_if_loaded?(Ecto.Query)
 
   def prefix_attribute(attribute) do
     :"#{@attribute_prefix}#{attribute}"
@@ -67,7 +67,7 @@ defmodule Algoliax.Utils do
   end
 
   if Code.ensure_loaded?(Ecto) do
-    import Ecto.Query
+    @batch_size Application.get_env(:algoliax, :batch_size, 500)
 
     def repo(settings) do
       index_name = Keyword.get(settings, :index_name)
@@ -81,7 +81,7 @@ defmodule Algoliax.Utils do
     end
 
     def find_in_batches(repo, query, cursor, settings, execute) do
-      cursor_field = Keyword.get(settings, :cursor_field, Config.cursor_field()) || :id
+      cursor_field = Keyword.get(settings, :cursor_field, Algoliax.Config.cursor_field()) || :id
       preloads = Keyword.get(settings, :preloads, [])
 
       q =

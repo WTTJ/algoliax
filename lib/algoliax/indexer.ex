@@ -183,42 +183,44 @@ defmodule Algoliax.Indexer do
   """
   @callback delete_object(model :: map() | struct()) :: {:ok, map()} | {:error, map()}
 
-  @doc """
-  Reindex a part of object by providing an Ecto query ([Ecto](https://hexdocs.pm/ecto/Ecto.html) specific)
+  if Code.ensure_loaded?(Ecto) do
+    @doc """
+    Reindex a part of object by providing an Ecto query ([Ecto](https://hexdocs.pm/ecto/Ecto.html) specific)
 
-  ## Example
-      import Ecto.Query
+    ## Example
+        import Ecto.Query
 
-      query = from(
-        p in People,
-        where: p.age > 45
-      )
+        query = from(
+          p in People,
+          where: p.age > 45
+        )
 
-      People.reindex(query)
+        People.reindex(query)
 
-  Available options:
+    Available options:
 
-  - `:force_delete`: delete objects that are in query and where `to_be_indexed?` is false
-  """
-  @callback reindex(query :: Ecto.Query.t(), opts :: Keyword.t()) :: {:ok, :completed}
+    - `:force_delete`: delete objects that are in query and where `to_be_indexed?` is false
+    """
+    @callback reindex(query :: Ecto.Query.t(), opts :: Keyword.t()) :: {:ok, :completed}
 
-  @doc """
-  Reindex all objects ([Ecto](https://hexdocs.pm/ecto/Ecto.html) specific)
+    @doc """
+    Reindex all objects ([Ecto](https://hexdocs.pm/ecto/Ecto.html) specific)
 
-  ## Example
+    ## Example
 
-      People.reindex(query)
+        People.reindex(query)
 
-  Available options:
+    Available options:
 
-  - `:force_delete`: delete objects where `to_be_indexed?` is `false`
-  """
-  @callback reindex(opts :: Keyword.t()) :: {:ok, :completed}
+    - `:force_delete`: delete objects where `to_be_indexed?` is `false`
+    """
+    @callback reindex(opts :: Keyword.t()) :: {:ok, :completed}
 
-  @doc """
-  Reindex atomicly ([Ecto](https://hexdocs.pm/ecto/Ecto.html) specific)
-  """
-  @callback reindex_atomic() :: {:ok, :completed}
+    @doc """
+    Reindex atomicly ([Ecto](https://hexdocs.pm/ecto/Ecto.html) specific)
+    """
+    @callback reindex_atomic() :: {:ok, :completed}
+  end
 
   @doc """
   Check if current object must be indexed or not. By default it's always true. To override this behaviour overide this function in your model
@@ -332,12 +334,12 @@ defmodule Algoliax.Indexer do
         Object.get_object(__MODULE__, @settings, model, @index_attributes)
       end
 
-      @impl Algoliax.Indexer
-      def reindex(opts) when is_list(opts) do
-        Object.reindex(__MODULE__, @settings, @index_attributes, nil, opts)
-      end
-
       if Code.ensure_loaded?(Ecto) do
+        @impl Algoliax.Indexer
+        def reindex(opts) when is_list(opts) do
+          Object.reindex(__MODULE__, @settings, @index_attributes, nil, opts)
+        end
+
         @impl Algoliax.Indexer
         def reindex(query \\ nil, opts \\ []) do
           Object.reindex(__MODULE__, @settings, @index_attributes, query, opts)
