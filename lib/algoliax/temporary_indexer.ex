@@ -8,11 +8,11 @@ defmodule Algoliax.TemporaryIndexer do
   alias Algoliax.SettingsStore
   alias Algoliax.Resources.Object
 
-  def run(action, module, settings, models, attributes, opts \\ []) do
-    do_run(action, module, settings, models, attributes, opts)
+  def run(action, module, settings, models, opts \\ []) do
+    do_run(action, module, settings, models, opts)
   end
 
-  defp do_run(action, module, settings, models, attributes, opts) do
+  defp do_run(action, module, settings, models, opts) do
     opts = Keyword.delete(opts, :temporary_only)
 
     index_name = index_name(module, settings)
@@ -21,19 +21,19 @@ defmodule Algoliax.TemporaryIndexer do
       tmp_index_name = :"#{index_name}.tmp"
       tmp_settings = SettingsStore.get_settings(tmp_index_name)
 
-      execute(action, module, tmp_settings, models, attributes, opts)
+      execute(action, module, tmp_settings, models, opts)
     end
   end
 
-  defp execute(:save_objects, module, settings, models, attributes, opts) do
-    Object.save_objects(module, settings, models, attributes, opts)
+  defp execute(:save_objects, module, settings, models, opts) do
+    Object.save_objects(module, settings, models, opts)
   end
 
-  defp execute(:save_object, module, settings, models, attributes, _) do
-    Object.save_object(module, settings, models, attributes)
+  defp execute(:save_object, module, settings, models, _) do
+    Object.save_object(module, settings, models)
   end
 
-  defp execute(:delete_object, module, settings, models, attributes, _) do
-    Object.delete_object(module, settings, models, attributes)
+  defp execute(:delete_object, module, settings, models, _) do
+    Object.delete_object(module, settings, models)
   end
 end

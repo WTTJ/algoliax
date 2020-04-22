@@ -12,12 +12,10 @@ defmodule AlgoliaxTest.Schema do
   alias Algoliax.Repo
 
   alias Algoliax.Schemas.{
-    Animal,
     Beer,
     PeopleEcto,
     PeopleWithoutIdEcto,
-    PeopleWithSchemas,
-    PeopleEctoWithAssociation
+    PeopleWithSchemas
   }
 
   @ref1 Ecto.UUID.generate()
@@ -80,29 +78,6 @@ defmodule AlgoliaxTest.Schema do
     end)
 
     [
-      %PeopleEctoWithAssociation{
-        reference: @ref1,
-        last_name: "Doe",
-        first_name: "John",
-        age: 77,
-        animals: [%Animal{kind: "cat"}, %Animal{kind: "snake"}]
-      },
-      %PeopleEctoWithAssociation{reference: @ref2, last_name: "al", first_name: "bert", age: 35},
-      %PeopleEctoWithAssociation{
-        reference: @ref3,
-        last_name: "Vador",
-        first_name: "Dark",
-        age: 9,
-        animals: [%Animal{kind: "dog"}]
-      }
-    ]
-    |> Enum.each(fn p ->
-      p
-      |> Ecto.Changeset.change()
-      |> Algoliax.Repo.insert()
-    end)
-
-    [
       %Beer{kind: "brune", name: "chimay", id: 1},
       %Beer{kind: "blonde", name: "jupiler", id: 2}
     ]
@@ -120,13 +95,29 @@ defmodule AlgoliaxTest.Schema do
 
     assert_request("POST", %{
       "requests" => [
-        %{"action" => "updateObject", "body" => %{"objectID" => @ref1}}
+        %{
+          "action" => "updateObject",
+          "body" => %{
+            "objectID" => @ref1,
+            "last_name" => "Doe",
+            "first_name" => "John",
+            "age" => 77
+          }
+        }
       ]
     })
 
     assert_request("POST", %{
       "requests" => [
-        %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
+        %{
+          "action" => "updateObject",
+          "body" => %{
+            "objectID" => @ref2,
+            "last_name" => "al",
+            "first_name" => "bert",
+            "age" => 35
+          }
+        }
       ]
     })
   end
@@ -212,28 +203,6 @@ defmodule AlgoliaxTest.Schema do
 
   test "reindex without an id column" do
     assert {:ok, :completed} = PeopleWithoutIdEcto.reindex()
-
-    assert_request("POST", %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"objectID" => @ref1}}
-      ]
-    })
-
-    assert_request("POST", %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
-      ]
-    })
-
-    assert_request("POST", %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"objectID" => @ref3}}
-      ]
-    })
-  end
-
-  test "reindex with association" do
-    assert {:ok, :completed} = PeopleEctoWithAssociation.reindex()
 
     assert_request("POST", %{
       "requests" => [

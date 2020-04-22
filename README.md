@@ -45,40 +45,44 @@ defmodule People do
     ]
 
   defstruct reference: nil, last_name: nil, first_name: nil, age: nil
-
-  attributes([:first_name, :last_name, :age])
-
-  attribute(:updated_at, DateTime.utc_now() |> DateTime.to_unix())
-
-  attribute :full_name do
-    Map.get(model, :first_name, "") <> " " <> Map.get(model, :last_name, "")
-  end
-
-  attribute :nickname do
-    Map.get(model, :first_name, "") |> String.downcase()
-  end
 end
 ```
 
-By default all object are indexed, but it's possible to change this behaviour by overriding the function `to_be_indexed?`
+Overridable functions:
+
+- `to_be_indexed/1` which take the model struct in parameter: allows to choose to index or not the current model
 
 ```elixir
 defmodule People do
   ...
 
   @impl Algoliax
-  def to_be_indexed?(model) do
-    model.age > 20
+  def to_be_indexed?(person) do
+    person.age > 20
   end
 end
-```
 
-```elixir
 # This object will be indexed
 people1 = %People{reference: 10, last_name: "Doe", first_name: "John", age: 13}
 
 # This object will not be indexed
 people2 = %People{reference: 87, last_name: "Fred", first_name: "Al", age: 70}
+```
+
+- `build_object/1` which take the model struct/map in parameter and should return a Map: allow to add attributes to the indexed object. By default the object contains only an `ObjectID`.
+
+```elixir
+defmodule People do
+  ...
+
+  @impl Algoliax
+  def build_object(person) do
+    %{
+      age: person.age,
+      now: Date.utc_today()
+    }
+  end
+end
 ```
 
 #### Index name at runtime
@@ -96,24 +100,6 @@ defmodule People do
 
   def algoliax_people do
     System.get_env("PEOPLE_INDEX_NAME")
-  end
-end
-```
-
-#### After build object callback
-
-To modify object before send to algolia, add `prepare_object` option. Must be a function of arity two and must return a `Map`
-
-```elixir
-defmodule People do
-  use Algoliax.Indexer,
-    index_name: :algoliax_people,
-    object_id: :reference,
-    prepare_object: &__MODULE__.prepare/2,
-    algolia: [...]
-
-  def prepare(object, model) do
-    object |> Map.put(:after_build_attribute, "test")
   end
 end
 ```
@@ -225,39 +211,5 @@ defmodulePeople do
     repo: MyApp.Repo,
     cursor_field: :inserted_at,
     algolia: [...]
-end
-```
-
-##### Preloads (`reindex` and `reindex_atomic`)
-
-Sometimes indexed attributes depend on association. To allow reindexing functions to work, you can add `preloads` to your schema settings.
-
-**Associations need to be defined in your Ecto Schema as well**
-
-```elixir
-defmodulePeople do
-  use Algoliax.Indexer,
-    index_name: :algoliax_people,
-    object_id: :reference,
-    preloads: [:animals],
-    algolia: [...]
-
-
-  attribute(:animals) do
-    Enum.map(model.animals, fn a ->
-      a.kind
-    end)
-  end
-
-  schema "peoples" do
-    field(:reference, Ecto.UUID)
-    field(:last_name)
-    field(:first_name)
-    field(:age, :integer)
-    field(:gender, :string)
-    has_many(:animals, Animal)
-
-    timestamps()
-  end
 end
 ```

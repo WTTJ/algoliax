@@ -23,8 +23,4 @@ defmodule Algoliax.Schemas.PeopleWithoutIdEcto do
 
     timestamps()
   end
-
-  attributes([:id, :first_name, :last_name, :age, :gender])
-
-  attribute(:updated_at, ~U[2019-01-01 00:00:00Z] |> DateTime.to_unix())
 end

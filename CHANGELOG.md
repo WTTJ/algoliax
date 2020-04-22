@@ -1,6 +1,12 @@
-## v0.3.0 (dev)
+## v0.4.0 (dev)
 
-## v0.3.0-alpha
+#### breaking changes
+
+- remove attributes macros in favor of `build_object/1`
+- remove `:prepare_object` options
+- remove `:preloads` options
+
+## v0.3.0
 
 #### New
 
@@ -15,6 +21,7 @@
 
 #### breaking changes
 
+- change dependencies to optional (ecto)
 - Move algoliax to algoliax/indexer.
 
 ```elixir

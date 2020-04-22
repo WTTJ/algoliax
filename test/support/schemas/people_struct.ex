@@ -12,19 +12,18 @@ defmodule Algoliax.Schemas.PeopleStruct do
 
   defstruct reference: nil, last_name: nil, first_name: nil, age: nil
 
-  attributes([:first_name, :last_name, :age])
-
-  attribute(:updated_at, ~U[2019-01-01 00:00:00Z] |> DateTime.to_unix())
-
-  attribute :full_name do
-    Map.get(model, :first_name, "") <> " " <> Map.get(model, :last_name, "")
+  def build_object(people) do
+    %{
+      first_name: people.first_name,
+      last_name: people.last_name,
+      age: people.age,
+      updated_at: ~U[2019-01-01 00:00:00Z] |> DateTime.to_unix(),
+      full_name: Map.get(people, :first_name, "") <> " " <> Map.get(people, :last_name, ""),
+      nickname: Map.get(people, :first_name, "") |> String.downcase()
+    }
   end
 
-  attribute :nickname do
-    Map.get(model, :first_name, "") |> String.downcase()
-  end
-
-  def to_be_indexed?(model) do
-    model.age > 50
+  def to_be_indexed?(people) do
+    people.age > 50
   end
 end

@@ -6,17 +6,11 @@ defmodule Algoliax.Indexer do
   - `:index_name`: specificy the index where the object will be added on. **Required**
   - `:object_id`: specify the attribute used to as algolia objectID. Default `:id`.
   - `:repo`: Specify an Ecto repo to be use to fecth records. Default `nil`
-  - `:preloads`: Specify preloads for a given schema. Default `[]`
   - `:cursor_field`: specify the column to be used to order and go through a given table. Default `:id`
-  - `:prepare_object`: Specify a function of arity 2 to call after building the object. Default `nil`
-  - `:schemas`: Specify which schemas used to populate index (attributes not used), Default: `[]`
+  - `:schemas`: Specify which schemas used to populate index, Default: `[__CALLER__]`
   - `:algolia`: Any valid Algolia settings, using snake case or camel case. Ex: Algolia `attributeForFaceting` can be configured with `:attribute_for_faceting`
 
   On first call to Algolia, we check that the settings on Algolia are up to date.
-
-  ### Attributes
-
-  Objects send to Algolia are built using the attributes defined in the module using `attribute/1`, `attributes/1` or `attribute/2`
 
   ### Example
 
@@ -30,22 +24,34 @@ defmodule Algoliax.Indexer do
           ]
 
         defstruct reference: nil, last_name: nil, first_name: nil, age: nil
+      end
 
-        attributes([:first_name, :last_name, :age])
+  ### Customize object
 
-        attribute(:updated_at, ~U[2019-07-18 08:45:56.639380Z] |> DateTime.to_unix())
+  By default the object contains only algolia `objectID`. To add more attributes to objects, override `build_object/1` functions to return a Map (objectID is automatically set by Algoliax)
 
-        attribute :full_name do
-          Map.get(model, :first_name, "") <> " " <> Map.get(model, :last_name, "")
-        end
+      defmodule People do
+        use Algoliax.Indexer,
+          index_name: :people,
+          object_id: :reference,
+          algolia: [
+            attribute_for_faceting: ["age"],
+            custom_ranking: ["desc(updated_at)"]
+          ]
 
-        attribute :nickname do
-          Map.get(model, :first_name, "") |> String.downcase()
+        defstruct reference: nil, last_name: nil, first_name: nil, age: nil
+
+        @impl Algoliax.Indexer
+        def build_object(person) do
+          %{
+            age: person.age,
+            last_name: person.last_name,
+            first_name: person.first_name
+          }
         end
       end
   """
 
-  alias Algoliax.Utils
   alias Algoliax.Resources.{Index, Object, Search}
 
   @doc """
@@ -223,6 +229,21 @@ defmodule Algoliax.Indexer do
   end
 
   @doc """
+  Build the object sent to algolia. By default the object contains only `objectID` set by Algoliax.Indexer
+
+  ## Example
+      @impl Algoliax.Indexer
+      def build_object(person) do
+        %{
+          age: person.age,
+          last_name: person.last_name,
+          first_name: person.first_name
+        }
+      end
+  """
+  @callback build_object(model :: Map.t()) :: Map.t()
+
+  @doc """
   Check if current object must be indexed or not. By default it's always true. To override this behaviour overide this function in your model
 
   ## Example
@@ -238,6 +259,7 @@ defmodule Algoliax.Indexer do
 
         #....
 
+        @impl Algoliax.Indexer
         def to_be_indexed?(model) do
           model.age > 50
         end
@@ -264,13 +286,8 @@ defmodule Algoliax.Indexer do
     quote do
       @behaviour Algoliax.Indexer
 
-      import unquote(__MODULE__)
-      Module.register_attribute(__MODULE__, :index_attributes, accumulate: true)
-
       settings = unquote(settings)
       @settings settings
-
-      @before_compile unquote(__MODULE__)
 
       @impl Algoliax.Indexer
       def search(query, params \\ %{}) do
@@ -298,40 +315,23 @@ defmodule Algoliax.Indexer do
       end
 
       @impl Algoliax.Indexer
-      def to_be_indexed?(model) do
-        true
-      end
-
-      defoverridable(to_be_indexed?: 1)
-    end
-  end
-
-  defmacro __before_compile__(_env) do
-    quote do
-      @impl Algoliax.Indexer
       def save_objects(models, opts \\ []) do
-        Object.save_objects(
-          __MODULE__,
-          @settings,
-          models,
-          @index_attributes,
-          opts
-        )
+        Object.save_objects(__MODULE__, @settings, models, opts)
       end
 
       @impl Algoliax.Indexer
       def save_object(model) do
-        Object.save_object(__MODULE__, @settings, model, @index_attributes)
+        Object.save_object(__MODULE__, @settings, model)
       end
 
       @impl Algoliax.Indexer
       def delete_object(model) do
-        Object.delete_object(__MODULE__, @settings, model, @index_attributes)
+        Object.delete_object(__MODULE__, @settings, model)
       end
 
       @impl Algoliax.Indexer
       def get_object(model) do
-        Object.get_object(__MODULE__, @settings, model, @index_attributes)
+        Object.get_object(__MODULE__, @settings, model)
       end
 
       if Code.ensure_loaded?(Ecto) do
@@ -339,95 +339,31 @@ defmodule Algoliax.Indexer do
 
         @impl Algoliax.Indexer
         def reindex(opts) when is_list(opts) do
-          ObjectEcto.reindex(__MODULE__, @settings, @index_attributes, nil, opts)
+          ObjectEcto.reindex(__MODULE__, @settings, nil, opts)
         end
 
         @impl Algoliax.Indexer
         def reindex(query \\ nil, opts \\ []) do
-          ObjectEcto.reindex(__MODULE__, @settings, @index_attributes, query, opts)
+          ObjectEcto.reindex(__MODULE__, @settings, query, opts)
         end
 
         @impl Algoliax.Indexer
         def reindex_atomic do
-          ObjectEcto.reindex_atomic(__MODULE__, @settings, @index_attributes)
+          ObjectEcto.reindex_atomic(__MODULE__, @settings)
         end
       end
-    end
-  end
 
-  @doc """
-  Define an attributes to be indexed with a computed value without or with model access
-
-  ## Example without model access
-
-  The model is not available.
-
-      attribute :utc_now, DateTime.utc_now()
-
-  ## Example with model access
-
-  The model is available inside the block.
-
-      attribute :uppcase_name do
-        model.name |> String.upcase()
+      @impl Algoliax.Indexer
+      def build_object(_) do
+        %{}
       end
-  """
-  defmacro attribute(attribute_name, do: block) do
-    method_attribute_name = Utils.prefix_attribute(attribute_name)
 
-    quote do
-      @index_attributes unquote(method_attribute_name)
-      def unquote(method_attribute_name)(model) do
-        var!(model) = model
-        unquote(block)
+      @impl Algoliax.Indexer
+      def to_be_indexed?(_) do
+        true
       end
-    end
-  end
 
-  defmacro attribute(attribute_name, value) do
-    method_attribute_name = Utils.prefix_attribute(attribute_name)
-
-    quote do
-      @index_attributes unquote(method_attribute_name)
-      def unquote(method_attribute_name)(model) do
-        unquote(value)
-      end
-    end
-  end
-
-  @doc """
-  Define an attribute to be added to the indexed object with a value taken from the model (map/struct)
-
-  ## Example
-
-      attribute :id
-  """
-  defmacro attribute(attribute_name) do
-    build_attribute(attribute_name)
-  end
-
-  @doc """
-  Define multiple attributes to be added to the indexed object with a value taken from the model (map/struct)
-
-  ## Example
-
-      attributes :id, :inserted_at
-  """
-  defmacro attributes(attribute_names) do
-    Enum.map(attribute_names, fn attribute_name ->
-      build_attribute(attribute_name)
-    end)
-  end
-
-  @doc false
-  def build_attribute(attribute_name) do
-    method_attribute_name = Utils.prefix_attribute(attribute_name)
-
-    quote do
-      @index_attributes unquote(method_attribute_name)
-      def unquote(method_attribute_name)(model) do
-        Map.get(model, unquote(attribute_name))
-      end
+      defoverridable(to_be_indexed?: 1, build_object: 1)
     end
   end
 end
