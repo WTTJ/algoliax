@@ -191,7 +191,7 @@ defmodule Algoliax.Indexer do
 
   if Code.ensure_loaded?(Ecto) do
     @doc """
-    Reindex a part of object by providing an Ecto query ([Ecto](https://hexdocs.pm/ecto/Ecto.html) specific)
+    Reindex a subset of records by providing an Ecto query or query filters as a Map([Ecto](https://hexdocs.pm/ecto/Ecto.html) specific)
 
     ## Example
         import Ecto.Query
@@ -203,9 +203,15 @@ defmodule Algoliax.Indexer do
 
         People.reindex(query)
 
+        # OR
+        filters = %{where: [name: "john"]}
+        People.reindex(filters)
+
     Available options:
 
     - `:force_delete`: delete objects that are in query and where `to_be_indexed?` is false
+
+    > NOTE: filters as Map supports only `:where` and equality
     """
     @callback reindex(query :: Ecto.Query.t(), opts :: Keyword.t()) :: {:ok, :completed}
 
@@ -339,13 +345,38 @@ defmodule Algoliax.Indexer do
 
         @impl Algoliax.Indexer
         def reindex(opts) when is_list(opts) do
-          ObjectEcto.reindex(__MODULE__, @settings, nil, opts)
+          ObjectEcto.reindex(__MODULE__, @settings, %{}, opts)
+        end
+
+        @impl Algoliax.Indexer
+        def reindex(query) when is_map(query) do
+          ObjectEcto.reindex(__MODULE__, @settings, query, [])
         end
 
         @impl Algoliax.Indexer
         def reindex(query \\ nil, opts \\ []) do
           ObjectEcto.reindex(__MODULE__, @settings, query, opts)
         end
+
+        # @impl Algoliax.Indexer
+        # def reindex do
+        #   ObjectEcto.reindex(__MODULE__, @settings, [], [])
+        # end
+
+        # @impl Algoliax.Indexer
+        # def reindex(opts) when is_list(opts) do
+        #   ObjectEcto.reindex(__MODULE__, @settings, [], opts)
+        # end
+
+        # @impl Algoliax.Indexer
+        # def reindex(query) when is_map(query) do
+        #   ObjectEcto.reindex(__MODULE__, @settings, query, [])
+        # end
+
+        # @impl Algoliax.Indexer
+        # def reindex(query \\ nil, opts \\ []) do
+        #   ObjectEcto.reindex(__MODULE__, @settings, query, opts)
+        # end
 
         @impl Algoliax.Indexer
         def reindex_atomic do

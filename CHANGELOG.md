@@ -1,5 +1,17 @@
 ## v0.4.0 (dev)
 
+#### New
+
+- add ability to pass query_filters or Ecto.Query to `reindex/2`.
+
+```elixir
+filters = %{where: [name: "John"]}
+People.reindex(filters)
+
+query = from(p in People, where: p.name == "john")
+People.reindex(query)
+```
+
 #### breaking changes
 
 - remove attributes macros in favor of `build_object/1`

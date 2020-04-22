@@ -29,9 +29,6 @@ defmodule AlgoliaxTest.Schema do
     Algoliax.SettingsStore.set_settings(:algoliax_people_without_id, %{})
     Algoliax.SettingsStore.set_settings(:"algoliax_people_without_id.tmp", %{})
 
-    Algoliax.SettingsStore.set_settings(:algoliax_people_ecto_with_association, %{})
-    Algoliax.SettingsStore.set_settings(:"algoliax_people_ecto_with_association.tmp", %{})
-
     Algoliax.SettingsStore.set_settings(:algoliax_with_schemas, %{})
     Algoliax.SettingsStore.set_settings(:"algoliax_with_schemas.tmp", %{})
 
@@ -79,7 +76,8 @@ defmodule AlgoliaxTest.Schema do
 
     [
       %Beer{kind: "brune", name: "chimay", id: 1},
-      %Beer{kind: "blonde", name: "jupiler", id: 2}
+      %Beer{kind: "blonde", name: "jupiler", id: 2},
+      %Beer{kind: "blonde", name: "heineken", id: 3}
     ]
     |> Enum.each(fn b ->
       b
@@ -259,6 +257,17 @@ defmodule AlgoliaxTest.Schema do
     assert_request("POST", %{
       "requests" => [
         %{"action" => "updateObject", "body" => %{"name" => "chimay", "objectID" => 1}}
+      ]
+    })
+  end
+
+  test "reindex/1 with schemas and query as keyword list" do
+    query = %{where: [name: "heineken"]}
+    assert {:ok, res} = PeopleWithSchemas.reindex(query)
+
+    assert_request("POST", %{
+      "requests" => [
+        %{"action" => "updateObject", "body" => %{"name" => "heineken", "objectID" => 3}}
       ]
     })
   end
