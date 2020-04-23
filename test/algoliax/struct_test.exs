@@ -1,7 +1,7 @@
 defmodule AlgoliaxTest.StructTest do
   use Algoliax.RequestCase
 
-  alias Algoliax.Schemas.{PeopleStruct, PeopleStructWithPrepareObject}
+  alias Algoliax.Schemas.PeopleStruct
 
   setup do
     Algoliax.SettingsStore.set_settings(:algoliax_people_struct, %{})
@@ -115,33 +115,6 @@ defmodule AlgoliaxTest.StructTest do
     test "search_facet/2" do
       assert {:ok, res} = PeopleStruct.search_facet("age", "2")
       assert_request("POST", %{"facetQuery" => "2"})
-    end
-  end
-
-  describe "struct with prepare_object option" do
-    test "save_object/1" do
-      reference = :random.uniform(1_000_000) |> to_string()
-
-      person = %PeopleStructWithPrepareObject{
-        reference: reference,
-        last_name: "Doe",
-        first_name: "John",
-        age: 77
-      }
-
-      assert {:ok, res} = PeopleStructWithPrepareObject.save_object(person)
-      assert %{"taskID" => _, "updatedAt" => _, "objectID" => ^reference} = res
-
-      assert_request("PUT", %{
-        "age" => 77,
-        "first_name" => "John",
-        "full_name" => "John Doe",
-        "last_name" => "Doe",
-        "nickname" => "john",
-        "objectID" => reference,
-        "updated_at" => 1_546_300_800,
-        "prepared" => true
-      })
     end
   end
 end

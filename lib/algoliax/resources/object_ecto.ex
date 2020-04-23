@@ -7,17 +7,19 @@ if Code.ensure_loaded?(Ecto) do
     alias Algoliax.Requests
     alias Algoliax.Resources.{Index, Object}
 
-    def reindex(module, settings, index_attributes, query, opts \\ [])
-
-    def reindex(module, settings, index_attributes, %Ecto.Query{} = query, opts) do
+    def reindex(module, settings, %Ecto.Query{} = query, opts) do
       repo = Algoliax.UtilsEcto.repo(settings)
 
       Algoliax.UtilsEcto.find_in_batches(repo, query, 0, settings, fn batch ->
-        Object.save_objects(module, settings, batch, index_attributes, opts)
+        Object.save_objects(module, settings, batch, opts)
       end)
     end
 
-    def reindex(module, settings, index_attributes, _, opts) do
+    def reindex(module, settings, nil, opts) do
+      reindex(module, settings, %{}, opts)
+    end
+
+    def reindex(module, settings, query_filters, opts) when is_map(query_filters) do
       repo = Algoliax.UtilsEcto.repo(settings)
 
       modules =
@@ -31,17 +33,25 @@ if Code.ensure_loaded?(Ecto) do
 
       modules
       |> Enum.each(fn mod ->
-        query = from(m in mod)
+        where_filters = Map.get(query_filters, :where, [])
+
+        query =
+          from(m in mod)
+          |> where(^where_filters)
 
         Algoliax.UtilsEcto.find_in_batches(repo, query, 0, settings, fn batch ->
-          Object.save_objects(module, settings, batch, index_attributes, opts)
+          Object.save_objects(module, settings, batch, opts)
         end)
       end)
 
       {:ok, :completed}
     end
 
-    def reindex_atomic(module, settings, index_attributes) do
+    def reindex(_, _, _, _) do
+      {:error, :invalid_query}
+    end
+
+    def reindex_atomic(module, settings) do
       Algoliax.UtilsEcto.repo(settings)
 
       Index.ensure_settings(module, settings)
@@ -52,7 +62,7 @@ if Code.ensure_loaded?(Ecto) do
 
       Algoliax.SettingsStore.start_reindexing(index_name)
 
-      reindex(module, tmp_settings, index_attributes, nil)
+      reindex(module, tmp_settings, nil, [])
 
       Requests.move_index(tmp_index_name, %{
         operation: "move",

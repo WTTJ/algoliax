@@ -25,7 +25,7 @@ defmodule Algoliax.MixProject do
       docs: [
         # The main page in the docs
         main: "Algoliax",
-        extras: ["README.md"]
+        extras: ["README.md", "guides/examples/global.md"]
       ],
 
       # Hex
@@ -58,7 +58,8 @@ defmodule Algoliax.MixProject do
       {:credo, "~> 1.3.0", only: [:dev, :test], runtime: false},
       {:faker, "~> 0.12", only: :test},
       {:excoveralls, "~> 0.10", only: :test},
-      {:plug_cowboy, "~> 2.0", only: :test}
+      {:plug_cowboy, "~> 2.0", only: :test},
+      {:mix_test_watch, "~> 1.0", only: :dev, runtime: false}
     ]
   end
 

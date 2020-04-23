@@ -1,6 +1,25 @@
-## v0.3.0 (dev)
+## v0.4.0 (dev)
 
-## v0.3.0-alpha
+#### New
+
+- add ability configure `:recv_timeout` for hackney.
+- add ability to pass query_filters or Ecto.Query to `reindex/2`.
+
+```elixir
+filters = %{where: [name: "John"]}
+People.reindex(filters)
+
+query = from(p in People, where: p.name == "john")
+People.reindex(query)
+```
+
+#### breaking changes
+
+- remove attributes macros in favor of `build_object/1`
+- remove `:prepare_object` options
+- remove `:preloads` options
+
+## v0.3.0
 
 #### New
 
@@ -15,6 +34,7 @@
 
 #### breaking changes
 
+- change dependencies to optional (ecto)
 - Move algoliax to algoliax/indexer.
 
 ```elixir

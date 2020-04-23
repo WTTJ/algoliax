@@ -12,12 +12,10 @@ defmodule AlgoliaxTest.Schema do
   alias Algoliax.Repo
 
   alias Algoliax.Schemas.{
-    Animal,
     Beer,
     PeopleEcto,
     PeopleWithoutIdEcto,
-    PeopleWithSchemas,
-    PeopleEctoWithAssociation
+    PeopleWithSchemas
   }
 
   @ref1 Ecto.UUID.generate()
@@ -30,9 +28,6 @@ defmodule AlgoliaxTest.Schema do
 
     Algoliax.SettingsStore.set_settings(:algoliax_people_without_id, %{})
     Algoliax.SettingsStore.set_settings(:"algoliax_people_without_id.tmp", %{})
-
-    Algoliax.SettingsStore.set_settings(:algoliax_people_ecto_with_association, %{})
-    Algoliax.SettingsStore.set_settings(:"algoliax_people_ecto_with_association.tmp", %{})
 
     Algoliax.SettingsStore.set_settings(:algoliax_with_schemas, %{})
     Algoliax.SettingsStore.set_settings(:"algoliax_with_schemas.tmp", %{})
@@ -80,31 +75,9 @@ defmodule AlgoliaxTest.Schema do
     end)
 
     [
-      %PeopleEctoWithAssociation{
-        reference: @ref1,
-        last_name: "Doe",
-        first_name: "John",
-        age: 77,
-        animals: [%Animal{kind: "cat"}, %Animal{kind: "snake"}]
-      },
-      %PeopleEctoWithAssociation{reference: @ref2, last_name: "al", first_name: "bert", age: 35},
-      %PeopleEctoWithAssociation{
-        reference: @ref3,
-        last_name: "Vador",
-        first_name: "Dark",
-        age: 9,
-        animals: [%Animal{kind: "dog"}]
-      }
-    ]
-    |> Enum.each(fn p ->
-      p
-      |> Ecto.Changeset.change()
-      |> Algoliax.Repo.insert()
-    end)
-
-    [
       %Beer{kind: "brune", name: "chimay", id: 1},
-      %Beer{kind: "blonde", name: "jupiler", id: 2}
+      %Beer{kind: "blonde", name: "jupiler", id: 2},
+      %Beer{kind: "blonde", name: "heineken", id: 3}
     ]
     |> Enum.each(fn b ->
       b
@@ -120,13 +93,29 @@ defmodule AlgoliaxTest.Schema do
 
     assert_request("POST", %{
       "requests" => [
-        %{"action" => "updateObject", "body" => %{"objectID" => @ref1}}
+        %{
+          "action" => "updateObject",
+          "body" => %{
+            "objectID" => @ref1,
+            "last_name" => "Doe",
+            "first_name" => "John",
+            "age" => 77
+          }
+        }
       ]
     })
 
     assert_request("POST", %{
       "requests" => [
-        %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
+        %{
+          "action" => "updateObject",
+          "body" => %{
+            "objectID" => @ref2,
+            "last_name" => "al",
+            "first_name" => "bert",
+            "age" => 35
+          }
+        }
       ]
     })
   end
@@ -232,28 +221,6 @@ defmodule AlgoliaxTest.Schema do
     })
   end
 
-  test "reindex with association" do
-    assert {:ok, :completed} = PeopleEctoWithAssociation.reindex()
-
-    assert_request("POST", %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"objectID" => @ref1}}
-      ]
-    })
-
-    assert_request("POST", %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
-      ]
-    })
-
-    assert_request("POST", %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"objectID" => @ref3}}
-      ]
-    })
-  end
-
   test "save_object/1 without attribute(s)" do
     assert {:ok, res} = PeopleWithSchemas.save_object(%Beer{kind: "brune", name: "chimay", id: 1})
 
@@ -290,6 +257,17 @@ defmodule AlgoliaxTest.Schema do
     assert_request("POST", %{
       "requests" => [
         %{"action" => "updateObject", "body" => %{"name" => "chimay", "objectID" => 1}}
+      ]
+    })
+  end
+
+  test "reindex/1 with schemas and query as keyword list" do
+    query = %{where: [name: "heineken"]}
+    assert {:ok, res} = PeopleWithSchemas.reindex(query)
+
+    assert_request("POST", %{
+      "requests" => [
+        %{"action" => "updateObject", "body" => %{"name" => "heineken", "objectID" => 3}}
       ]
     })
   end

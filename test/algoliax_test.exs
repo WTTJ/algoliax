@@ -13,12 +13,8 @@ defmodule AlgoliaxTest do
 
   test "People has algoliax_attr_ functions" do
     [
-      :algoliax_attr_age,
-      :algoliax_attr_first_name,
-      :algoliax_attr_full_name,
-      :algoliax_attr_last_name,
-      :algoliax_attr_nickname,
-      :algoliax_attr_updated_at
+      :build_object,
+      :to_be_indexed?
     ]
     |> Enum.each(fn f ->
       assert f in Keyword.keys(PeopleStruct.__info__(:functions))
@@ -28,24 +24,30 @@ defmodule AlgoliaxTest do
   test "People algolia_attr_ functions" do
     people = %PeopleStruct{reference: 10, last_name: "Doe", first_name: "John", age: 20}
 
-    assert PeopleStruct.algoliax_attr_age(people) == 20
-    assert PeopleStruct.algoliax_attr_first_name(people) == "John"
-    assert PeopleStruct.algoliax_attr_full_name(people) == "John Doe"
-    assert PeopleStruct.algoliax_attr_last_name(people) == "Doe"
-    assert PeopleStruct.algoliax_attr_nickname(people) == "john"
-    assert PeopleStruct.algoliax_attr_updated_at(people) == 1_546_300_800
+    assert PeopleStruct.build_object(people) == %{
+             age: 20,
+             first_name: "John",
+             full_name: "John Doe",
+             last_name: "Doe",
+             nickname: "john",
+             updated_at: 1_546_300_800
+           }
+
     refute PeopleStruct.to_be_indexed?(people)
   end
 
   test "People algolia_attr_ functions older than 50 " do
-    people = %PeopleStruct{reference: 10, last_name: "Doe", first_name: "John", age: 55}
+    people = %PeopleStruct{reference: 10, last_name: "Dark", first_name: "Vador", age: 55}
 
-    assert PeopleStruct.algoliax_attr_age(people) == 55
-    assert PeopleStruct.algoliax_attr_first_name(people) == "John"
-    assert PeopleStruct.algoliax_attr_full_name(people) == "John Doe"
-    assert PeopleStruct.algoliax_attr_last_name(people) == "Doe"
-    assert PeopleStruct.algoliax_attr_nickname(people) == "john"
-    assert PeopleStruct.algoliax_attr_updated_at(people) == 1_546_300_800
+    assert PeopleStruct.build_object(people) == %{
+             age: 55,
+             first_name: "Vador",
+             full_name: "Vador Dark",
+             last_name: "Dark",
+             nickname: "vador",
+             updated_at: 1_546_300_800
+           }
+
     assert PeopleStruct.to_be_indexed?(people)
   end
 
