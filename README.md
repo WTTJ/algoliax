@@ -28,7 +28,8 @@ Algoliax needs only `:api_key` and `:application_id` config. These configs can e
 config :algoliax,
   api_key: "<API_KEY>",
   application_id: "<APPLICATION_ID>",
-  batch_size: 500
+  batch_size: 500,
+  recv_timeout: 5000
 ```
 
 ## Usage

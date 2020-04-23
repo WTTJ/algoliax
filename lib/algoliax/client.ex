@@ -4,6 +4,7 @@ defmodule Algoliax.Client do
   require Logger
 
   alias Algoliax.{Config, Routes}
+  @recv_timeout Application.get_env(:algoliax, :recv_timeout, 5000)
 
   def request(request, retry \\ 0)
 
@@ -18,7 +19,10 @@ defmodule Algoliax.Client do
     log(action, method, url, body)
 
     method
-    |> :hackney.request(url, request_headers(), Jason.encode!(body), [:with_body])
+    |> :hackney.request(url, request_headers(), Jason.encode!(body), [
+      :with_body,
+      recv_timeout: @recv_timeout
+    ])
     |> case do
       {:ok, code, _headers, response} when code in 200..299 ->
         Jason.decode(response)
