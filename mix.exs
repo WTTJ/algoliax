@@ -25,7 +25,7 @@ defmodule Algoliax.MixProject do
       docs: [
         # The main page in the docs
         main: "Algoliax",
-        extras: ["README.md"]
+        extras: ["README.md", "guides/examples/global.md"]
       ],
 
       # Hex
