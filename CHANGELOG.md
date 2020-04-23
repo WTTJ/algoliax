@@ -2,6 +2,7 @@
 
 #### New
 
+- add ability configure `:recv_timeout` for hackney.
 - add ability to pass query_filters or Ecto.Query to `reindex/2`.
 
 ```elixir
