@@ -2,6 +2,8 @@
 
 [![CircleCI](https://circleci.com/gh/StephaneRob/algoliax/tree/master.svg?style=svg)](https://circleci.com/gh/StephaneRob/algoliax/tree/master)
 
+[CHANGELOG](changelog.md)
+
 This package let you easily integrate Algolia to your elixir application. It can be used with built in elixir struct or with [ecto](https://github.com/elixir-ecto/ecto) schemas.
 
 ## Installation
@@ -167,7 +169,7 @@ config :algoliax,
   batch_size: 250
 ```
 
-** ⚠️ _Important_**: Algoliax use by default the `id` column to order and go through the table. (cf [Custom order column](#custom-order-column))
+> **NOTE:** Algoliax use by default the `id` column to order and go through the table. (cf [Custom order column](#custom-order-column))
 
 ```elixir
 import Ecto.Query
@@ -194,7 +196,7 @@ If you don't have an `id` column, you can change it by setting the `cursor_field
 
 Make sure this column ensure a consistent order even when new records are created.
 
-Using the global config:
+- Using the global config:
 
 ```elixir
 config :algoliax,
@@ -202,10 +204,10 @@ config :algoliax,
   cursor_field: :reference
 ```
 
-Schema specific:
+- Indexer specific:
 
 ```elixir
-defmodulePeople do
+defmodule People do
   use Algoliax.Indexer,
     index_name: :algoliax_people,
     object_id: :reference,
