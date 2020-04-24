@@ -25,7 +25,10 @@ defmodule Algoliax.MixProject do
       docs: [
         # The main page in the docs
         main: "Algoliax",
-        extras: ["README.md", "guides/examples/global.md"]
+        extras: ["README.md", "guides/examples/global.md", "guides/examples/secured_api_key.md"],
+        groups_for_extras: [
+          Examples: Path.wildcard("guides/examples/*.md")
+        ]
       ],
 
       # Hex

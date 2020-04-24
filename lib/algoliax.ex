@@ -17,21 +17,41 @@ defmodule Algoliax do
 
   ## Examples
 
-      Algoliax.generate_secured_api_key("reference:10")
-      Algoliax.generate_secured_api_key("reference:10 OR nickname:john")
+      Algoliax.generate_secured_api_key(%{filters: "reference:10"})
+      Algoliax.generate_secured_api_key(%{filters: "reference:10 OR nickname:john"})
   """
-  @spec generate_secured_api_key(filters :: binary()) :: binary()
-  def generate_secured_api_key(filters) do
-    query_string = "filters=#{URI.encode_www_form("#{filters}")}"
 
-    hmac =
-      :crypto.hmac(
-        :sha256,
-        Config.api_key(),
-        query_string
-      )
-      |> Base.encode16(case: :lower)
+  @algolia_params [
+    :filters,
+    :validUntil,
+    :restrictIndices,
+    :restrictSources,
+    :userToken
+  ]
 
-    Base.encode64(hmac <> query_string)
+  @spec generate_secured_api_key(params :: map()) ::
+          {:ok, binary()} | {:error, :invalid_params}
+  def generate_secured_api_key(params) do
+    if valid_params?(params) do
+      query_string = URI.encode_query(params)
+
+      hmac =
+        :crypto.hmac(
+          :sha256,
+          Config.api_key(),
+          query_string
+        )
+        |> Base.encode16(case: :lower)
+
+      {:ok, Base.encode64(hmac <> query_string)}
+    else
+      {:error, :invalid_params}
+    end
+  end
+
+  defp valid_params?(params) do
+    params
+    |> Map.keys()
+    |> Enum.all?(&(&1 in @algolia_params))
   end
 end
