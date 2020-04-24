@@ -15,6 +15,7 @@ People.reindex(query)
 
 #### breaking changes
 
+- improved `generate_secured_api_key/1`
 - remove attributes macros in favor of `build_object/1`
 - remove `:prepare_object` options
 - remove `:preloads` options

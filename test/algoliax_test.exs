@@ -53,6 +53,7 @@ defmodule AlgoliaxTest do
 
   test "generate secured api key" do
     Application.put_env(:algoliax, :api_key, "api_key")
-    assert Algoliax.generate_secured_api_key("reference:10")
+    assert {:ok, _} = Algoliax.generate_secured_api_key(%{filters: "reference:10"})
+    assert {:error, :invalid_params} = Algoliax.generate_secured_api_key(%{sdfsd: "reference:10"})
   end
 end
