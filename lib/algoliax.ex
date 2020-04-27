@@ -49,6 +49,17 @@ defmodule Algoliax do
     end
   end
 
+  @spec generate_secured_api_key!(params :: map()) :: binary()
+  def generate_secured_api_key!(params) do
+    case generate_secured_api_key(params) do
+      {:ok, key} ->
+        key
+
+      {:error, _} ->
+        raise Algoliax.InvalidApiKeyParamsError, message: "Invalid params"
+    end
+  end
+
   defp valid_params?(params) do
     params
     |> Map.keys()
