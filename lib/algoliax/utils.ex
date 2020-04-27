@@ -1,25 +1,3 @@
-defmodule Algoliax.MissingRepoError do
-  @moduledoc false
-
-  defexception [:message]
-
-  @impl true
-  def exception(index_name) do
-    %__MODULE__{message: "No repo configured for index #{index_name}"}
-  end
-end
-
-defmodule Algoliax.MissingIndexNameError do
-  @moduledoc false
-
-  defexception [:message]
-
-  @impl true
-  def exception(_) do
-    %__MODULE__{message: "No index_name configured"}
-  end
-end
-
 defmodule Algoliax.Utils do
   @moduledoc false
 

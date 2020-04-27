@@ -55,5 +55,11 @@ defmodule AlgoliaxTest do
     Application.put_env(:algoliax, :api_key, "api_key")
     assert {:ok, _} = Algoliax.generate_secured_api_key(%{filters: "reference:10"})
     assert {:error, :invalid_params} = Algoliax.generate_secured_api_key(%{sdfsd: "reference:10"})
+
+    assert key = Algoliax.generate_secured_api_key!(%{filters: "reference:10"})
+
+    assert_raise(Algoliax.InvalidApiKeyParamsError, fn ->
+      Algoliax.generate_secured_api_key!(%{sdfsd: "reference:10"})
+    end)
   end
 end
