@@ -1,3 +1,9 @@
+## v0.4.1
+
+#### New
+
+- add `generate_secured_api_key!/1`
+
 ## v0.4.0
 
 #### New
