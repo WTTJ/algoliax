@@ -22,22 +22,15 @@ if Code.ensure_loaded?(Ecto) do
     def reindex(module, settings, query_filters, opts) when is_map(query_filters) do
       repo = Algoliax.UtilsEcto.repo(settings)
 
-      modules =
-        case Algoliax.Utils.schemas(settings) do
-          [_ | _] = schemas ->
-            schemas
-
-          _ ->
-            [module]
-        end
-
-      modules
-      |> Enum.each(fn mod ->
+      module
+      |> fetch_schemas(settings)
+      |> Enum.each(fn {mod, preloads} ->
         where_filters = Map.get(query_filters, :where, [])
 
         query =
           from(m in mod)
           |> where(^where_filters)
+          |> preload(^preloads)
 
         Algoliax.UtilsEcto.find_in_batches(repo, query, 0, settings, fn batch ->
           Object.save_objects(module, settings, batch, opts)
@@ -49,6 +42,17 @@ if Code.ensure_loaded?(Ecto) do
 
     def reindex(_, _, _, _) do
       {:error, :invalid_query}
+    end
+
+    defp fetch_schemas(module, settings) do
+      Algoliax.Utils.schemas(settings, [module])
+      |> Enum.map(fn
+        m when is_tuple(m) ->
+          m
+
+        m ->
+          {m, []}
+      end)
     end
 
     def reindex_atomic(module, settings) do

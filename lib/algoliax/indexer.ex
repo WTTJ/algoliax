@@ -50,6 +50,39 @@ defmodule Algoliax.Indexer do
           }
         end
       end
+
+  ### Schemas
+
+  `:schemas` options allows to define a list of module you want to index into the current index. By default only the module defining the indexer.
+
+      defmodule Global do
+        use Algoliax.Indexer,
+          index_name: :people,
+          object_id: :reference,
+          schemas: [People, Animal],
+          algolia: [
+            attribute_for_faceting: ["age"],
+            custom_ranking: ["desc(updated_at)"]
+          ]
+
+      end
+
+    This option allows to define also the preloads use during `reindex`/`reindex_atomic` (preload on `save_object` and `save_objects` have to be done manually)
+
+        defmodule People do
+          use Algoliax.Indexer,
+            index_name: :people,
+            object_id: :reference,
+            schemas: [
+              {__MODULE__, [:animals]}
+            ]
+            algolia: [
+              attribute_for_faceting: ["age"],
+              custom_ranking: ["desc(updated_at)"]
+            ]
+
+        end
+
   """
 
   alias Algoliax.Resources.{Index, Object, Search}

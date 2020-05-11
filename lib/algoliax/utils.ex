@@ -24,8 +24,8 @@ defmodule Algoliax.Utils do
     Keyword.get(settings, :object_id, :id)
   end
 
-  def schemas(settings) do
-    Keyword.get(settings, :schemas, [])
+  def schemas(settings, default) do
+    Keyword.get(settings, :schemas, default)
   end
 
   def camelize(params) when is_map(params) do
