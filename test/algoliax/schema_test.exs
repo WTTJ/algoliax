@@ -12,10 +12,12 @@ defmodule AlgoliaxTest.Schema do
   alias Algoliax.Repo
 
   alias Algoliax.Schemas.{
+    Animal,
     Beer,
     PeopleEcto,
     PeopleWithoutIdEcto,
-    PeopleWithSchemas
+    PeopleWithSchemas,
+    PeopleWithAssociation
   }
 
   @ref1 Ecto.UUID.generate()
@@ -31,6 +33,9 @@ defmodule AlgoliaxTest.Schema do
 
     Algoliax.SettingsStore.set_settings(:algoliax_with_schemas, %{})
     Algoliax.SettingsStore.set_settings(:"algoliax_with_schemas.tmp", %{})
+
+    Algoliax.SettingsStore.set_settings(:algoliax_people_ecto_with_association, %{})
+    Algoliax.SettingsStore.set_settings(:"algoliax_people_ecto_with_association.tmp", %{})
 
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(Repo)
 
@@ -81,6 +86,36 @@ defmodule AlgoliaxTest.Schema do
     ]
     |> Enum.each(fn b ->
       b
+      |> Ecto.Changeset.change()
+      |> Algoliax.Repo.insert()
+    end)
+
+    [
+      %PeopleWithAssociation{
+        reference: @ref1,
+        last_name: "Doe",
+        first_name: "John",
+        age: 77,
+        animals: [%Animal{kind: "cat"}, %Animal{kind: "snake"}]
+      },
+      %PeopleWithAssociation{
+        reference: @ref1,
+        last_name: "Einstein",
+        first_name: "Alber",
+        age: 22,
+        animals: [%Animal{kind: "cat"}, %Animal{kind: "snake"}, %Animal{kind: "dog"}]
+      },
+      %PeopleWithAssociation{reference: @ref2, last_name: "al", first_name: "bert", age: 35},
+      %PeopleWithAssociation{
+        reference: @ref3,
+        last_name: "Vador",
+        first_name: "Dark",
+        age: 9,
+        animals: [%Animal{kind: "dog"}]
+      }
+    ]
+    |> Enum.each(fn p ->
+      p
       |> Ecto.Changeset.change()
       |> Algoliax.Repo.insert()
     end)
@@ -270,5 +305,9 @@ defmodule AlgoliaxTest.Schema do
         %{"action" => "updateObject", "body" => %{"name" => "heineken", "objectID" => 3}}
       ]
     })
+  end
+
+  test "reindex/1 with association" do
+    assert {:ok, res} = PeopleWithAssociation.reindex()
   end
 end
