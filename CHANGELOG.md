@@ -1,3 +1,25 @@
+## v0.4.2
+
+#### New
+
+- add ability to provide preloads for `reindex` and `reindex_atomic` function
+
+```elixir
+defmodule People do
+  use Algoliax.Indexer,
+    index_name: :people,
+    object_id: :reference,
+    schemas: [
+      {__MODULE__, [:animals]}
+    ]
+    algolia: [
+      attribute_for_faceting: ["age"],
+      custom_ranking: ["desc(updated_at)"]
+    ]
+
+end
+```
+
 ## v0.4.1
 
 #### New
