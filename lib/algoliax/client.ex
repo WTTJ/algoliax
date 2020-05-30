@@ -15,7 +15,6 @@ defmodule Algoliax.Client do
   def request(%{action: action, url_params: url_params} = request, retry) do
     body = Map.get(request, :body)
     {method, url} = Routes.url(action, url_params, retry)
-
     log(action, method, url, body)
 
     method

@@ -1,8 +1,11 @@
 defmodule Algoliax.Utils do
   @moduledoc false
 
+  alias Algoliax.Resources.Index
+
   def index_name(module, settings) do
     index_name = Keyword.get(settings, :index_name)
+    Index.ensure_settings(index_name, settings)
 
     if index_name do
       if module.__info__(:functions)
