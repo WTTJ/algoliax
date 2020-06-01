@@ -125,6 +125,14 @@ defmodule Algoliax.ApiMockServer do
     end
   end
 
+  put "/:application_id/write/settings" do
+    send_resp(conn, 200, Jason.encode!(%{}))
+  end
+
+  get "/:application_id/read/settings" do
+    send_resp(conn, 200, Jason.encode!(%{}))
+  end
+
   # Delete object: https://www.algolia.com/doc/rest-api/search/#delete-object
   delete "/:application_id/:mode/:index_name/:object_id" do
     response = %{

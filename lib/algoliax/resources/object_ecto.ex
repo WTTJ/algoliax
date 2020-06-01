@@ -3,9 +3,9 @@ if Code.ensure_loaded?(Ecto) do
     @moduledoc false
 
     import Ecto.Query
+    import Algoliax.Client, only: [request: 1]
 
-    alias Algoliax.Requests
-    alias Algoliax.Resources.{Index, Object}
+    alias Algoliax.Resources.Object
 
     def reindex(module, settings, %Ecto.Query{} = query, opts) do
       repo = Algoliax.UtilsEcto.repo(settings)
@@ -57,9 +57,6 @@ if Code.ensure_loaded?(Ecto) do
 
     def reindex_atomic(module, settings) do
       Algoliax.UtilsEcto.repo(settings)
-
-      Index.ensure_settings(module, settings)
-
       index_name = Algoliax.Utils.index_name(module, settings)
       tmp_index_name = :"#{index_name}.tmp"
       tmp_settings = Keyword.put(settings, :index_name, tmp_index_name)
@@ -68,9 +65,13 @@ if Code.ensure_loaded?(Ecto) do
 
       reindex(module, tmp_settings, nil, [])
 
-      Requests.move_index(tmp_index_name, %{
-        operation: "move",
-        destination: "#{index_name}"
+      request(%{
+        action: :move_index,
+        url_params: [index_name: tmp_index_name],
+        body: %{
+          operation: "move",
+          destination: "#{index_name}"
+        }
       })
 
       Algoliax.SettingsStore.delete_settings(tmp_index_name)

@@ -1,27 +1,22 @@
 defmodule Algoliax.Resources.Object do
   @moduledoc false
 
-  import Algoliax.Utils,
-    only: [
-      index_name: 2,
-      object_id_attribute: 1
-    ]
+  import Algoliax.Utils, only: [index_name: 2, object_id_attribute: 1]
+  import Algoliax.Client, only: [request: 1]
 
-  alias Algoliax.{Requests, TemporaryIndexer}
-  alias Algoliax.Resources.Index
+  alias Algoliax.TemporaryIndexer
 
   def get_object(module, settings, model) do
-    Index.ensure_settings(module, settings)
-
-    object_id = get_object_id(settings, model)
-    Requests.get_object(index_name(module, settings), %{objectID: object_id})
+    request(%{
+      action: :get_object,
+      url_params: [
+        index_name: index_name(module, settings),
+        object_id: get_object_id(settings, model)
+      ]
+    })
   end
 
   def save_objects(module, settings, models, opts) do
-    Index.ensure_settings(module, settings)
-
-    index_name = index_name(module, settings)
-
     objects =
       Enum.map(models, fn model ->
         action = get_action(module, model, opts)
@@ -32,33 +27,40 @@ defmodule Algoliax.Resources.Object do
       end)
       |> Enum.reject(&is_nil/1)
 
-    response = Requests.save_objects(index_name, %{requests: objects})
     call_indexer(:save_objects, module, settings, models, opts)
-    response
+
+    request(%{
+      action: :save_objects,
+      url_params: [index_name: index_name(module, settings)],
+      body: %{requests: objects}
+    })
   end
 
   def save_object(module, settings, model) do
-    Index.ensure_settings(module, settings)
-
     if apply(module, :to_be_indexed?, [model]) do
       object = build_object(module, settings, model)
-      index_name = index_name(module, settings)
-      response = Requests.save_object(index_name, object)
       call_indexer(:save_object, module, settings, model)
-      response
+
+      request(%{
+        action: :save_object,
+        url_params: [index_name: index_name(module, settings), object_id: object.objectID],
+        body: object
+      })
     else
       {:not_indexable, model}
     end
   end
 
   def delete_object(module, settings, model) do
-    Index.ensure_settings(module, settings)
     call_indexer(:delete_object, module, settings, model)
-    object = %{objectID: get_object_id(settings, model)}
 
-    module
-    |> index_name(settings)
-    |> Requests.delete_object(object)
+    request(%{
+      action: :delete_object,
+      url_params: [
+        index_name: index_name(module, settings),
+        object_id: get_object_id(settings, model)
+      ]
+    })
   end
 
   defp build_batch_object(_module, settings, model, "deleteObject" = action) do
