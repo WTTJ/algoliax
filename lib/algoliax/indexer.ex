@@ -391,26 +391,6 @@ defmodule Algoliax.Indexer do
           ObjectEcto.reindex(__MODULE__, @settings, query, opts)
         end
 
-        # @impl Algoliax.Indexer
-        # def reindex do
-        #   ObjectEcto.reindex(__MODULE__, @settings, [], [])
-        # end
-
-        # @impl Algoliax.Indexer
-        # def reindex(opts) when is_list(opts) do
-        #   ObjectEcto.reindex(__MODULE__, @settings, [], opts)
-        # end
-
-        # @impl Algoliax.Indexer
-        # def reindex(query) when is_map(query) do
-        #   ObjectEcto.reindex(__MODULE__, @settings, query, [])
-        # end
-
-        # @impl Algoliax.Indexer
-        # def reindex(query \\ nil, opts \\ []) do
-        #   ObjectEcto.reindex(__MODULE__, @settings, query, opts)
-        # end
-
         @impl Algoliax.Indexer
         def reindex_atomic do
           ObjectEcto.reindex_atomic(__MODULE__, @settings)
