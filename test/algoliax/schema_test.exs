@@ -17,7 +17,8 @@ defmodule AlgoliaxTest.Schema do
     PeopleEcto,
     PeopleWithoutIdEcto,
     PeopleWithSchemas,
-    PeopleWithAssociation
+    PeopleWithAssociation,
+    PeopleWithCustomObjectId
   }
 
   @ref1 Ecto.UUID.generate()
@@ -36,6 +37,9 @@ defmodule AlgoliaxTest.Schema do
 
     Algoliax.SettingsStore.set_settings(:algoliax_people_ecto_with_association, %{})
     Algoliax.SettingsStore.set_settings(:"algoliax_people_ecto_with_association.tmp", %{})
+
+    Algoliax.SettingsStore.set_settings(:algoliax_people_with_custom_object_id, %{})
+    Algoliax.SettingsStore.set_settings(:"algoliax_people_with_custom_object_id.tmp", %{})
 
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(Repo)
 
@@ -309,5 +313,35 @@ defmodule AlgoliaxTest.Schema do
 
   test "reindex/1 with association" do
     assert {:ok, res} = PeopleWithAssociation.reindex()
+  end
+
+  describe "indexer w/ custom object id" do
+    test "reindex" do
+      assert {:ok, :completed} = PeopleWithCustomObjectId.reindex()
+
+      assert_request("POST", %{
+        "requests" => [
+          %{
+            "action" => "updateObject",
+            "body" => %{
+              "objectID" => "people-" <> @ref1,
+              "last_name" => "Doe"
+            }
+          }
+        ]
+      })
+
+      assert_request("POST", %{
+        "requests" => [
+          %{
+            "action" => "updateObject",
+            "body" => %{
+              "objectID" => "people-" <> @ref2,
+              "last_name" => "al"
+            }
+          }
+        ]
+      })
+    end
   end
 end
