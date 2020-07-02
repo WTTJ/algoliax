@@ -307,6 +307,16 @@ defmodule Algoliax.Indexer do
   @callback to_be_indexed?(model :: map()) :: true | false
 
   @doc """
+  Override this function to provide custom objectID for the model
+
+  ## Example
+      @impl Algoliax.Indexer
+      def get_object_id(%Cat{id: id}), do: "Cat:" <> to_string(id)
+      def get_object_id(%Dog{id: id}), do: "Dog:" <> to_string(id)
+  """
+  @callback get_object_id(model :: map()) :: binary() | :default
+
+  @doc """
   Get index settings from Algolia
   """
   @callback get_settings() :: {:ok, map()} | {:error, map()}
@@ -407,7 +417,12 @@ defmodule Algoliax.Indexer do
         true
       end
 
-      defoverridable(to_be_indexed?: 1, build_object: 1)
+      @impl Algoliax.Indexer
+      def get_object_id(_) do
+        :default
+      end
+
+      defoverridable(to_be_indexed?: 1, build_object: 1, get_object_id: 1)
     end
   end
 end

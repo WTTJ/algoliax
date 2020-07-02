@@ -11,7 +11,7 @@ defmodule Algoliax.Resources.Object do
       action: :get_object,
       url_params: [
         index_name: index_name(module, settings),
-        object_id: get_object_id(settings, model)
+        object_id: get_object_id(module, settings, model)
       ]
     })
   end
@@ -58,15 +58,15 @@ defmodule Algoliax.Resources.Object do
       action: :delete_object,
       url_params: [
         index_name: index_name(module, settings),
-        object_id: get_object_id(settings, model)
+        object_id: get_object_id(module, settings, model)
       ]
     })
   end
 
-  defp build_batch_object(_module, settings, model, "deleteObject" = action) do
+  defp build_batch_object(module, settings, model, "deleteObject" = action) do
     %{
       action: action,
-      body: %{objectID: get_object_id(settings, model)}
+      body: %{objectID: get_object_id(module, settings, model)}
     }
   end
 
@@ -79,11 +79,17 @@ defmodule Algoliax.Resources.Object do
 
   defp build_object(module, settings, model) do
     apply(module, :build_object, [model])
-    |> Map.put(:objectID, get_object_id(settings, model))
+    |> Map.put(:objectID, get_object_id(module, settings, model))
   end
 
-  defp get_object_id(settings, model) do
-    Map.get(model, object_id_attribute(settings))
+  defp get_object_id(module, settings, model) do
+    case apply(module, :get_object_id, [model]) do
+      :default ->
+        Map.fetch!(model, object_id_attribute(settings))
+
+      value ->
+        to_string(value)
+    end
   end
 
   defp get_action(module, model, opts) do
