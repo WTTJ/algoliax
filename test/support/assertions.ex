@@ -43,7 +43,7 @@ defmodule Algoliax.Assertions do
             |> Enum.join("\n")
 
           flunk(
-            "No request found for method=#{method}, path=#{path}, body=#{inspect(body)}\n\n Found:\n" <>
+            "No request found for method=#{method}, path=#{inspect(path)}, body=#{inspect(body)}\n\n Found:\n" <>
               if(message == "", do: "None", else: message)
           )
 
