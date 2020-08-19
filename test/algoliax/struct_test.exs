@@ -1,7 +1,7 @@
 defmodule AlgoliaxTest.StructTest do
   use Algoliax.RequestCase
 
-  alias Algoliax.Schemas.PeopleStruct
+  alias Algoliax.Schemas.{PeopleStruct, PeopleStructRuntimeIndexName}
 
   setup do
     Algoliax.SettingsStore.set_settings(:algoliax_people_struct, %{})
@@ -115,6 +115,23 @@ defmodule AlgoliaxTest.StructTest do
     test "search_facet/2" do
       assert {:ok, res} = PeopleStruct.search_facet("age", "2")
       assert_request("POST", %{"facetQuery" => "2"})
+    end
+  end
+
+  describe "runtime index name" do
+    test "get_object/1" do
+      person = %PeopleStructRuntimeIndexName{
+        reference: "known",
+        last_name: "Doe",
+        first_name: "John",
+        age: 77
+      }
+
+      assert {:ok, res} = PeopleStructRuntimeIndexName.get_object(person)
+      assert %{"objectID" => "known"} = res
+      assert_request("PUT", ~r/people_runtime_index_name\/settings/, %{})
+      assert_request("GET", ~r/people_runtime_index_name\/settings/, %{})
+      assert_request("GET", ~r/people_runtime_index_name\/known/, %{})
     end
   end
 end

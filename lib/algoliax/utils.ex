@@ -4,16 +4,19 @@ defmodule Algoliax.Utils do
   alias Algoliax.Resources.Index
 
   def index_name(module, settings) do
-    index_name = Keyword.get(settings, :index_name)
-    Index.ensure_settings(index_name, settings)
+    index_name_opt = Keyword.get(settings, :index_name)
 
-    if index_name do
-      if module.__info__(:functions)
-         |> Keyword.get(index_name) == 0 do
-        apply(module, index_name, [])
-      else
-        index_name
-      end
+    if index_name_opt do
+      index_name =
+        if module.__info__(:functions)
+           |> Keyword.get(index_name_opt) == 0 do
+          apply(module, index_name_opt, [])
+        else
+          index_name_opt
+        end
+
+      Index.ensure_settings(index_name, settings)
+      index_name
     else
       raise Algoliax.MissingIndexNameError
     end
