@@ -1,3 +1,13 @@
+## v0.4.3
+
+#### New
+
+- add ability to customize objectID by overriding `get_object_id/1`
+
+#### Improvement
+
+- Make sure index is configured before any action.
+
 ## v0.4.2
 
 #### New
