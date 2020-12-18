@@ -1,6 +1,6 @@
 # Algoliax
 
-[![CircleCI](https://circleci.com/gh/StephaneRob/algoliax/tree/master.svg?style=svg)](https://circleci.com/gh/StephaneRob/algoliax/tree/master)
+[![CircleCI](https://circleci.com/gh/WTTJ/algoliax/tree/master.svg?style=svg)](https://circleci.com/gh/WTTJ/algoliax/tree/master)
 
 [CHANGELOG](CHANGELOG.md)
 
