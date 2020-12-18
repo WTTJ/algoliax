@@ -20,8 +20,8 @@ defmodule Algoliax.MixProject do
 
       # docs
       name: "Algoliax",
-      source_url: "https://github.com/StephaneRob/algoliax",
-      homepage_url: "https://github.com/StephaneRob/algoliax",
+      source_url: "https://github.com/WTTJ/algoliax",
+      homepage_url: "https://github.com/WTTJ/algoliax",
       docs: [
         # The main page in the docs
         main: "Algoliax",
@@ -77,7 +77,7 @@ defmodule Algoliax.MixProject do
     [
       maintainers: ["Stéphane Robino"],
       licenses: ["BSD-2-Clause"],
-      links: %{"GitHub" => "https://github.com/StephaneRob/algoliax"}
+      links: %{"GitHub" => "https://github.com/WTTJ/algoliax"}
     ]
   end
 end

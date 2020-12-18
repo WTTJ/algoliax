@@ -1,4 +1,4 @@
-Copyright (c) 2020, Stéphane Robino
+Copyright (c) 2020, CORUSCANT (welcome to the jungle) - https://www.welcometothejungle.com
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
