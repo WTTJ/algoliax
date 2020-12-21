@@ -1,3 +1,9 @@
+## DEV
+
+#### Breaking changes
+
+- Drop support of Elixir 1.9. Elixir 1.10 or greater required
+
 ## v0.4.3
 
 #### New
