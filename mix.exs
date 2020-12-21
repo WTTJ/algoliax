@@ -5,7 +5,7 @@ defmodule Algoliax.MixProject do
     [
       app: :algoliax,
       version: "0.4.3",
-      elixir: "~> 1.9",
+      elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       aliases: aliases(),

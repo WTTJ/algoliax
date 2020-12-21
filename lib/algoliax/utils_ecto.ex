@@ -3,7 +3,7 @@ if Code.ensure_loaded?(Ecto) do
     @moduledoc false
 
     import Ecto.Query
-    @batch_size Application.get_env(:algoliax, :batch_size, 500)
+    @batch_size Application.compile_env(:algoliax, :batch_size, 500)
 
     def repo(settings) do
       index_name = Keyword.get(settings, :index_name)
