@@ -15,7 +15,7 @@ defmodule Algoliax.Utils do
           index_name_opt
         end
 
-      Index.ensure_settings(index_name, settings)
+      Index.ensure_settings(module, index_name, settings)
       index_name
     else
       raise Algoliax.MissingIndexNameError

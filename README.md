@@ -216,3 +216,21 @@ defmodule People do
     algolia: [...]
 end
 ```
+
+#### Replicas configuration
+
+```elixir
+use Algoliax.Indexer,
+  index_name: :algoliax_people,
+  object_id: :reference
+  repo: MyApp.Repo,
+  forward_to_replica: true,
+  algolia: [
+    attributes_for_faceting: ["age"],
+    searchable_attributes: ["full_name"],
+  ],
+  replicas: [
+    [name: :algoliax_people_by_age_asc, ranking: ["asc(age)"]],
+    [name: :algoliax_people_by_age_desc, ranking: ["desc(age)"]]
+  ]
+```
