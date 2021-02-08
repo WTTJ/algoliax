@@ -5,7 +5,7 @@ defmodule Algoliax.MixProject do
     [
       app: :algoliax,
       version: "0.4.3",
-      elixir: "~> 1.9",
+      elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       aliases: aliases(),
@@ -49,7 +49,7 @@ defmodule Algoliax.MixProject do
 
   defp deps do
     [
-      {:hackney, "~> 1.15.2"},
+      {:hackney, "~> 1.17.0"},
       {:jason, "~> 1.1"},
       {:ex_doc, "~> 0.21", only: :dev, runtime: false, override: true},
       {:ecto, "~> 3.0", optional: true},
@@ -58,7 +58,7 @@ defmodule Algoliax.MixProject do
       {:inflex, "~> 2.0.0"},
       {:mox, "~> 0.5", only: :test},
       {:mock, "~> 0.3.0", only: :test},
-      {:credo, "~> 1.3.0", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
       {:faker, "~> 0.12", only: :test},
       {:excoveralls, "~> 0.10", only: :test},
       {:plug_cowboy, "~> 2.0", only: :test},

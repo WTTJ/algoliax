@@ -4,7 +4,7 @@ defmodule Algoliax.Client do
   require Logger
 
   alias Algoliax.{Config, Routes}
-  @recv_timeout Application.get_env(:algoliax, :recv_timeout, 5000)
+  @recv_timeout Application.compile_env(:algoliax, :recv_timeout, 5000)
 
   def request(request, retry \\ 0)
 
