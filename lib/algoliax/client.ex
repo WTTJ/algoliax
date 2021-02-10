@@ -27,12 +27,26 @@ defmodule Algoliax.Client do
         Jason.decode(response)
 
       {:ok, code, _, response} when code in 300..499 ->
-        {:error, code, response}
+        handle_error(code, response, action)
 
       error ->
         Logger.debug("#{inspect(error)}")
         request(request, retry + 1)
     end
+  end
+
+  defp handle_error(404, response, action) when action in [:get_settings, :get_object] do
+    {:error, 404, response}
+  end
+
+  defp handle_error(code, response, action) do
+    error =
+      case Jason.decode(response) do
+        {:ok, response} -> Map.get(response, "message")
+        _ -> response
+      end
+
+    raise Algoliax.AlgoliaApiError, %{code: code, error: error}
   end
 
   defp request_headers do

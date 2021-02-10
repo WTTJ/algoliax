@@ -25,3 +25,20 @@ defmodule Algoliax.MissingIndexNameError do
     %__MODULE__{message: "No index_name configured"}
   end
 end
+
+defmodule Algoliax.AlgoliaApiError do
+  @moduledoc "Raise Algolia API error"
+
+  defexception [:message]
+
+  @impl true
+  def exception(%{code: code, error: error}) do
+    message = """
+    Algolia HTTP error:
+
+    #{code} : #{error}
+    """
+
+    %__MODULE__{message: message}
+  end
+end

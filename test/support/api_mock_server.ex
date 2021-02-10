@@ -90,6 +90,15 @@ defmodule Algoliax.ApiMockServer do
     send_resp(conn, 200, Jason.encode!(response))
   end
 
+  # Raise a 403 error
+  get "/:application_id/:mode/index_name_not_authorized/:object_id" do
+    send_resp(
+      conn,
+      403,
+      Jason.encode!(%{"message" => "Index not allowed with this API key", "status" => 403})
+    )
+  end
+
   # Get object: https://www.algolia.com/doc/rest-api/search/#get-object
   get "/:application_id/:mode/:count/:index_name/:object_id" do
     case Map.get(conn.params, "object_id") do
