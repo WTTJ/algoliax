@@ -33,14 +33,9 @@ defmodule Algoliax.Resources.Index do
     |> replicas()
     |> Enum.each(fn replica_settings ->
       index_name = index_name(module, replica_settings)
+      replica_settings = Settings.replica_settings(settings, replica_settings)
 
-      settings =
-        settings
-        |> algolia_settings()
-        |> Keyword.merge(replica_settings)
-        |> map_algolia_settings()
-
-      request_configure_index(index_name, settings)
+      request_configure_index(index_name, replica_settings)
     end)
   end
 
@@ -64,10 +59,9 @@ defmodule Algoliax.Resources.Index do
   end
 
   defp settings_to_algolia_settings(module, settings) do
-    Settings.settings()
-    |> Enum.into(%{}, fn setting ->
-      {camelize(setting), Keyword.get(algolia_settings(settings), setting)}
-    end)
+    settings
+    |> algolia_settings()
+    |> Settings.map_algolia_settings()
     |> add_replicas_to_algolia_settings(module, settings)
   end
 

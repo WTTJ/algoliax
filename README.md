@@ -219,18 +219,23 @@ end
 
 #### Replicas configuration
 
+You can add replicas to your index configuration. You must specify the `index_name`. All options available in `algolia` param are allowed here.
+
+##### Inherits
+
+You can add a `inherits` params to specify whether you want the params from the primary to be inherited or not. *Default is true*
+
 ```elixir
 use Algoliax.Indexer,
   index_name: :algoliax_people,
-  object_id: :reference
+  object_id: :reference,
   repo: MyApp.Repo,
-  forward_to_replica: true,
   algolia: [
     attributes_for_faceting: ["age"],
     searchable_attributes: ["full_name"],
   ],
   replicas: [
-    [name: :algoliax_people_by_age_asc, ranking: ["asc(age)"]],
-    [name: :algoliax_people_by_age_desc, ranking: ["desc(age)"]]
+    [index_name: :algoliax_people_by_age_asc, ranking: ["asc(age)"], inherits: true],
+    [index_name: :algoliax_people_by_age_desc, ranking: ["desc(age)"], inherits: false]
   ]
 ```
