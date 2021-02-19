@@ -59,9 +59,7 @@ if Code.ensure_loaded?(Ecto) do
       Algoliax.UtilsEcto.repo(settings)
       index_name = Algoliax.Utils.index_name(module, settings)
       tmp_index_name = :"#{index_name}.tmp"
-
-      tmp_settings =
-        settings |> Keyword.put(:index_name, tmp_index_name) |> Keyword.delete(:replicas)
+      tmp_settings = Keyword.put(settings, :index_name, tmp_index_name)
 
       Algoliax.SettingsStore.start_reindexing(index_name)
 
@@ -78,8 +76,6 @@ if Code.ensure_loaded?(Ecto) do
 
       Algoliax.SettingsStore.delete_settings(tmp_index_name)
       Algoliax.SettingsStore.stop_reindexing(index_name)
-
-      Index.configure_index(module, settings)
 
       {:ok, :completed}
     end

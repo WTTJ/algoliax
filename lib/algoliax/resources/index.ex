@@ -12,10 +12,40 @@ defmodule Algoliax.Resources.Index do
         request_configure_index(index_name, settings_to_algolia_settings(module, settings))
         algolia_remote_settings = request_get_settings(index_name)
         SettingsStore.set_settings(index_name, algolia_remote_settings)
+        replicas_names(module, settings)
 
       _ ->
         true
     end
+  end
+
+  def replicas_names(module, settings) do
+    settings
+    |> replicas_settings()
+    |> Enum.map(fn replica_settings ->
+      index_name(module, replica_settings)
+    end)
+  end
+
+  def replicas_settings(settings) do
+    replicas = Keyword.get(settings, :replicas, [])
+
+    Enum.map(replicas, fn replica ->
+      case Keyword.get(replica, :inherits, true) do
+        true ->
+          replica_algolia_settings = algolia_settings(replica)
+          primary_algolia_setttings = algolia_settings(settings)
+
+          Keyword.put(
+            replica,
+            :algolia,
+            Keyword.merge(primary_algolia_setttings, replica_algolia_settings)
+          )
+
+        false ->
+          replica
+      end
+    end)
   end
 
   def get_settings(module, settings) do
@@ -26,16 +56,16 @@ defmodule Algoliax.Resources.Index do
   end
 
   def configure_index(module, settings) do
+    configure_replicas(module, settings)
     index_name = index_name(module, settings)
     request_configure_index(index_name, settings_to_algolia_settings(module, settings))
+  end
 
+  def configure_replicas(module, settings) do
     settings
-    |> replicas()
-    |> Enum.each(fn replica_settings ->
-      index_name = index_name(module, replica_settings)
-      replica_settings = Settings.replica_settings(settings, replica_settings)
-
-      request_configure_index(index_name, replica_settings)
+    |> replicas_settings()
+    |> Enum.map(fn replica_settings ->
+      configure_index(module, replica_settings)
     end)
   end
 
@@ -70,10 +100,6 @@ defmodule Algoliax.Resources.Index do
   end
 
   defp replicas(settings), do: Keyword.get(settings, :replicas, [])
-
-  defp replicas_names(module, settings) do
-    settings |> replicas() |> Enum.map(&index_name(module, &1))
-  end
 
   defp map_algolia_settings(algolia_settings) do
     Settings.settings()

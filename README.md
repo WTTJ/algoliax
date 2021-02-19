@@ -219,7 +219,7 @@ end
 
 #### Replicas configuration
 
-You can add replicas to your index configuration. You must specify the `index_name`. All options available in `algolia` param are allowed here.
+You can add replicas to your index configuration. You can configure them using `:index_name`, `:algolia` and `:inherits`. 
 
 ##### Inherits
 
@@ -235,7 +235,7 @@ use Algoliax.Indexer,
     searchable_attributes: ["full_name"],
   ],
   replicas: [
-    [index_name: :algoliax_people_by_age_asc, ranking: ["asc(age)"], inherits: true],
-    [index_name: :algoliax_people_by_age_desc, ranking: ["desc(age)"], inherits: false]
+    [index_name: :algoliax_by_age_asc, inherits: true, algolia: [ranking: ["asc(age)"]]],
+    [index_name: :algoliax_by_age_desc, inherits: false, algolia: [ranking: ["desc(age)"]]]
   ]
 ```
