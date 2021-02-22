@@ -216,3 +216,26 @@ defmodule People do
     algolia: [...]
 end
 ```
+
+#### Replicas configuration
+
+You can add replicas to your index configuration. You can configure them using `:index_name`, `:algolia` and `:inherits`. 
+
+##### Inherits
+
+You can add a `inherits` params to specify whether you want the params from the primary to be inherited or not. *Default is true*
+
+```elixir
+use Algoliax.Indexer,
+  index_name: :algoliax_people,
+  object_id: :reference,
+  repo: MyApp.Repo,
+  algolia: [
+    attributes_for_faceting: ["age"],
+    searchable_attributes: ["full_name"],
+  ],
+  replicas: [
+    [index_name: :algoliax_by_age_asc, inherits: true, algolia: [ranking: ["asc(age)"]]],
+    [index_name: :algoliax_by_age_desc, inherits: false, algolia: [ranking: ["desc(age)"]]]
+  ]
+```

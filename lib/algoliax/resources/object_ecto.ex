@@ -5,7 +5,7 @@ if Code.ensure_loaded?(Ecto) do
     import Ecto.Query
     import Algoliax.Client, only: [request: 1]
 
-    alias Algoliax.Resources.Object
+    alias Algoliax.Resources.{Index, Object}
 
     def reindex(module, settings, %Ecto.Query{} = query, opts) do
       repo = Algoliax.UtilsEcto.repo(settings)

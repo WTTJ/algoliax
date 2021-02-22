@@ -1,6 +1,8 @@
 defmodule Algoliax.Settings do
   @moduledoc false
 
+  import Algoliax.Utils, only: [camelize: 1, algolia_settings: 1]
+
   @algolia_settings [
     :searchable_attributes,
     :attributes_for_faceting,
@@ -56,5 +58,22 @@ defmodule Algoliax.Settings do
 
   def settings do
     @algolia_settings
+  end
+
+  def replica_settings(settings, replica_settings) do
+    replica_settings =
+      case Keyword.get(replica_settings, :inherits, true) do
+        true -> replica_settings ++ algolia_settings(settings)
+        false -> replica_settings
+      end
+
+    map_algolia_settings(replica_settings)
+  end
+
+  def map_algolia_settings(algolia_settings) do
+    @algolia_settings
+    |> Enum.into(%{}, fn setting ->
+      {camelize(setting), Keyword.get(algolia_settings, setting)}
+    end)
   end
 end

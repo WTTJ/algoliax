@@ -55,4 +55,83 @@ defmodule Algoliax.SettingsTest do
              :alt_corrections
            ]
   end
+
+  describe "replica_settings/2" do
+    test "default" do
+      replica_settings = [
+        name: :algoliax_people_by_age_asc,
+        attributes_for_faceting: ["age"],
+        ranking: ["asc(age)"]
+      ]
+
+      settings = [
+        index_name: :algoliax_people,
+        object_id: :reference,
+        repo: MyApp.Repo,
+        algolia: [
+          attributes_for_faceting: ["location"],
+          searchable_attributes: ["full_name"]
+        ],
+        replicas: [replica_settings]
+      ]
+
+      assert result = Algoliax.Settings.replica_settings(settings, replica_settings)
+
+      assert result["attributesForFaceting"] == ["age"]
+      assert result["searchableAttributes"] == ["full_name"]
+      assert result["ranking"] == ["asc(age)"]
+    end
+
+    test "inherits:true" do
+      replica_settings = [
+        name: :algoliax_people_by_age_asc,
+        attributes_for_faceting: ["age"],
+        ranking: ["asc(age)"],
+        inherits: true
+      ]
+
+      settings = [
+        index_name: :algoliax_people,
+        object_id: :reference,
+        repo: MyApp.Repo,
+        algolia: [
+          attributes_for_faceting: ["location"],
+          searchable_attributes: ["full_name"]
+        ],
+        replicas: [replica_settings]
+      ]
+
+      assert result = Algoliax.Settings.replica_settings(settings, replica_settings)
+
+      assert result["attributesForFaceting"] == ["age"]
+      assert result["searchableAttributes"] == ["full_name"]
+      assert result["ranking"] == ["asc(age)"]
+    end
+
+    test "inherits:false" do
+      replica_settings = [
+        name: :algoliax_people_by_age_asc,
+        attributes_for_faceting: ["age"],
+        ranking: ["asc(age)"],
+        inherits: false
+      ]
+
+      settings = [
+        index_name: :algoliax_people,
+        object_id: :reference,
+        repo: MyApp.Repo,
+        algolia: [
+          attributes_for_faceting: ["location"],
+          searchable_attributes: ["full_name"]
+        ],
+        replicas: [replica_settings]
+      ]
+
+      assert result = Algoliax.Settings.replica_settings(settings, replica_settings)
+
+      assert result["attributesForFaceting"] == ["age"]
+      assert result["searchableAttributes"] == nil
+      assert result["ranking"] == ["asc(age)"]
+    end
+  end
 end
