@@ -1,7 +1,7 @@
 defmodule Algoliax.Resources.Index do
   @moduledoc false
 
-  import Algoliax.Utils, only: [index_name: 2, camelize: 1, algolia_settings: 1]
+  import Algoliax.Utils, only: [index_name: 2, algolia_settings: 1]
   import Algoliax.Client, only: [request: 1]
 
   alias Algoliax.{Settings, SettingsStore}
@@ -99,14 +99,5 @@ defmodule Algoliax.Resources.Index do
 
   defp add_replicas_to_algolia_settings(algolia_settings, module, settings) do
     algolia_settings |> Map.put(:replicas, replicas_names(module, settings))
-  end
-
-  defp replicas(settings), do: Keyword.get(settings, :replicas, [])
-
-  defp map_algolia_settings(algolia_settings) do
-    Settings.settings()
-    |> Enum.into(%{}, fn setting ->
-      {camelize(setting), Keyword.get(algolia_settings, setting)}
-    end)
   end
 end
