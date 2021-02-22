@@ -10,7 +10,6 @@ defmodule Algoliax do
         api_key: "",
         application_id: ""
   """
-  alias Algoliax.Config
 
   @doc """
   Generate a secured api key with filter
@@ -29,34 +28,38 @@ defmodule Algoliax do
     :userToken
   ]
 
-  @spec generate_secured_api_key(params :: map()) ::
-          {:ok, binary()} | {:error, :invalid_params}
-  def generate_secured_api_key(params) do
+  @spec generate_secured_api_key(api_key :: String.t(), params :: map()) ::
+          {:ok, binary()} | {:error, binary()}
+  def generate_secured_api_key(api_key, _) when api_key in [nil, ""] do
+    {:error, "Invalid api key"}
+  end
+
+  def generate_secured_api_key(api_key, params) do
     if valid_params?(params) do
       query_string = URI.encode_query(params)
 
       hmac =
         :crypto.hmac(
           :sha256,
-          Config.api_key(),
+          api_key,
           query_string
         )
         |> Base.encode16(case: :lower)
 
       {:ok, Base.encode64(hmac <> query_string)}
     else
-      {:error, :invalid_params}
+      {:error, "Invalid params"}
     end
   end
 
-  @spec generate_secured_api_key!(params :: map()) :: binary()
-  def generate_secured_api_key!(params) do
-    case generate_secured_api_key(params) do
+  @spec generate_secured_api_key!(api_key :: String.t(), params :: map()) :: binary()
+  def generate_secured_api_key!(api_key, params) do
+    case generate_secured_api_key(api_key, params) do
       {:ok, key} ->
         key
 
-      {:error, _} ->
-        raise Algoliax.InvalidApiKeyParamsError, message: "Invalid params"
+      {:error, message} ->
+        raise Algoliax.InvalidApiKeyParamsError, message: message
     end
   end
 

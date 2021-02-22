@@ -51,15 +51,31 @@ defmodule AlgoliaxTest do
     assert PeopleStruct.to_be_indexed?(people)
   end
 
-  test "generate secured api key" do
-    Application.put_env(:algoliax, :api_key, "api_key")
-    assert {:ok, _} = Algoliax.generate_secured_api_key(%{filters: "reference:10"})
-    assert {:error, :invalid_params} = Algoliax.generate_secured_api_key(%{sdfsd: "reference:10"})
+  describe "generate_secured_api_key/2" do
+    test "should generate key if correct params" do
+      assert {:ok, _} = Algoliax.generate_secured_api_key("api_key", %{filters: "reference:10"})
+    end
 
-    assert key = Algoliax.generate_secured_api_key!(%{filters: "reference:10"})
+    test "should return invalid params if api_key but invalid params" do
+      assert {:error, "Invalid params"} =
+               Algoliax.generate_secured_api_key("api_key", %{sdfsd: "reference:10"})
+    end
 
-    assert_raise(Algoliax.InvalidApiKeyParamsError, fn ->
-      Algoliax.generate_secured_api_key!(%{sdfsd: "reference:10"})
-    end)
+    test "should return invalid api key if api_key not provided" do
+      assert {:error, "Invalid api key"} =
+               Algoliax.generate_secured_api_key(nil, %{sdfsd: "reference:10"})
+    end
+
+    test "should raise an InvalidApiKeyParamsError if no api_key provided" do
+      assert_raise(Algoliax.InvalidApiKeyParamsError, "Invalid api key", fn ->
+        Algoliax.generate_secured_api_key!(nil, %{filters: "reference:10"})
+      end)
+    end
+
+    test "should raise an InvalidApiKeyParamsError if api key and invalid params" do
+      assert_raise(Algoliax.InvalidApiKeyParamsError, "Invalid params", fn ->
+        Algoliax.generate_secured_api_key!("api_key", %{sdfsd: "reference:10"})
+      end)
+    end
   end
 end
