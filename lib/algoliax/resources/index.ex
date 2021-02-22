@@ -56,9 +56,11 @@ defmodule Algoliax.Resources.Index do
   end
 
   def configure_index(module, settings) do
-    configure_replicas(module, settings)
     index_name = index_name(module, settings)
-    request_configure_index(index_name, settings_to_algolia_settings(module, settings))
+    r = request_configure_index(index_name, settings_to_algolia_settings(module, settings))
+    configure_replicas(module, settings)
+
+    r
   end
 
   def configure_replicas(module, settings) do
