@@ -12,7 +12,7 @@ defmodule Algoliax.Schemas.PeopleWithReplicas do
     replicas: [
       [
         index_name: :algoliax_people_replicas_asc,
-        inherits: true,
+        inherit: true,
         algolia: [
           searchable_attributes: ["age"],
           ranking: ["asc(age)"]
@@ -20,7 +20,7 @@ defmodule Algoliax.Schemas.PeopleWithReplicas do
       ],
       [
         index_name: :algoliax_people_replicas_desc,
-        inherits: false,
+        inherit: false,
         algolia: [ranking: ["desc(age)"]]
       ]
     ]

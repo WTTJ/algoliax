@@ -62,7 +62,7 @@ defmodule Algoliax.Settings do
 
   def replica_settings(settings, replica_settings) do
     replica_settings =
-      case Keyword.get(replica_settings, :inherits, true) do
+      case Keyword.get(replica_settings, :inherit, true) do
         true -> replica_settings ++ algolia_settings(settings)
         false -> replica_settings
       end

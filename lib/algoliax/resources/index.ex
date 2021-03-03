@@ -31,7 +31,7 @@ defmodule Algoliax.Resources.Index do
     replicas = Keyword.get(settings, :replicas, [])
 
     Enum.map(replicas, fn replica ->
-      case Keyword.get(replica, :inherits, true) do
+      case Keyword.get(replica, :inherit, true) do
         true ->
           replica_algolia_settings = algolia_settings(replica)
           primary_algolia_setttings = algolia_settings(settings)
