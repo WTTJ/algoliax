@@ -13,7 +13,7 @@ The package can be installed by adding `algoliax` to your list of dependencies i
 ```elixir
 def deps do
   [
-    {:algoliax, "~> 0.4.0"}
+    {:algoliax, "~> 0.5.0"}
   ]
 end
 ```
@@ -219,11 +219,8 @@ end
 
 #### Replicas configuration
 
-You can add replicas to your index configuration. You can configure them using `:index_name`, `:algolia` and `:inherits`. 
-
-##### Inherits
-
-You can add a `inherits` params to specify whether you want the params from the primary to be inherited or not. *Default is true*
+Replicas can be configured using `:replicas` options. This option accepts the following `:index_name`, `:algolia` and `:inherit`.
+Use `inherit: true` on the replica if you want it to inherit from the primary settings, if custom settings in `:algolia` they will be merged.
 
 ```elixir
 use Algoliax.Indexer,
@@ -235,7 +232,7 @@ use Algoliax.Indexer,
     searchable_attributes: ["full_name"],
   ],
   replicas: [
-    [index_name: :algoliax_by_age_asc, inherits: true, algolia: [ranking: ["asc(age)"]]],
-    [index_name: :algoliax_by_age_desc, inherits: false, algolia: [ranking: ["desc(age)"]]]
+    [index_name: :algoliax_by_age_asc, inherit: true, algolia: [ranking: ["asc(age)"]]],
+    [index_name: :algoliax_by_age_desc, inherit: false, algolia: [ranking: ["desc(age)"]]]
   ]
 ```

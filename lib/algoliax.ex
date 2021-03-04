@@ -16,10 +16,9 @@ defmodule Algoliax do
 
   ## Examples
 
-      Algoliax.generate_secured_api_key(%{filters: "reference:10"})
-      Algoliax.generate_secured_api_key(%{filters: "reference:10 OR nickname:john"})
+      Algoliax.generate_secured_api_key("api_key", %{filters: "reference:10"})
+      Algoliax.generate_secured_api_key("api_key", %{filters: "reference:10 OR nickname:john"})
   """
-
   @algolia_params [
     :filters,
     :validUntil,
@@ -52,6 +51,14 @@ defmodule Algoliax do
     end
   end
 
+  @doc """
+  Same as `generate_secured_api_key/2` but returns the key or raises if invalid params
+
+  ## Examples
+
+      Algoliax.generate_secured_api_key!("api_key", %{filters: "reference:10"})
+      Algoliax.generate_secured_api_key!("api_key", %{filters: "reference:10 OR nickname:john"})
+  """
   @spec generate_secured_api_key!(api_key :: String.t(), params :: map()) :: binary()
   def generate_secured_api_key!(api_key, params) do
     case generate_secured_api_key(api_key, params) do

@@ -82,12 +82,12 @@ defmodule Algoliax.SettingsTest do
       assert result["ranking"] == ["asc(age)"]
     end
 
-    test "inherits:true" do
+    test "inherit:true" do
       replica_settings = [
         name: :algoliax_people_by_age_asc,
         attributes_for_faceting: ["age"],
         ranking: ["asc(age)"],
-        inherits: true
+        inherit: true
       ]
 
       settings = [
@@ -108,12 +108,12 @@ defmodule Algoliax.SettingsTest do
       assert result["ranking"] == ["asc(age)"]
     end
 
-    test "inherits:false" do
+    test "inherit:false" do
       replica_settings = [
         name: :algoliax_people_by_age_asc,
         attributes_for_faceting: ["age"],
         ranking: ["asc(age)"],
-        inherits: false
+        inherit: false
       ]
 
       settings = [

@@ -1,8 +1,21 @@
 ## DEV
 
+## v0.5.0
+
+#### New
+
+- [Welcome to the Jungle](https://www.welcometothejungle.com) became the owner :tada:
+- Add ability to define replicas
+- Raise when Algolia API error
+
 #### Breaking changes
 
+- `generate_secured_api_key/1` is removed in favor of `generate_secured_api_key/2`
 - Drop support of Elixir 1.9. Elixir 1.10 or greater required
+
+#### Updates
+
+- update hackney to 1.17
 
 ## v0.4.3
 
