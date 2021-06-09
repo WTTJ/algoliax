@@ -38,7 +38,8 @@ defmodule Algoliax do
       query_string = URI.encode_query(params)
 
       hmac =
-        :crypto.hmac(
+        :crypto.mac(
+          :hmac,
           :sha256,
           api_key,
           query_string
