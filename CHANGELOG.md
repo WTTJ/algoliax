@@ -1,5 +1,13 @@
 ## DEV
 
+## v0.6.0
+
+#### Updates
+- Replace deprecated `hmac` function with new :crypto API `mac` function to support OTP-24
+  
+#### Breaking changes
+- Drop support for OTP 21. OTP 22+ is now required.
+
 ## v0.5.0
 
 #### New
