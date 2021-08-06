@@ -203,7 +203,7 @@ defmodule Algoliax.Indexer do
               {:ok, map()} | {:error, map()}
 
   @doc """
-  Fetch object from algolia. By passing the model, the object is retreived using the object_id configured
+  Fetch object from algolia. By passing the model, the object is retrieved using the object_id configured
 
   ## Example
       people = %People{reference: 10, last_name: "Doe", first_name: "John", age: 20}
@@ -213,7 +213,7 @@ defmodule Algoliax.Indexer do
   @callback get_object(model :: map() | struct()) :: {:ok, map()} | {:error, map()}
 
   @doc """
-  Delete object from algolia. By passing the model, the object is retreived using the object_id configured
+  Delete object from algolia. By passing the model, the object is retrieved using the object_id configured
 
   ## Example
       people = %People{reference: 10, last_name: "Doe", first_name: "John", age: 20}
@@ -262,7 +262,7 @@ defmodule Algoliax.Indexer do
     @callback reindex(opts :: Keyword.t()) :: {:ok, :completed}
 
     @doc """
-    Reindex atomicly ([Ecto](https://hexdocs.pm/ecto/Ecto.html) specific)
+    Reindex atomically ([Ecto](https://hexdocs.pm/ecto/Ecto.html) specific)
     """
     @callback reindex_atomic() :: {:ok, :completed}
   end
@@ -283,7 +283,7 @@ defmodule Algoliax.Indexer do
   @callback build_object(model :: Map.t()) :: Map.t()
 
   @doc """
-  Check if current object must be indexed or not. By default it's always true. To override this behaviour overide this function in your model
+  Check if current object must be indexed or not. By default it's always true. To override this behaviour override this function in your model
 
   ## Example
 

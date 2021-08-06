@@ -1,10 +1,14 @@
 defmodule Algoliax.MixProject do
   use Mix.Project
 
+  @source_url "https://github.com/WTTJ/algoliax"
+  @version "0.6.0"
+
   def project do
     [
       app: :algoliax,
-      version: "0.6.0",
+      name: "Algoliax",
+      version: @version,
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -17,22 +21,7 @@ defmodule Algoliax.MixProject do
         "coveralls.post": :test,
         "coveralls.html": :test
       ],
-
-      # docs
-      name: "Algoliax",
-      source_url: "https://github.com/WTTJ/algoliax",
-      homepage_url: "https://github.com/WTTJ/algoliax",
-      docs: [
-        # The main page in the docs
-        main: "Algoliax",
-        extras: ["README.md", "guides/examples/global.md", "guides/examples/secured_api_key.md"],
-        groups_for_extras: [
-          Examples: Path.wildcard("guides/examples/*.md")
-        ]
-      ],
-
-      # Hex
-      description: "AlgoliaSearch integration for Elixir app",
+      docs: docs(),
       package: package()
     ]
   end
@@ -51,7 +40,7 @@ defmodule Algoliax.MixProject do
     [
       {:hackney, "~> 1.17.0"},
       {:jason, "~> 1.1"},
-      {:ex_doc, "~> 0.21", only: :dev, runtime: false, override: true},
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false, override: true},
       {:ecto, "~> 3.0", optional: true},
       {:ecto_sql, "~> 3.0", only: [:dev, :test]},
       {:postgrex, ">= 0.0.0", only: [:dev, :test]},
@@ -75,9 +64,32 @@ defmodule Algoliax.MixProject do
 
   defp package do
     [
+      description: "AlgoliaSearch integration for Elixir app",
       maintainers: ["Stéphane Robino"],
       licenses: ["BSD-2-Clause"],
-      links: %{"GitHub" => "https://github.com/WTTJ/algoliax"}
+      links: %{
+        "Changelog" => "https://hexdocs.pm/algoliax/changelog.html",
+        "GitHub" => @source_url
+      }
+    ]
+  end
+
+  def docs do
+    [
+      extras: [
+        "CHANGELOG.md": [],
+        "LICENSE.md": [title: "License"],
+        "README.md": [title: "Overview"],
+        "guides/examples/global.md": [],
+        "guides/examples/secured_api_key.md": []
+      ],
+      main: "readme",
+      source_url: @source_url,
+      homepage_url: @source_url,
+      formatters: ["html"],
+      groups_for_extras: [
+        Examples: Path.wildcard("guides/examples/*.md")
+      ]
     ]
   end
 end

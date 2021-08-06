@@ -1,14 +1,17 @@
 # Algoliax
 
 [![CircleCI](https://circleci.com/gh/WTTJ/algoliax/tree/master.svg?style=svg)](https://circleci.com/gh/WTTJ/algoliax/tree/master)
+[![Module Version](https://img.shields.io/hexpm/v/algoliax.svg)](https://hex.pm/packages/algoliax)
+[![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/algoliax/)
+[![Total Download](https://img.shields.io/hexpm/dt/algoliax.svg)](https://hex.pm/packages/algoliax)
+[![License](https://img.shields.io/hexpm/l/algoliax.svg)](https://github.com/WTTJ/algoliax/blob/master/LICENSE.md)
+[![Last Updated](https://img.shields.io/github/last-commit/WTTJ/algoliax.svg)](https://github.com/WTTJ/algoliax/commits/master)
 
-[CHANGELOG](CHANGELOG.md)
-
-This package let you easily integrate Algolia to your elixir application. It can be used with built in elixir struct or with [ecto](https://github.com/elixir-ecto/ecto) schemas.
+This package let you easily integrate Algolia to your Elixir application. It can be used with built in Elixir struct or with [Ecto](https://github.com/elixir-ecto/ecto) schemas.
 
 ## Installation
 
-The package can be installed by adding `algoliax` to your list of dependencies in `mix.exs`:
+The package can be installed by adding `:algoliax` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
@@ -18,9 +21,7 @@ def deps do
 end
 ```
 
-if using with ecto schemas Algoliax requires `ecto`.
-
-The docs can be found at [https://hexdocs.pm/algoliax](https://hexdocs.pm/algoliax).
+If using with Ecto schemas, Algoliax requires `:ecto`.
 
 ## Configuration
 
@@ -186,7 +187,7 @@ query = from(p in People, where: p.age > 20)
 People.reindex(query, force_delete: true)
 People.reindex(force_delete: true)
 
-# Reindex atomicly (create a temporary index and move it to initial index)
+# Reindex atomically (create a temporary index and move it to initial index)
 People.reindex_atomic()
 ```
 
@@ -236,3 +237,9 @@ use Algoliax.Indexer,
     [index_name: :algoliax_by_age_desc, inherit: false, algolia: [ranking: ["desc(age)"]]]
   ]
 ```
+
+## Copyright and License
+
+Copyright (c) 2020 CORUSCANT (welcome to the jungle) - https://www.welcometothejungle.com
+
+This library is licensed under the [BSD-2-Clause](./LICENSE.md).
