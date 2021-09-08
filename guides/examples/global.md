@@ -85,6 +85,6 @@ import Ecto.Query
 query = from(c in MyApp.Cat, where: c.name == "Kitty")
 MyApp.GlobalIndex.reindex(query)
 
-# Reindex all atomicly
+# Reindex all atomically
 MyApp.GlobalIndex.reindex_atomic()
 ```

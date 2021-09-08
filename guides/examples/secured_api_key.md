@@ -1,6 +1,6 @@
 # Generate a secured api key
 
-**NOTE**: Make sure to use a Search only api_key to genrate secured api key.
+**NOTE**: Make sure to use a Search only api_key to generate secured api key.
 
 [See on algolia](https://www.algolia.com/doc/guides/security/api-keys/how-to/user-restricted-access-to-data/#generating-a-secured-api-key)
 

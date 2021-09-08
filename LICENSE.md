@@ -1,3 +1,5 @@
+# BSD-2-Clause License
+
 Copyright (c) 2020, CORUSCANT (welcome to the jungle) - https://www.welcometothejungle.com
 All rights reserved.
 

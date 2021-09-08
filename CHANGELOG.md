@@ -1,14 +1,16 @@
+# Changelog
+
 ## DEV
 
-## v0.6.0
+## v0.6.0 - 2021-06-10
 
 #### Updates
 - Replace deprecated `hmac` function with new :crypto API `mac` function to support OTP-24
-  
+
 #### Breaking changes
 - Drop support for OTP 21. OTP 22+ is now required.
 
-## v0.5.0
+## v0.5.0 - 2021-03-04
 
 #### New
 
@@ -25,7 +27,7 @@
 
 - update hackney to 1.17
 
-## v0.4.3
+## v0.4.3 - 2020-08-31
 
 #### New
 
@@ -35,7 +37,7 @@
 
 - Make sure index is configured before any action.
 
-## v0.4.2
+## v0.4.2 - 2020-05-14
 
 #### New
 
@@ -57,13 +59,13 @@ defmodule People do
 end
 ```
 
-## v0.4.1
+## v0.4.1 - 2020-05-01
 
 #### New
 
 - add `generate_secured_api_key!/1`
 
-## v0.4.0
+## v0.4.0 - 2020-04-24
 
 #### New
 
@@ -85,7 +87,7 @@ People.reindex(query)
 - remove `:prepare_object` options
 - remove `:preloads` options
 
-## v0.3.0
+## v0.3.0 - 2020-04-04
 
 #### New
 
@@ -136,7 +138,7 @@ use Algoliax.Indexer,
 
 ```
 
-## v0.2.0 (2020-01-27)
+## v0.2.0 - 2020-01-27
 
 ### Enhancements
 
