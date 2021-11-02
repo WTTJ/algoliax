@@ -1,10 +1,7 @@
 defmodule AlgoliaxTest do
   use ExUnit.Case, async: true
 
-  import Mox
   alias Algoliax.Schemas.PeopleStruct
-
-  setup :verify_on_exit!
 
   setup do
     Algoliax.SettingsStore.set_settings(:algoliax_people, %{})

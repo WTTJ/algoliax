@@ -88,7 +88,7 @@ defmodule AlgoliaxTest.StructTest do
 
     test "delete_object/1" do
       person = %PeopleStruct{reference: "unknown", last_name: "Doe", first_name: "John", age: 77}
-      assert {:ok, res} = PeopleStruct.delete_object(person)
+      assert {:ok, _} = PeopleStruct.delete_object(person)
       assert_request("DELETE", %{})
     end
 
@@ -97,7 +97,7 @@ defmodule AlgoliaxTest.StructTest do
     end
 
     test "delete_index/0" do
-      assert {:ok, res} = PeopleStruct.delete_index()
+      assert {:ok, _} = PeopleStruct.delete_index()
       assert_request("DELETE", %{})
     end
 
@@ -108,12 +108,12 @@ defmodule AlgoliaxTest.StructTest do
     end
 
     test "search/2" do
-      assert {:ok, res} = PeopleStruct.search("john", %{hitsPerPage: 10})
+      assert {:ok, _} = PeopleStruct.search("john", %{hitsPerPage: 10})
       assert_request("POST", %{"query" => "john", "hitsPerPage" => 10})
     end
 
     test "search_facet/2" do
-      assert {:ok, res} = PeopleStruct.search_facet("age", "2")
+      assert {:ok, _} = PeopleStruct.search_facet("age", "2")
       assert_request("POST", %{"facetQuery" => "2"})
     end
   end

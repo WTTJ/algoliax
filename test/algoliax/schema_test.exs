@@ -15,6 +15,7 @@ defmodule AlgoliaxTest.Schema do
     Animal,
     Beer,
     PeopleEcto,
+    PeopleEctoFail,
     PeopleWithoutIdEcto,
     PeopleWithSchemas,
     PeopleWithAssociation,
@@ -28,6 +29,9 @@ defmodule AlgoliaxTest.Schema do
   setup do
     Algoliax.SettingsStore.set_settings(:algoliax_people, %{})
     Algoliax.SettingsStore.set_settings(:"algoliax_people.tmp", %{})
+
+    Algoliax.SettingsStore.set_settings(:algoliax_people_fail, %{})
+    Algoliax.SettingsStore.set_settings(:"algoliax_people_fail.tmp", %{})
 
     Algoliax.SettingsStore.set_settings(:algoliax_people_without_id, %{})
     Algoliax.SettingsStore.set_settings(:"algoliax_people_without_id.tmp", %{})
@@ -238,6 +242,15 @@ defmodule AlgoliaxTest.Schema do
     })
   end
 
+  test "reindex atomic with fail" do
+    assert_raise Postgrex.Error, fn ->
+      PeopleEctoFail.reindex_atomic()
+    end
+
+    assert_request("DELETE", ~r/algoliax_people_fail\.tmp/, %{})
+    refute Algoliax.SettingsStore.reindexing?(:algoliax_people_fail)
+  end
+
   test "reindex without an id column" do
     assert {:ok, :completed} = PeopleWithoutIdEcto.reindex()
 
@@ -261,7 +274,7 @@ defmodule AlgoliaxTest.Schema do
   end
 
   test "save_object/1 without attribute(s)" do
-    assert {:ok, res} = PeopleWithSchemas.save_object(%Beer{kind: "brune", name: "chimay", id: 1})
+    assert {:ok, _} = PeopleWithSchemas.save_object(%Beer{kind: "brune", name: "chimay", id: 1})
 
     assert_request("PUT", %{
       "name" => "chimay",
@@ -270,7 +283,7 @@ defmodule AlgoliaxTest.Schema do
   end
 
   test "reindex/1 with schemas" do
-    assert res = PeopleWithSchemas.reindex()
+    assert PeopleWithSchemas.reindex()
 
     assert_request("POST", %{
       "requests" => [
@@ -291,7 +304,7 @@ defmodule AlgoliaxTest.Schema do
         where: b.name == "chimay"
       )
 
-    assert {:ok, res} = PeopleWithSchemas.reindex(query)
+    assert {:ok, _} = PeopleWithSchemas.reindex(query)
 
     assert_request("POST", %{
       "requests" => [
@@ -302,7 +315,7 @@ defmodule AlgoliaxTest.Schema do
 
   test "reindex/1 with schemas and query as keyword list" do
     query = %{where: [name: "heineken"]}
-    assert {:ok, res} = PeopleWithSchemas.reindex(query)
+    assert {:ok, _} = PeopleWithSchemas.reindex(query)
 
     assert_request("POST", %{
       "requests" => [
@@ -312,7 +325,7 @@ defmodule AlgoliaxTest.Schema do
   end
 
   test "reindex/1 with association" do
-    assert {:ok, res} = PeopleWithAssociation.reindex()
+    assert {:ok, _} = PeopleWithAssociation.reindex()
   end
 
   describe "indexer w/ custom object id" do

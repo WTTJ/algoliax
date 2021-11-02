@@ -39,7 +39,7 @@ defmodule Algoliax.Client do
     {:error, 404, response}
   end
 
-  defp handle_error(code, response, action) do
+  defp handle_error(code, response, _action) do
     error =
       case Jason.decode(response) do
         {:ok, response} -> Map.get(response, "message")
