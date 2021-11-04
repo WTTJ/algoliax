@@ -110,12 +110,12 @@ defmodule AlgoliaxTest.ReplicaTest do
         age: 77
       }
 
-      assert {:ok, res} = PeopleWithReplicas.delete_object(person)
+      assert {:ok, _} = PeopleWithReplicas.delete_object(person)
       assert_request("DELETE", %{})
     end
 
     test "delete_index/0" do
-      assert {:ok, res} = PeopleWithReplicas.delete_index()
+      assert {:ok, _} = PeopleWithReplicas.delete_index()
       assert_request("DELETE", %{})
     end
 
@@ -126,12 +126,12 @@ defmodule AlgoliaxTest.ReplicaTest do
     end
 
     test "search/2" do
-      assert {:ok, res} = PeopleWithReplicas.search("john", %{hitsPerPage: 10})
+      assert {:ok, _} = PeopleWithReplicas.search("john", %{hitsPerPage: 10})
       assert_request("POST", %{"query" => "john", "hitsPerPage" => 10})
     end
 
     test "search_facet/2" do
-      assert {:ok, res} = PeopleWithReplicas.search_facet("age", "2")
+      assert {:ok, _} = PeopleWithReplicas.search_facet("age", "2")
       assert_request("POST", %{"facetQuery" => "2"})
     end
   end

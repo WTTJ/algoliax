@@ -47,11 +47,8 @@ if Code.ensure_loaded?(Ecto) do
     defp fetch_schemas(module, settings) do
       Algoliax.Utils.schemas(settings, [module])
       |> Enum.map(fn
-        m when is_tuple(m) ->
-          m
-
-        m ->
-          {m, []}
+        m when is_tuple(m) -> m
+        m -> {m, []}
       end)
     end
 
@@ -65,21 +62,24 @@ if Code.ensure_loaded?(Ecto) do
 
       Algoliax.SettingsStore.start_reindexing(index_name)
 
-      reindex(module, tmp_settings, nil, [])
+      try do
+        reindex(module, tmp_settings, nil, [])
 
-      request(%{
-        action: :move_index,
-        url_params: [index_name: tmp_index_name],
-        body: %{
-          operation: "move",
-          destination: "#{index_name}"
-        }
-      })
+        request(%{
+          action: :move_index,
+          url_params: [index_name: tmp_index_name],
+          body: %{
+            operation: "move",
+            destination: "#{index_name}"
+          }
+        })
 
-      Algoliax.SettingsStore.delete_settings(tmp_index_name)
-      Algoliax.SettingsStore.stop_reindexing(index_name)
-
-      {:ok, :completed}
+        {:ok, :completed}
+      after
+        Algoliax.Resources.Index.delete_index(module, tmp_settings)
+        Algoliax.SettingsStore.delete_settings(tmp_index_name)
+        Algoliax.SettingsStore.stop_reindexing(index_name)
+      end
     end
   end
 end
