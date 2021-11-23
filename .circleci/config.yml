@@ -2,64 +2,70 @@ defaults: &defaults
   working_directory: ~/algoliax
 
 version: 2.1
+
+parameters:
+  elixir_base_image:
+    type: string
+    default: "924484830305.dkr.ecr.eu-west-1.amazonaws.com/circleci-elixir:v1.10"
+
 jobs:
   checkout:
     <<: *defaults
     docker:
-      - image: circleci/elixir:1.10.4
+      - image: << pipeline.parameters.elixir_base_image >>
     steps:
       - checkout
       - save_cache:
-          key: v1-algoliax-{{ .Environment.CIRCLE_SHA1 }}
+          key: v1-new-algoliax-{{ .Environment.CIRCLE_SHA1 }}
           paths:
             - ~/algoliax
 
   mix_deps_get:
     <<: *defaults
     docker:
-      - image: circleci/elixir:1.10.4
+      - image: << pipeline.parameters.elixir_base_image >>
     steps:
       - run:
           name: install hex & rebar
           command: mix do local.hex --force, local.rebar --force
       - restore_cache:
-          key: v1-algoliax-{{ .Environment.CIRCLE_SHA1 }}
+          key: v1-new-algoliax-{{ .Environment.CIRCLE_SHA1 }}
       - restore_cache:
           keys:
-            - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
-            - v1-mix-cache-{{ .Branch }}
-            - v1-mix-cache
+            - v1-new-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+            - v1-new-mix-cache-{{ .Branch }}
+            - v1-new-mix-cache
       - run:
           name: gather dependencies
           command: mix deps.get
       - save_cache:
-          key: v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+          key: v1-new-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
           paths:
             - deps
       - save_cache:
-          key: v1-mix-cache-{{ .Branch }}
+          key: v1-new-mix-cache-{{ .Branch }}
           paths:
             - deps
       - save_cache:
-          key: v1-mix-cache
+          key: v1-new-mix-cache
           paths:
             - deps
 
   credo:
     <<: *defaults
     docker:
-      - image: circleci/elixir:1.10.4
+      - image: << pipeline.parameters.elixir_base_image >>
     steps:
       - run:
           name: install hex & rebar
           command: mix do local.hex --force, local.rebar --force
       - restore_cache:
-          key: v1-algoliax-{{ .Environment.CIRCLE_SHA1 }}
+          key: v1-new-algoliax-{{ .Environment.CIRCLE_SHA1 }}
       - restore_cache:
           keys:
-            - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
-            - v1-mix-cache-{{ .Branch }}
-            - v1-mix-cache
+            - v1-new-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+            - v1-new-mix-cache-{{ .Branch }}
+            - v1-new-mix-cache
       - run:
           name: Run credo
           command: mix credo
@@ -67,7 +73,7 @@ jobs:
   test:
     <<: *defaults
     docker:
-      - image: circleci/elixir:1.10.4
+      - image: << pipeline.parameters.elixir_base_image >>
         environment:
           MIX_ENV: test
           DB_USERNAME: algoliax
@@ -82,18 +88,18 @@ jobs:
           name: Install hex & rebar
           command: mix do local.hex --force, local.rebar --force
       - restore_cache:
-          key: v1-algoliax-{{ .Environment.CIRCLE_SHA1 }}
+          key: v1-new-algoliax-{{ .Environment.CIRCLE_SHA1 }}
       - restore_cache:
           keys:
-            - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
-            - v1-mix-cache-{{ .Branch }}
-            - v1-mix-cache
+            - v1-new-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+            - v1-new-mix-cache-{{ .Branch }}
+            - v1-new-mix-cache
       - run:
           name: Apt update
-          command: sudo apt update
+          command: apt update
       - run:
           name: Install postgresql-client
-          command: sudo apt install postgresql-client
+          command: apt install -y postgresql-client
       - run:
           name: Wait for database
           command: dockerize -wait tcp://localhost:5432 -timeout 1m
