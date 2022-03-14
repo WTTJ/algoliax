@@ -34,13 +34,12 @@ defmodule Algoliax.Assertions do
           message =
             requests
             |> Enum.with_index()
-            |> Enum.map(fn {r, i} ->
+            |> Enum.map_join("\n", fn {r, i} ->
               String.slice(
                 "#{i}: method=#{r.method}, path=#{r.path}, body=#{inspect(r.body)}",
                 0..500
               )
             end)
-            |> Enum.join("\n")
 
           flunk(
             "No request found for method=#{method}, path=#{inspect(path)}, body=#{inspect(body)}\n\n Found:\n" <>

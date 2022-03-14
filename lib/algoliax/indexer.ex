@@ -280,7 +280,7 @@ defmodule Algoliax.Indexer do
         }
       end
   """
-  @callback build_object(model :: Map.t()) :: Map.t()
+  @callback build_object(model :: map()) :: map()
 
   @doc """
   Check if current object must be indexed or not. By default it's always true. To override this behaviour override this function in your model
