@@ -31,14 +31,14 @@ defmodule Algoliax.MixProject do
 
   defp deps do
     [
-      {:hackney, "~> 1.17.0"},
-      {:jason, "~> 1.1"},
+      {:hackney, "~> 1.18"},
+      {:jason, "~> 1.3"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false, override: true},
       {:ecto, "~> 3.0", optional: true},
       {:ecto_sql, "~> 3.0", only: [:dev, :test]},
       {:postgrex, ">= 0.0.0", only: [:dev, :test]},
       {:inflex, "~> 2.0.0"},
-      {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:faker, "~> 0.12", only: :test},
       {:plug_cowboy, "~> 2.0", only: :test},
       {:mix_test_watch, "~> 1.0", only: :dev, runtime: false}
