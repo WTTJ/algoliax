@@ -51,6 +51,25 @@ defmodule Algoliax.ApiMockServer do
     send_resp(conn, 200, Jason.encode!(response))
   end
 
+  @max_retries_before_published 3
+
+  # get tasks info
+  get "/:application_id/:mode/:index_name/task/:task_id" do
+    task_id = Map.get(conn.params, "task_id")
+    retry_count = Algoliax.TaskStore.get(task_id)
+
+    status =
+      if retry_count < @max_retries_before_published do
+        Algoliax.TaskStore.increment(task_id)
+        "notPublished"
+      else
+        "published"
+      end
+
+    response = %{status: status}
+    send_resp(conn, 200, Jason.encode!(response))
+  end
+
   # Add/update object (with ID): https://www.algolia.com/doc/rest-api/search/#addupdate-object-with-id
   put "/:application_id/:mode/:index_name/:object_id" do
     response = %{

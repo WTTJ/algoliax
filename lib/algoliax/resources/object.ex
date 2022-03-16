@@ -27,13 +27,15 @@ defmodule Algoliax.Resources.Object do
       end)
       |> Enum.reject(&is_nil/1)
 
-    call_indexer(:save_objects, module, settings, models, opts)
+    if Enum.any?(objects) do
+      call_indexer(:save_objects, module, settings, models, opts)
 
-    request(%{
-      action: :save_objects,
-      url_params: [index_name: index_name(module, settings)],
-      body: %{requests: objects}
-    })
+      request(%{
+        action: :save_objects,
+        url_params: [index_name: index_name(module, settings)],
+        body: %{requests: objects}
+      })
+    end
   end
 
   def save_object(module, settings, model) do

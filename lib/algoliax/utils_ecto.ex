@@ -16,7 +16,7 @@ if Code.ensure_loaded?(Ecto) do
       end
     end
 
-    def find_in_batches(repo, query, cursor, settings, execute) do
+    def find_in_batches(repo, query, cursor, settings, execute, acc \\ []) do
       cursor_field = Keyword.get(settings, :cursor_field, Algoliax.Config.cursor_field()) || :id
       preloads = Keyword.get(settings, :preloads, [])
 
@@ -35,15 +35,18 @@ if Code.ensure_loaded?(Ecto) do
         repo.all(q)
         |> repo.preload(preloads)
 
-      if Enum.any?(results) do
-        execute.(results)
-      end
+      acc =
+        if Enum.any?(results) do
+          acc ++ [execute.(results)]
+        else
+          acc
+        end
 
       if length(results) == @batch_size do
         last_cursor = results |> List.last() |> Map.get(cursor_field)
-        find_in_batches(repo, query, last_cursor, settings, execute)
+        find_in_batches(repo, query, last_cursor, settings, execute, acc)
       else
-        {:ok, :completed}
+        acc
       end
     end
   end

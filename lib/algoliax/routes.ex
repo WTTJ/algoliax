@@ -12,7 +12,8 @@ defmodule Algoliax.Routes do
     save_objects: {"/{index_name}/batch", :post},
     get_object: {"/{index_name}/{object_id}", :get},
     save_object: {"/{index_name}/{object_id}", :put},
-    delete_object: {"/{index_name}/{object_id}", :delete}
+    delete_object: {"/{index_name}/{object_id}", :delete},
+    task: {"/{index_name}/task/{task_id}", :get}
   }
 
   def url(action, url_params, retry \\ 0) do

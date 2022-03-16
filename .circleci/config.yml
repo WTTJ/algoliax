@@ -6,7 +6,7 @@ jobs:
   checkout:
     <<: *defaults
     docker:
-      - image: circleci/elixir:1.10.4
+      - image: cimg/elixir:1.10.4
     steps:
       - checkout
       - save_cache:
@@ -17,7 +17,7 @@ jobs:
   mix_deps_get:
     <<: *defaults
     docker:
-      - image: circleci/elixir:1.10.4
+      - image: cimg/elixir:1.10.4
     steps:
       - run:
           name: install hex & rebar
@@ -48,7 +48,7 @@ jobs:
   credo:
     <<: *defaults
     docker:
-      - image: circleci/elixir:1.10.4
+      - image: cimg/elixir:1.10.4
     steps:
       - run:
           name: install hex & rebar
@@ -67,7 +67,7 @@ jobs:
   test:
     <<: *defaults
     docker:
-      - image: circleci/elixir:1.10.4
+      - image: cimg/elixir:1.10.4
         environment:
           MIX_ENV: test
           DB_USERNAME: algoliax

@@ -76,4 +76,36 @@ defmodule Algoliax do
     |> Map.keys()
     |> Enum.all?(&(&1 in @algolia_params))
   end
+
+  @doc """
+  Wait for a task to be published on Algolia side. Work with all indexer function except `reindex_atomic/0`
+
+  ## Examples
+
+      MyApp.People.save_object(%MyApp.People{id: 1}) |> Algoliax.wait_task()
+  """
+  def wait_task({:ok, response}), do: wait_task(response)
+
+  def wait_task(tasks) when is_list(tasks) do
+    tasks
+    |> Enum.map(&Task.async(fn -> wait_task(&1) end))
+    |> Enum.map(&Task.await/1)
+  end
+
+  def wait_task({:ok, %Algoliax.Response{task_id: nil}} = response), do: response
+  def wait_task({:error} = response), do: response
+  def wait_task(response), do: do_wait_task(response)
+
+  def do_wait_task(response, retry \\ 0) do
+    retry = retry + 1
+
+    case Algoliax.Resources.Task.task(response) do
+      {:ok, %Algoliax.Response{response: %{"status" => "published"}}} ->
+        {:ok, response}
+
+      _ ->
+        :timer.sleep(min(100 * retry, 1000))
+        do_wait_task(response, retry)
+    end
+  end
 end

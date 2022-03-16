@@ -10,9 +10,13 @@ if Code.ensure_loaded?(Ecto) do
     def reindex(module, settings, %Ecto.Query{} = query, opts) do
       repo = Algoliax.UtilsEcto.repo(settings)
 
-      Algoliax.UtilsEcto.find_in_batches(repo, query, 0, settings, fn batch ->
-        Object.save_objects(module, settings, batch, opts)
-      end)
+      acc =
+        Algoliax.UtilsEcto.find_in_batches(repo, query, 0, settings, fn batch ->
+          Object.save_objects(module, settings, batch, opts)
+        end)
+        |> Enum.reject(&is_nil/1)
+
+      {:ok, acc}
     end
 
     def reindex(module, settings, nil, opts) do
@@ -22,22 +26,31 @@ if Code.ensure_loaded?(Ecto) do
     def reindex(module, settings, query_filters, opts) when is_map(query_filters) do
       repo = Algoliax.UtilsEcto.repo(settings)
 
-      module
-      |> fetch_schemas(settings)
-      |> Enum.each(fn {mod, preloads} ->
-        where_filters = Map.get(query_filters, :where, [])
+      acc =
+        module
+        |> fetch_schemas(settings)
+        |> Enum.reduce([], fn {mod, preloads}, acc ->
+          where_filters = Map.get(query_filters, :where, [])
 
-        query =
-          from(m in mod)
-          |> where(^where_filters)
-          |> preload(^preloads)
+          query =
+            from(m in mod)
+            |> where(^where_filters)
+            |> preload(^preloads)
 
-        Algoliax.UtilsEcto.find_in_batches(repo, query, 0, settings, fn batch ->
-          Object.save_objects(module, settings, batch, opts)
+          Algoliax.UtilsEcto.find_in_batches(
+            repo,
+            query,
+            0,
+            settings,
+            fn batch ->
+              Object.save_objects(module, settings, batch, opts)
+            end,
+            acc
+          )
         end)
-      end)
+        |> Enum.reject(&is_nil/1)
 
-      {:ok, :completed}
+      {:ok, acc}
     end
 
     def reindex(_, _, _, _) do
