@@ -12,7 +12,7 @@ defmodule AlgoliaxTest.StructTest do
   describe "basic struct" do
     test "configure_index/0" do
       assert {:ok, res} = PeopleStruct.configure_index()
-      assert %{"taskID" => _, "updatedAt" => _} = res
+      assert %Algoliax.Response{response: %{"taskID" => _, "updatedAt" => _}} = res
 
       assert_request("PUT", %{
         "searchableAttributes" => ["full_name"],
@@ -24,7 +24,10 @@ defmodule AlgoliaxTest.StructTest do
       reference = :random.uniform(1_000_000) |> to_string()
       person = %PeopleStruct{reference: reference, last_name: "Doe", first_name: "John", age: 77}
       assert {:ok, res} = PeopleStruct.save_object(person)
-      assert %{"taskID" => _, "updatedAt" => _, "objectID" => ^reference} = res
+
+      assert %Algoliax.Response{
+               response: %{"objectID" => ^reference, "taskID" => _, "updatedAt" => _}
+             } = res
 
       assert_request("PUT", %{
         "age" => 77,
@@ -47,7 +50,10 @@ defmodule AlgoliaxTest.StructTest do
       ]
 
       assert {:ok, res} = PeopleStruct.save_objects(people)
-      assert %{"taskID" => _, "objectIDs" => [reference1]} = res
+
+      assert %Algoliax.Response{
+               response: %{"taskID" => _, "objectIDs" => [reference1]}
+             } = res
 
       assert_request("POST", %{
         "requests" => [%{"action" => "updateObject", "body" => %{"objectID" => reference1}}]
@@ -64,7 +70,10 @@ defmodule AlgoliaxTest.StructTest do
       ]
 
       assert {:ok, res} = PeopleStruct.save_objects(people, force_delete: true)
-      assert %{"taskID" => _, "objectIDs" => [reference1, reference2]} = res
+
+      assert %Algoliax.Response{
+               response: %{"taskID" => _, "objectIDs" => [reference1, reference2]}
+             } = res
 
       assert_request("POST", %{
         "requests" => [
@@ -77,7 +86,7 @@ defmodule AlgoliaxTest.StructTest do
     test "get_object/1" do
       person = %PeopleStruct{reference: "known", last_name: "Doe", first_name: "John", age: 77}
       assert {:ok, res} = PeopleStruct.get_object(person)
-      assert %{"objectID" => "known"} = res
+      assert %Algoliax.Response{response: %{"objectID" => "known"}} = res
       assert_request("GET", %{})
     end
 
@@ -103,7 +112,7 @@ defmodule AlgoliaxTest.StructTest do
 
     test "get_settings/0" do
       assert {:ok, res} = PeopleStruct.get_settings()
-      assert %{"searchableAttributes" => ["test"]} = res
+      assert %Algoliax.Response{response: %{"searchableAttributes" => ["test"]}} = res
       assert_request("GET", %{})
     end
 
@@ -128,10 +137,26 @@ defmodule AlgoliaxTest.StructTest do
       }
 
       assert {:ok, res} = PeopleStructRuntimeIndexName.get_object(person)
-      assert %{"objectID" => "known"} = res
+      assert %Algoliax.Response{response: %{"objectID" => "known"}} = res
       assert_request("PUT", ~r/people_runtime_index_name\/settings/, %{})
       assert_request("GET", ~r/people_runtime_index_name\/settings/, %{})
       assert_request("GET", ~r/people_runtime_index_name\/known/, %{})
     end
+  end
+
+  describe "wait for task" do
+    reference = :random.uniform(1_000_000) |> to_string()
+    person = %PeopleStruct{reference: reference, last_name: "Doe", first_name: "John", age: 77}
+    assert {:ok, res} = PeopleStruct.save_object(person) |> Algoliax.wait_task()
+
+    assert %Algoliax.Response{
+             response: %{"objectID" => ^reference, "taskID" => task_id, "updatedAt" => _}
+           } = res
+
+    # Assert that there are 4 calls to check task status
+    assert_request("GET", ~r/algoliax_people_struct\/task\/#{task_id}/, %{})
+    assert_request("GET", ~r/algoliax_people_struct\/task\/#{task_id}/, %{})
+    assert_request("GET", ~r/algoliax_people_struct\/task\/#{task_id}/, %{})
+    assert_request("GET", ~r/algoliax_people_struct\/task\/#{task_id}/, %{})
   end
 end

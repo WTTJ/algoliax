@@ -13,7 +13,7 @@ defmodule AlgoliaxTest.ReplicaTest do
   describe "replica" do
     test "configure_index/0" do
       assert {:ok, res} = PeopleWithReplicas.configure_index()
-      assert %{"taskID" => _, "updatedAt" => _} = res
+      assert %Algoliax.Response{response: %{"taskID" => _, "updatedAt" => _}} = res
 
       assert_request("PUT", ~r/algoliax_people_replicas/, %{
         "searchableAttributes" => ["full_name"],
@@ -45,7 +45,10 @@ defmodule AlgoliaxTest.ReplicaTest do
       }
 
       assert {:ok, res} = PeopleWithReplicas.save_object(person)
-      assert %{"taskID" => _, "updatedAt" => _, "objectID" => ^reference} = res
+
+      assert %Algoliax.Response{
+               response: %{"taskID" => _, "updatedAt" => _, "objectID" => ^reference}
+             } = res
 
       assert_request("PUT", %{
         "age" => 77,
@@ -68,7 +71,13 @@ defmodule AlgoliaxTest.ReplicaTest do
       ]
 
       assert {:ok, res} = PeopleWithReplicas.save_objects(people)
-      assert %{"taskID" => _, "objectIDs" => [reference1, reference2]} = res
+
+      assert %Algoliax.Response{
+               response: %{
+                 "taskID" => _,
+                 "objectIDs" => [reference1, reference2]
+               }
+             } = res
 
       assert_request("POST", %{
         "requests" => [
@@ -87,7 +96,7 @@ defmodule AlgoliaxTest.ReplicaTest do
       }
 
       assert {:ok, res} = PeopleWithReplicas.get_object(person)
-      assert %{"objectID" => "known"} = res
+      assert %Algoliax.Response{response: %{"objectID" => "known"}} = res
       assert_request("GET", %{})
     end
 
@@ -121,7 +130,7 @@ defmodule AlgoliaxTest.ReplicaTest do
 
     test "get_settings/0" do
       assert {:ok, res} = PeopleWithReplicas.get_settings()
-      assert %{"searchableAttributes" => ["test"]} = res
+      assert %Algoliax.Response{response: %{"searchableAttributes" => ["test"]}} = res
       assert_request("GET", %{})
     end
 

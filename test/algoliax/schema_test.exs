@@ -132,7 +132,8 @@ defmodule AlgoliaxTest.Schema do
   end
 
   test "reindex" do
-    assert {:ok, :completed} = PeopleEcto.reindex()
+    assert {:ok, [{:ok, %Algoliax.Response{}}, {:ok, %Algoliax.Response{}}]} =
+             PeopleEcto.reindex()
 
     assert_request("POST", %{
       "requests" => [
@@ -164,7 +165,12 @@ defmodule AlgoliaxTest.Schema do
   end
 
   test "reindex with force delete" do
-    assert {:ok, :completed} = PeopleEcto.reindex(force_delete: true)
+    assert {:ok,
+            [
+              {:ok, %Algoliax.Response{}},
+              {:ok, %Algoliax.Response{}},
+              {:ok, %Algoliax.Response{}}
+            ]} = PeopleEcto.reindex(force_delete: true)
 
     assert_request("POST", %{
       "requests" => [
@@ -191,7 +197,7 @@ defmodule AlgoliaxTest.Schema do
         where: p.age == 35
       )
 
-    assert {:ok, :completed} = PeopleEcto.reindex(query)
+    assert {:ok, [{:ok, %Algoliax.Response{}}]} = PeopleEcto.reindex(query)
 
     assert_request("POST", %{
       "requests" => [
@@ -206,7 +212,11 @@ defmodule AlgoliaxTest.Schema do
         where: p.age == 35 or p.first_name == "Dark"
       )
 
-    assert {:ok, :completed} = PeopleEcto.reindex(query, force_delete: true)
+    assert {:ok,
+            [
+              {:ok, %Algoliax.Response{}},
+              {:ok, %Algoliax.Response{}}
+            ]} = PeopleEcto.reindex(query, force_delete: true)
 
     assert_request("POST", %{
       "requests" => [
@@ -252,7 +262,12 @@ defmodule AlgoliaxTest.Schema do
   end
 
   test "reindex without an id column" do
-    assert {:ok, :completed} = PeopleWithoutIdEcto.reindex()
+    assert {:ok,
+            [
+              {:ok, %Algoliax.Response{}},
+              {:ok, %Algoliax.Response{}},
+              {:ok, %Algoliax.Response{}}
+            ]} = PeopleWithoutIdEcto.reindex()
 
     assert_request("POST", %{
       "requests" => [
@@ -330,7 +345,12 @@ defmodule AlgoliaxTest.Schema do
 
   describe "indexer w/ custom object id" do
     test "reindex" do
-      assert {:ok, :completed} = PeopleWithCustomObjectId.reindex()
+      assert {:ok,
+              [
+                {:ok, %Algoliax.Response{}},
+                {:ok, %Algoliax.Response{}},
+                {:ok, %Algoliax.Response{}}
+              ]} = PeopleWithCustomObjectId.reindex()
 
       assert_request("POST", %{
         "requests" => [

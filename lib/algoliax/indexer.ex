@@ -143,7 +143,7 @@ defmodule Algoliax.Indexer do
   """
 
   @callback search(query :: binary(), params :: map()) ::
-              {:ok, map()} | {:not_indexable, model :: map()}
+              {:ok, Algoliax.Response.t()} | {:not_indexable, model :: map()}
 
   @doc """
   Search for facet values
@@ -169,7 +169,7 @@ defmodule Algoliax.Indexer do
         }}
   """
   @callback search_facet(facet_name :: binary(), facet_query :: binary(), params :: map()) ::
-              {:ok, map()} | {:not_indexable, model :: map()}
+              {:ok, Algoliax.Response.t()} | {:not_indexable, model :: map()}
 
   @doc """
   Add/update object. The object is added/updated to algolia with the object_id configured.
@@ -180,7 +180,7 @@ defmodule Algoliax.Indexer do
       People.save_object(people)
   """
   @callback save_object(object :: map() | struct()) ::
-              {:ok, map()} | {:not_indexable, model :: map()}
+              {:ok, Algoliax.Response.t()} | {:not_indexable, model :: map()}
 
   @doc """
   Save multiple object at once
@@ -200,7 +200,7 @@ defmodule Algoliax.Indexer do
       People.save_objects(peoples, force_delete: true)
   """
   @callback save_objects(models :: list(map()) | list(struct()), opts :: Keyword.t()) ::
-              {:ok, map()} | {:error, map()}
+              {:ok, Algoliax.Response.t()} | {:error, map()}
 
   @doc """
   Fetch object from algolia. By passing the model, the object is retrieved using the object_id configured
@@ -210,7 +210,8 @@ defmodule Algoliax.Indexer do
 
       People.get_object(people)
   """
-  @callback get_object(model :: map() | struct()) :: {:ok, map()} | {:error, map()}
+  @callback get_object(model :: map() | struct()) ::
+              {:ok, Algoliax.Response.t()} | {:error, map()}
 
   @doc """
   Delete object from algolia. By passing the model, the object is retrieved using the object_id configured
@@ -220,7 +221,8 @@ defmodule Algoliax.Indexer do
 
       People.delete_object(people)
   """
-  @callback delete_object(model :: map() | struct()) :: {:ok, map()} | {:error, map()}
+  @callback delete_object(model :: map() | struct()) ::
+              {:ok, Algoliax.Response.t()} | {:error, map()}
 
   if Code.ensure_loaded?(Ecto) do
     @doc """
@@ -246,7 +248,8 @@ defmodule Algoliax.Indexer do
 
     > NOTE: filters as Map supports only `:where` and equality
     """
-    @callback reindex(query :: Ecto.Query.t(), opts :: Keyword.t()) :: {:ok, :completed}
+    @callback reindex(query :: Ecto.Query.t(), opts :: Keyword.t()) ::
+                {:ok, [Algoliax.Response.t()]}
 
     @doc """
     Reindex all objects ([Ecto](https://hexdocs.pm/ecto/Ecto.html) specific)
@@ -259,7 +262,7 @@ defmodule Algoliax.Indexer do
 
     - `:force_delete`: delete objects where `to_be_indexed?` is `false`
     """
-    @callback reindex(opts :: Keyword.t()) :: {:ok, :completed}
+    @callback reindex(opts :: Keyword.t()) :: {:ok, [Algoliax.Response.t()]}
 
     @doc """
     Reindex atomically ([Ecto](https://hexdocs.pm/ecto/Ecto.html) specific)

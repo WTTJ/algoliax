@@ -24,7 +24,7 @@ defmodule Algoliax.Client do
     ])
     |> case do
       {:ok, code, _headers, response} when code in 200..299 ->
-        Jason.decode(response)
+        build_response(response, request)
 
       {:ok, code, _, response} when code in 300..499 ->
         handle_error(code, response, action)
@@ -47,6 +47,13 @@ defmodule Algoliax.Client do
       end
 
     raise Algoliax.AlgoliaApiError, %{code: code, error: error}
+  end
+
+  defp build_response(response, request) do
+    case Jason.decode(response) do
+      {:ok, response} -> Algoliax.Response.new(response, request[:url_params])
+      error -> error
+    end
   end
 
   defp request_headers do
