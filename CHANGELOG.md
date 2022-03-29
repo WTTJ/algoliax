@@ -2,7 +2,7 @@
 
 ## DEV
 
-## v0.7.0
+## v0.7.0 - 2022-03-29
 
 #### Breaking changes
 
