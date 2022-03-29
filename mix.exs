@@ -57,6 +57,8 @@ defmodule Algoliax.MixProject do
       description: "AlgoliaSearch integration for Elixir app",
       maintainers: ["Stéphane Robino"],
       licenses: ["BSD-2-Clause"],
+      files: ~w(lib .formatter.exs mix.exs README* readme* LICENSE*
+                license* CHANGELOG* changelog* src),
       links: %{
         "Changelog" => "https://hexdocs.pm/algoliax/changelog.html",
         "GitHub" => @source_url
