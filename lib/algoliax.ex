@@ -96,6 +96,7 @@ defmodule Algoliax do
   def wait_task({:error} = response), do: response
   def wait_task(response), do: do_wait_task(response)
 
+  @doc false
   def do_wait_task(response, retry \\ 0) do
     retry = retry + 1
 

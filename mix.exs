@@ -2,7 +2,7 @@ defmodule Algoliax.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/WTTJ/algoliax"
-  @version "0.7.0"
+  @version "0.7.1"
 
   def project do
     [
@@ -57,8 +57,7 @@ defmodule Algoliax.MixProject do
       description: "AlgoliaSearch integration for Elixir app",
       maintainers: ["Stéphane Robino"],
       licenses: ["BSD-2-Clause"],
-      files: ~w(lib .formatter.exs mix.exs README* readme* LICENSE*
-                license* CHANGELOG* changelog* src),
+      files: ~w(lib .formatter.exs mix.exs README* LICENSE* CHANGELOG*),
       links: %{
         "Changelog" => "https://hexdocs.pm/algoliax/changelog.html",
         "GitHub" => @source_url
