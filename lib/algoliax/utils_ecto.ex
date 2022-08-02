@@ -3,7 +3,6 @@ if Code.ensure_loaded?(Ecto) do
     @moduledoc false
 
     import Ecto.Query
-    @batch_size Application.compile_env(:algoliax, :batch_size, 500)
 
     def repo(settings) do
       index_name = Keyword.get(settings, :index_name)
@@ -22,10 +21,10 @@ if Code.ensure_loaded?(Ecto) do
 
       q =
         if cursor == 0 do
-          from(q in query, limit: ^@batch_size, order_by: field(q, ^cursor_field))
+          from(q in query, limit: ^batch_size(), order_by: field(q, ^cursor_field))
         else
           from(q in query,
-            limit: ^@batch_size,
+            limit: ^batch_size(),
             where: field(q, ^cursor_field) > ^cursor,
             order_by: field(q, ^cursor_field)
           )
@@ -42,12 +41,16 @@ if Code.ensure_loaded?(Ecto) do
           acc
         end
 
-      if length(results) == @batch_size do
+      if length(results) == batch_size() do
         last_cursor = results |> List.last() |> Map.get(cursor_field)
         find_in_batches(repo, query, last_cursor, settings, execute, acc)
       else
         acc
       end
+    end
+
+    defp batch_size() do
+      Application.get_env(:algoliax, :batch_size, 500)
     end
   end
 end
