@@ -1,6 +1,6 @@
 # Algoliax
 
-[![CircleCI](https://circleci.com/gh/WTTJ/algoliax/tree/master.svg?style=svg)](https://circleci.com/gh/WTTJ/algoliax/tree/master)
+[![CircleCI](https://circleci.com/gh/WTTJ/algoliax/tree/main.svg?style=svg)](https://circleci.com/gh/WTTJ/algoliax/tree/main)
 [![Module Version](https://img.shields.io/hexpm/v/algoliax.svg)](https://hex.pm/packages/algoliax)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/algoliax/)
 [![Total Download](https://img.shields.io/hexpm/dt/algoliax.svg)](https://hex.pm/packages/algoliax)
