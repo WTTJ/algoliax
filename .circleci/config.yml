@@ -1,73 +1,110 @@
 defaults: &defaults
   working_directory: ~/algoliax
 
+parameters:
+  elixir_base_image:
+    type: string
+    default: cimg/elixir:1.10.4
+  cache_version:
+    type: string
+    default: v1
+
 version: 2.1
 jobs:
   checkout:
     <<: *defaults
     docker:
-      - image: cimg/elixir:1.10.4
+      - image: << pipeline.parameters.elixir_base_image >>
     steps:
       - checkout
       - save_cache:
-          key: v1-algoliax-{{ .Environment.CIRCLE_SHA1 }}
+          key: << pipeline.parameters.cache_version >>-code-{{ .Environment.CIRCLE_SHA1 }}
           paths:
             - ~/algoliax
 
   mix_deps_get:
     <<: *defaults
     docker:
-      - image: cimg/elixir:1.10.4
+      - image: << pipeline.parameters.elixir_base_image >>
     steps:
       - run:
           name: install hex & rebar
           command: mix do local.hex --force, local.rebar --force
       - restore_cache:
-          key: v1-algoliax-{{ .Environment.CIRCLE_SHA1 }}
+          key: << pipeline.parameters.cache_version >>-code-{{ .Environment.CIRCLE_SHA1 }}
       - restore_cache:
           keys:
-            - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
-            - v1-mix-cache-{{ .Branch }}
-            - v1-mix-cache
+            - << pipeline.parameters.cache_version >>-mix-{{ .Branch }}-{{ checksum "mix.lock" }}
+            - << pipeline.parameters.cache_version >>-mix-{{ .Branch }}
+            - << pipeline.parameters.cache_version >>-mix
       - run:
           name: gather dependencies
           command: mix deps.get
       - save_cache:
-          key: v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+          key: << pipeline.parameters.cache_version >>-mix-{{ .Branch }}-{{ checksum "mix.lock" }}
           paths:
             - deps
       - save_cache:
-          key: v1-mix-cache-{{ .Branch }}
+          key: << pipeline.parameters.cache_version >>-mix-{{ .Branch }}
           paths:
             - deps
       - save_cache:
-          key: v1-mix-cache
+          key: << pipeline.parameters.cache_version >>-mix
           paths:
             - deps
 
-  credo:
+  code_analysis:
     <<: *defaults
     docker:
-      - image: cimg/elixir:1.10.4
+      - image: << pipeline.parameters.elixir_base_image >>
+        environment:
+          MIX_ENV: test
     steps:
       - run:
           name: install hex & rebar
           command: mix do local.hex --force, local.rebar --force
       - restore_cache:
-          key: v1-algoliax-{{ .Environment.CIRCLE_SHA1 }}
+          key: << pipeline.parameters.cache_version >>-code-{{ .Environment.CIRCLE_SHA1 }}
       - restore_cache:
           keys:
-            - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
-            - v1-mix-cache-{{ .Branch }}
-            - v1-mix-cache
+            - << pipeline.parameters.cache_version >>-mix-{{ .Branch }}-{{ checksum "mix.lock" }}
+            - << pipeline.parameters.cache_version >>-mix-{{ .Branch }}
+      - run:
+          name: Run mix format
+          command: mix format --check-formatted
       - run:
           name: Run credo
           command: mix credo
 
+  vulnerabilities_mix:
+    <<: *defaults
+    docker:
+      - image: << pipeline.parameters.elixir_base_image >>
+        environment:
+          MIX_ENV: test
+    steps:
+      - run:
+          name: install hex & rebar
+          command: mix do local.hex --force, local.rebar --force
+      - restore_cache:
+          key: << pipeline.parameters.cache_version >>-code-{{ .Environment.CIRCLE_SHA1 }}
+      - restore_cache:
+          keys:
+            - << pipeline.parameters.cache_version >>-mix-{{ .Branch }}-{{ checksum "mix.lock" }}
+            - << pipeline.parameters.cache_version >>-mix-{{ .Branch }}
+      - run:
+          name: Run sobelow
+          command: mix sobelow --config > sobelow.txt
+      - store_artifacts:
+          path: sobelow.txt
+      - run:
+          name: Run mix audit
+          command: mix deps.audit --format human
+
   test:
     <<: *defaults
     docker:
-      - image: cimg/elixir:1.10.4
+      - image: << pipeline.parameters.elixir_base_image >>
         environment:
           MIX_ENV: test
           DB_USERNAME: algoliax
@@ -82,12 +119,12 @@ jobs:
           name: Install hex & rebar
           command: mix do local.hex --force, local.rebar --force
       - restore_cache:
-          key: v1-algoliax-{{ .Environment.CIRCLE_SHA1 }}
+          key: << pipeline.parameters.cache_version >>-code-{{ .Environment.CIRCLE_SHA1 }}
       - restore_cache:
           keys:
-            - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
-            - v1-mix-cache-{{ .Branch }}
-            - v1-mix-cache
+            - << pipeline.parameters.cache_version >>-mix-{{ .Branch }}-{{ checksum "mix.lock" }}
+            - << pipeline.parameters.cache_version >>-mix-{{ .Branch }}
+            - << pipeline.parameters.cache_version >>-mix
       - run:
           name: Apt update
           command: sudo apt update
@@ -118,6 +155,9 @@ workflows:
       - test:
           requires:
             - mix_deps_get
-      - credo:
+      - code_analysis:
+          requires:
+            - mix_deps_get
+      - vulnerabilities_mix:
           requires:
             - mix_deps_get
