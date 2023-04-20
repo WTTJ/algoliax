@@ -36,4 +36,8 @@ defmodule Algoliax.TemporaryIndexer do
   defp execute(:delete_object, module, settings, models, _) do
     Object.delete_object(module, settings, models)
   end
+
+  defp execute(:delete_by, module, settings, matching_filter) do
+    Object.delete_by(module, settings, matching_filter)
+  end
 end
