@@ -125,6 +125,15 @@ defmodule AlgoliaxTest.StructTest do
       assert {:ok, _} = PeopleStruct.search_facet("age", "2")
       assert_request("POST", %{"facetQuery" => "2"})
     end
+
+    test "delete_by/1" do
+      assert {:ok, res} = PeopleStruct.delete_by("age > 18")
+      assert_request("POST", %{"params" => "filters=age > 18"})
+
+      assert %Algoliax.Response{
+               response: %{"taskID" => _, "updatedAt" => _}
+             } = res
+    end
   end
 
   describe "runtime index name" do

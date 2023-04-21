@@ -64,6 +64,7 @@ defmodule Algoliax.Resources.Object do
       ]
     })
   end
+
   def delete_by(module, settings, matching_filter) do
     call_indexer(:delete_by, module, settings, matching_filter)
 
@@ -75,14 +76,14 @@ defmodule Algoliax.Resources.Object do
         _ ->
           %{params: "filters=#{matching_filter}"}
       end
+
     request(%{
       action: :delete_by,
       url_params: [
-        index_name: index_name(module, settings),
+        index_name: index_name(module, settings)
       ],
       body: body
     })
-
   end
 
   defp build_batch_object(module, settings, model, "deleteObject" = action) do

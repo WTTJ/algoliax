@@ -185,6 +185,7 @@ defmodule Algoliax.ApiMockServer do
 
     send_resp(conn, 200, Jason.encode!(response))
   end
+
   match _ do
     Logger.warn(inspect(conn))
     send_resp(conn, 404, "oops")

@@ -48,6 +48,11 @@ defmodule Algoliax.RoutesTest do
       assert Routes.url(:delete_object, index_name: @index_name, object_id: 10) ==
                {:delete, "http://localhost:8002/APPLICATION_ID/write/algolia_index/10"}
     end
+
+    test "url delete_by" do
+      assert Routes.url(:delete_by, index_name: @index_name) ==
+               {:post, "http://localhost:8002/APPLICATION_ID/write/algolia_index/deleteByQuery"}
+    end
   end
 
   describe "First retry" do
@@ -84,6 +89,11 @@ defmodule Algoliax.RoutesTest do
     test "url delete_object" do
       assert Routes.url(:delete_object, [index_name: @index_name, object_id: 10], 1) ==
                {:delete, "http://localhost:8002/APPLICATION_ID/retry/1/algolia_index/10"}
+    end
+
+    test "url delete_by" do
+      assert Routes.url(:delete_by, [index_name: @index_name], 1) ==
+               {:post, "http://localhost:8002/APPLICATION_ID/retry/1/algolia_index/deleteByQuery"}
     end
   end
 end
