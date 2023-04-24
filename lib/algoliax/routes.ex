@@ -13,7 +13,8 @@ defmodule Algoliax.Routes do
     get_object: {"/{index_name}/{object_id}", :get},
     save_object: {"/{index_name}/{object_id}", :put},
     delete_object: {"/{index_name}/{object_id}", :delete},
-    task: {"/{index_name}/task/{task_id}", :get}
+    task: {"/{index_name}/task/{task_id}", :get},
+    delete_by: {"/{index_name}/deleteByQuery", :post}
   }
 
   def url(action, url_params, retry \\ 0) do

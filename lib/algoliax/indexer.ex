@@ -224,6 +224,15 @@ defmodule Algoliax.Indexer do
   @callback delete_object(model :: map() | struct()) ::
               {:ok, Algoliax.Response.t()} | {:error, map()}
 
+  @doc """
+  Delete objects from algolia. By passing a matching filter query, the records are retrieved and deleted.[Filters](https://www.algolia.com/doc/api-reference/api-parameters/filters/)
+
+  ## Example:
+      People.delete_by("age > 18")
+  """
+  @callback delete_by(matching_filter :: String.t()) ::
+              {:ok, Algoliax.Response.t()} | {:error, map()}
+
   if Code.ensure_loaded?(Ecto) do
     @doc """
     Reindex a subset of records by providing an Ecto query or query filters as a Map([Ecto](https://hexdocs.pm/ecto/Ecto.html) specific)
@@ -379,6 +388,11 @@ defmodule Algoliax.Indexer do
       @impl Algoliax.Indexer
       def delete_object(model) do
         Object.delete_object(__MODULE__, @settings, model)
+      end
+
+      @impl Algoliax.Indexer
+      def delete_by(matching_filter) do
+        Object.delete_by(__MODULE__, @settings, matching_filter)
       end
 
       @impl Algoliax.Indexer

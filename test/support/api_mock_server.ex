@@ -176,6 +176,16 @@ defmodule Algoliax.ApiMockServer do
     send_resp(conn, 200, Jason.encode!(%{}))
   end
 
+  # delete index objects that match a query filter: https://www.algolia.com/doc/rest-api/search/#delete-by
+  post "/:application_id/:mode/:index_name/deleteByQuery" do
+    response = %{
+      "taskID" => 6311,
+      "updatedAt" => "2023-02-20T17:45:11.523Z"
+    }
+
+    send_resp(conn, 200, Jason.encode!(response))
+  end
+
   match _ do
     Logger.warn(inspect(conn))
     send_resp(conn, 404, "oops")
