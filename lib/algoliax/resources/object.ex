@@ -7,13 +7,20 @@ defmodule Algoliax.Resources.Object do
   alias Algoliax.TemporaryIndexer
 
   def get_object(module, settings, model) do
-    request(%{
-      action: :get_object,
-      url_params: [
-        index_name: index_name(module, settings),
-        object_id: get_object_id(module, settings, model)
-      ]
-    })
+    index_name(module, settings)
+    |> Enum.map(fn index_name ->
+      request(%{
+        action: :get_object,
+        url_params: [
+          index_name: index_name,
+          object_id: get_object_id(module, settings, model)
+        ]
+      })
+    end)
+    |> case do
+      [single_result] -> single_result
+      [_ | _] = multiple_result -> multiple_result
+    end
   end
 
   def save_objects(module, settings, models, opts) do
@@ -30,22 +37,40 @@ defmodule Algoliax.Resources.Object do
     if Enum.any?(objects) do
       call_indexer(:save_objects, module, settings, models, opts)
 
-      request(%{
-        action: :save_objects,
-        url_params: [index_name: index_name(module, settings)],
-        body: %{requests: objects}
-      })
+      index_name(module, settings)
+      |> Enum.map(fn index_name ->
+        request(%{
+          action: :save_objects,
+          url_params: [index_name: index_name],
+          body: %{requests: objects}
+        })
+      end)
+      |> case do
+        [single_result] -> single_result
+        [_ | _] = multiple_result -> multiple_result
+      end
     end
   end
 
   def save_object(module, settings, model) do
+    index_name(module, settings)
+    |> Enum.map(fn index_name ->
+      save_object(module, settings, model, index_name)
+    end)
+    |> case do
+      [single_result] -> single_result
+      [_ | _] = multiple_result -> multiple_result
+    end
+  end
+
+  defp save_object(module, settings, model, index) do
     if apply(module, :to_be_indexed?, [model]) do
       object = build_object(module, settings, model)
       call_indexer(:save_object, module, settings, model)
 
       request(%{
         action: :save_object,
-        url_params: [index_name: index_name(module, settings), object_id: object.objectID],
+        url_params: [index_name: index, object_id: object.objectID],
         body: object
       })
     else
@@ -56,13 +81,20 @@ defmodule Algoliax.Resources.Object do
   def delete_object(module, settings, model) do
     call_indexer(:delete_object, module, settings, model)
 
-    request(%{
-      action: :delete_object,
-      url_params: [
-        index_name: index_name(module, settings),
-        object_id: get_object_id(module, settings, model)
-      ]
-    })
+    index_name(module, settings)
+    |> Enum.map(fn index_name ->
+      request(%{
+        action: :delete_object,
+        url_params: [
+          index_name: index_name,
+          object_id: get_object_id(module, settings, model)
+        ]
+      })
+    end)
+    |> case do
+      [single_result] -> single_result
+      [_ | _] = multiple_result -> multiple_result
+    end
   end
 
   def delete_by(module, settings, matching_filter) do
@@ -77,13 +109,20 @@ defmodule Algoliax.Resources.Object do
           %{params: "filters=#{matching_filter}"}
       end
 
-    request(%{
-      action: :delete_by,
-      url_params: [
-        index_name: index_name(module, settings)
-      ],
-      body: body
-    })
+    index_name(module, settings)
+    |> Enum.map(fn index_name ->
+      request(%{
+        action: :delete_by,
+        url_params: [
+          index_name: index_name
+        ],
+        body: body
+      })
+    end)
+    |> case do
+      [single_result] -> single_result
+      [_ | _] = multiple_result -> multiple_result
+    end
   end
 
   defp build_batch_object(module, settings, model, "deleteObject" = action) do

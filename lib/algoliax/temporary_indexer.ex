@@ -16,13 +16,18 @@ defmodule Algoliax.TemporaryIndexer do
   defp do_run(action, module, settings, models, opts) do
     opts = Keyword.delete(opts, :temporary_only)
 
-    index_name = index_name(module, settings)
+    index_name(module, settings)
+    |> Enum.map(fn index_name ->
+      if SettingsStore.reindexing?(index_name) do
+        tmp_index_name = :"#{index_name}.tmp"
+        tmp_settings = SettingsStore.get_settings(tmp_index_name)
 
-    if SettingsStore.reindexing?(index_name) do
-      tmp_index_name = :"#{index_name}.tmp"
-      tmp_settings = SettingsStore.get_settings(tmp_index_name)
-
-      execute(action, module, tmp_settings, models, opts)
+        execute(action, module, tmp_settings, models, opts)
+      end
+    end)
+    |> case do
+      [single_result] -> single_result
+      [_ | _] = multiple_result -> multiple_result
     end
   end
 
