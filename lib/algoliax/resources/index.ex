@@ -24,6 +24,10 @@ defmodule Algoliax.Resources.Index do
     |> replicas_settings()
     |> Enum.map(fn replica_settings ->
       index_name(module, replica_settings)
+      |> case do
+        [single_result] -> single_result
+        [_ | _] = multiple_result -> multiple_result
+      end
     end)
   end
 
@@ -49,18 +53,29 @@ defmodule Algoliax.Resources.Index do
   end
 
   def get_settings(module, settings) do
-    index_name = index_name(module, settings)
-    algolia_remote_settings = request_get_settings(index_name)
-    SettingsStore.set_settings(index_name, algolia_remote_settings)
-    algolia_remote_settings
+    index_name(module, settings)
+    |> Enum.map(fn index_name ->
+      algolia_remote_settings = request_get_settings(index_name)
+      SettingsStore.set_settings(index_name, algolia_remote_settings)
+      algolia_remote_settings
+    end)
+    |> case do
+      [single_result] -> single_result
+      [_ | _] = multiple_result -> multiple_result
+    end
   end
 
   def configure_index(module, settings) do
-    index_name = index_name(module, settings)
-    r = request_configure_index(index_name, settings_to_algolia_settings(module, settings))
-    configure_replicas(module, settings)
-
-    r
+    index_name(module, settings)
+    |> Enum.map(fn index_name ->
+      r = request_configure_index(index_name, settings_to_algolia_settings(module, settings))
+      configure_replicas(module, settings)
+      r
+    end)
+    |> case do
+      [single_result] -> single_result
+      [_ | _] = multiple_result -> multiple_result
+    end
   end
 
   def configure_replicas(module, settings) do
@@ -87,7 +102,14 @@ defmodule Algoliax.Resources.Index do
   end
 
   def delete_index(module, settings) do
-    request(%{action: :delete_index, url_params: [index_name: index_name(module, settings)]})
+    index_name(module, settings)
+    |> Enum.map(fn index_name ->
+      request(%{action: :delete_index, url_params: [index_name: index_name]})
+    end)
+    |> case do
+      [single_result] -> single_result
+      [_ | _] = multiple_result -> multiple_result
+    end
   end
 
   defp settings_to_algolia_settings(module, settings) do

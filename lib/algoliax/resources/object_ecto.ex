@@ -67,31 +67,38 @@ if Code.ensure_loaded?(Ecto) do
 
     def reindex_atomic(module, settings) do
       Algoliax.UtilsEcto.repo(settings)
-      index_name = Algoliax.Utils.index_name(module, settings)
-      tmp_index_name = :"#{index_name}.tmp"
 
-      tmp_settings =
-        settings |> Keyword.put(:index_name, tmp_index_name) |> Keyword.delete(:replicas)
+      Algoliax.Utils.index_name(module, settings)
+      |> Enum.map(fn index_name ->
+        tmp_index_name = :"#{index_name}.tmp"
 
-      Algoliax.SettingsStore.start_reindexing(index_name)
+        tmp_settings =
+          settings |> Keyword.put(:index_name, tmp_index_name) |> Keyword.delete(:replicas)
 
-      try do
-        reindex(module, tmp_settings, nil, [])
+        Algoliax.SettingsStore.start_reindexing(index_name)
 
-        request(%{
-          action: :move_index,
-          url_params: [index_name: tmp_index_name],
-          body: %{
-            operation: "move",
-            destination: "#{index_name}"
-          }
-        })
+        try do
+          reindex(module, tmp_settings, nil, [])
 
-        {:ok, :completed}
-      after
-        Algoliax.Resources.Index.delete_index(module, tmp_settings)
-        Algoliax.SettingsStore.delete_settings(tmp_index_name)
-        Algoliax.SettingsStore.stop_reindexing(index_name)
+          request(%{
+            action: :move_index,
+            url_params: [index_name: tmp_index_name],
+            body: %{
+              operation: "move",
+              destination: "#{index_name}"
+            }
+          })
+
+          {:ok, :completed}
+        after
+          Algoliax.Resources.Index.delete_index(module, tmp_settings)
+          Algoliax.SettingsStore.delete_settings(tmp_index_name)
+          Algoliax.SettingsStore.stop_reindexing(index_name)
+        end
+      end)
+      |> case do
+        [single_result] -> single_result
+        [_ | _] = multiple_result -> multiple_result
       end
     end
   end

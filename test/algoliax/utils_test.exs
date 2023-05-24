@@ -21,6 +21,10 @@ defmodule Algoliax.UtilsTest do
     def algoliax_people do
       :algoliax_people_from_function
     end
+
+    def additional_indexes do
+      [:index_en, :index_fr]
+    end
   end
 
   defmodule NoIndexName do
@@ -62,15 +66,15 @@ defmodule Algoliax.UtilsTest do
     end
   end
 
-  describe "should get correct index_name" do
-    test "if there is a function" do
+  describe "index_name/2" do
+    test "with a function" do
       assert Algoliax.Utils.index_name(IndexNameFromFunction, index_name: :algoliax_people) ==
-               :algoliax_people_from_function
+               [:algoliax_people_from_function]
     end
 
-    test "if there is not function" do
+    test "without a function" do
       assert Algoliax.Utils.index_name(NoRepo, index_name: :algoliax_people) ==
-               :algoliax_people
+               [:algoliax_people]
     end
   end
 end

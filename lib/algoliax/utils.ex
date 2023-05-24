@@ -4,22 +4,30 @@ defmodule Algoliax.Utils do
   alias Algoliax.Resources.Index
 
   def index_name(module, settings) do
-    index_name_opt = Keyword.get(settings, :index_name)
+    indexes =
+      case Keyword.get(settings, :index_name) do
+        nil ->
+          raise Algoliax.MissingIndexNameError
 
-    if index_name_opt do
-      index_name =
-        if module.__info__(:functions)
-           |> Keyword.get(index_name_opt) == 0 do
-          apply(module, index_name_opt, [])
-        else
-          index_name_opt
-        end
+        atom when is_atom(atom) ->
+          if module.__info__(:functions) |> Keyword.get(atom) == 0 do
+            apply(module, atom, [])
+            |> case do
+              indexes when is_list(indexes) -> indexes
+              index -> [index]
+            end
+          else
+            [atom]
+          end
 
-      Index.ensure_settings(module, index_name, settings)
-      index_name
-    else
-      raise Algoliax.MissingIndexNameError
-    end
+        list when is_list(list) ->
+          list
+      end
+
+    indexes
+    |> Enum.each(fn index -> Index.ensure_settings(module, index, settings) end)
+
+    indexes
   end
 
   def algolia_settings(settings) do

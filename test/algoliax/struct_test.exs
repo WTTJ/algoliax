@@ -1,7 +1,11 @@
 defmodule AlgoliaxTest.StructTest do
   use Algoliax.RequestCase
 
-  alias Algoliax.Schemas.{PeopleStruct, PeopleStructRuntimeIndexName}
+  alias Algoliax.Schemas.{
+    PeopleStruct,
+    PeopleStructRuntimeIndexName,
+    PeopleStructWithAdditionalIndexes
+  }
 
   setup do
     Algoliax.SettingsStore.set_settings(:algoliax_people_struct, %{})
