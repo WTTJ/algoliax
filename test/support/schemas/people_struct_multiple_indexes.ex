@@ -1,4 +1,4 @@
-defmodule Algoliax.Schemas.PeopleStructWithAdditionalIndexes do
+defmodule Algoliax.Schemas.PeopleStructMultipleIndexes do
   @moduledoc false
 
   use Algoliax.Indexer,

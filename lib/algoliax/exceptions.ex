@@ -10,6 +10,11 @@ defmodule Algoliax.MissingRepoError do
   defexception [:message]
 
   @impl true
+  def exception(index_name) when is_list(index_name) do
+    %__MODULE__{message: "No repo configured for indexes #{Enum.join(index_name, ", ")}"}
+  end
+
+  @impl true
   def exception(index_name) do
     %__MODULE__{message: "No repo configured for index #{index_name}"}
   end

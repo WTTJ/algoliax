@@ -35,7 +35,7 @@ defmodule AlgoliaxTest.ReplicaTest do
     end
 
     test "save_object/1" do
-      reference = :random.uniform(1_000_000) |> to_string()
+      reference = :rand.uniform(1_000_000) |> to_string()
 
       person = %PeopleWithReplicas{
         reference: reference,
@@ -62,8 +62,8 @@ defmodule AlgoliaxTest.ReplicaTest do
     end
 
     test "save_objects/1" do
-      reference1 = :random.uniform(1_000_000) |> to_string()
-      reference2 = :random.uniform(1_000_000) |> to_string()
+      reference1 = :rand.uniform(1_000_000) |> to_string()
+      reference2 = :rand.uniform(1_000_000) |> to_string()
 
       people = [
         %PeopleWithReplicas{reference: reference1, last_name: "Doe", first_name: "John", age: 77},
