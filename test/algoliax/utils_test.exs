@@ -21,9 +21,27 @@ defmodule Algoliax.UtilsTest do
     def algoliax_people do
       :algoliax_people_from_function
     end
+  end
 
-    def additional_indexes do
-      [:index_en, :index_fr]
+  defmodule MultipleIndexNames do
+    use Algoliax.Indexer,
+      index_name: [:algoliax_people_en, :algoliax_people_fr],
+      attributes_for_faceting: ["age"],
+      searchable_attributes: ["full_name"],
+      custom_ranking: ["desc(updated_at)"],
+      object_id: :reference
+  end
+
+  defmodule MultipleIndexNameFromFunction do
+    use Algoliax.Indexer,
+      index_name: :algoliax_people,
+      attributes_for_faceting: ["age"],
+      searchable_attributes: ["full_name"],
+      custom_ranking: ["desc(updated_at)"],
+      object_id: :reference
+
+    def algoliax_people do
+      [:algoliax_people_from_function_en, :algoliax_people_from_function_fr]
     end
   end
 
@@ -75,6 +93,18 @@ defmodule Algoliax.UtilsTest do
     test "without a function" do
       assert Algoliax.Utils.index_name(NoRepo, index_name: :algoliax_people) ==
                [:algoliax_people]
+    end
+
+    test "multiple indexes with a function" do
+      assert Algoliax.Utils.index_name(MultipleIndexNameFromFunction, index_name: :algoliax_people) ==
+               [:algoliax_people_from_function_en, :algoliax_people_from_function_fr]
+    end
+
+    test "multiple indexes without a function" do
+      assert Algoliax.Utils.index_name(MultipleIndexNames,
+               index_name: [:algoliax_people_en, :algoliax_people_fr]
+             ) ==
+               [:algoliax_people_en, :algoliax_people_fr]
     end
   end
 end
