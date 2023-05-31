@@ -2,9 +2,12 @@ defmodule AlgoliaxTest.ReplicaTest do
   use Algoliax.RequestCase
 
   alias Algoliax.Schemas.PeopleWithReplicas
+  alias Algoliax.Schemas.PeopleWithReplicasMultipleIndexes
 
   setup do
     Algoliax.SettingsStore.set_settings(:algoliax_people_replicas, %{})
+    Algoliax.SettingsStore.set_settings(:algoliax_people_replicas_en, %{})
+    Algoliax.SettingsStore.set_settings(:algoliax_people_replicas_fr, %{})
     Algoliax.SettingsStore.set_settings(:algoliax_people_replicas_asc, %{})
     Algoliax.SettingsStore.set_settings(:algoliax_people_replicas_desc, %{})
     :ok
@@ -28,6 +31,58 @@ defmodule AlgoliaxTest.ReplicaTest do
       })
 
       assert_request("PUT", ~r/algoliax_people_replicas_desc/, %{
+        "searchableAttributes" => nil,
+        "attributesForFaceting" => nil,
+        "ranking" => ["desc(age)"]
+      })
+    end
+
+    test "configure_index/0 with multiple indexes" do
+      assert [{:ok, res}, {:ok, res2}] = PeopleWithReplicasMultipleIndexes.configure_index()
+
+      assert %Algoliax.Response{
+               response: %{"taskID" => _, "updatedAt" => _},
+               params: [index_name: :algoliax_people_replicas_en]
+             } = res
+
+      assert %Algoliax.Response{
+               response: %{"taskID" => _, "updatedAt" => _},
+               params: [index_name: :algoliax_people_replicas_fr]
+             } = res2
+
+      # TODO: MATCHER LE REPLICA AVEC L'INDEX PRINCIPAL ASSOCIÉ POUR PAS DUPLIQUER LES REPLICAS AVEC LES MÊMES NOMS
+
+      assert_request("PUT", ~r/algoliax_people_replicas_en/, %{
+        "searchableAttributes" => ["full_name"],
+        "attributesForFaceting" => ["age"],
+        "replicas" => ["algoliax_people_replicas_asc_en", "algoliax_people_replicas_desc_en"]
+      })
+
+      assert_request("PUT", ~r/algoliax_people_replicas_fr/, %{
+        "searchableAttributes" => ["full_name"],
+        "attributesForFaceting" => ["age"],
+        "replicas" => ["algoliax_people_replicas_asc_fr", "algoliax_people_replicas_desc_fr"]
+      })
+
+      assert_request("PUT", ~r/algoliax_people_replicas_asc_en/, %{
+        "searchableAttributes" => ["age"],
+        "attributesForFaceting" => ["age"],
+        "ranking" => ["asc(age)"]
+      })
+
+      assert_request("PUT", ~r/algoliax_people_replicas_asc_fr/, %{
+        "searchableAttributes" => ["age"],
+        "attributesForFaceting" => ["age"],
+        "ranking" => ["asc(age)"]
+      })
+
+      assert_request("PUT", ~r/algoliax_people_replicas_desc_en/, %{
+        "searchableAttributes" => nil,
+        "attributesForFaceting" => nil,
+        "ranking" => ["desc(age)"]
+      })
+
+      assert_request("PUT", ~r/algoliax_people_replicas_desc_fr/, %{
         "searchableAttributes" => nil,
         "attributesForFaceting" => nil,
         "ranking" => ["desc(age)"]
