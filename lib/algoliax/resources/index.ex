@@ -6,28 +6,29 @@ defmodule Algoliax.Resources.Index do
 
   alias Algoliax.{Settings, SettingsStore}
 
-  def ensure_settings(module, index_name, settings) do
+  def ensure_settings(module, index_name, settings, replica_index) do
     case SettingsStore.get_settings(index_name) do
       nil ->
-        request_configure_index(index_name, settings_to_algolia_settings(module, settings))
+        request_configure_index(
+          index_name,
+          settings_to_algolia_settings(module, settings, replica_index)
+        )
+
         algolia_remote_settings = request_get_settings(index_name)
         SettingsStore.set_settings(index_name, algolia_remote_settings)
-        replicas_names(module, settings)
+        replicas_names(module, settings, replica_index)
 
       _ ->
         true
     end
   end
 
-  def replicas_names(module, settings) do
+  def replicas_names(module, settings, replica_index) do
     settings
     |> replicas_settings()
     |> Enum.map(fn replica_settings ->
       index_name(module, replica_settings)
-      |> case do
-        [single_result] -> single_result
-        [_ | _] = multiple_result -> multiple_result
-      end
+      |> Enum.at(replica_index)
     end)
   end
 
@@ -67,8 +68,14 @@ defmodule Algoliax.Resources.Index do
 
   def configure_index(module, settings) do
     index_name(module, settings)
-    |> Enum.map(fn index_name ->
-      r = request_configure_index(index_name, settings_to_algolia_settings(module, settings))
+    |> Enum.with_index()
+    |> Enum.map(fn {index_name, replica_index} ->
+      r =
+        request_configure_index(
+          index_name,
+          settings_to_algolia_settings(module, settings, replica_index)
+        )
+
       configure_replicas(module, settings)
       r
     end)
@@ -112,14 +119,14 @@ defmodule Algoliax.Resources.Index do
     end
   end
 
-  defp settings_to_algolia_settings(module, settings) do
+  defp settings_to_algolia_settings(module, settings, replica_index) do
     settings
     |> algolia_settings()
     |> Settings.map_algolia_settings()
-    |> add_replicas_to_algolia_settings(module, settings)
+    |> add_replicas_to_algolia_settings(module, settings, replica_index)
   end
 
-  defp add_replicas_to_algolia_settings(algolia_settings, module, settings) do
-    algolia_settings |> Map.put(:replicas, replicas_names(module, settings))
+  defp add_replicas_to_algolia_settings(algolia_settings, module, settings, replica_index) do
+    algolia_settings |> Map.put(:replicas, replicas_names(module, settings, replica_index))
   end
 end

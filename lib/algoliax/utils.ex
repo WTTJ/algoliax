@@ -25,7 +25,8 @@ defmodule Algoliax.Utils do
       end
 
     indexes
-    |> Enum.each(fn index -> Index.ensure_settings(module, index, settings) end)
+    |> Enum.with_index()
+    |> Enum.each(fn {index, i} -> Index.ensure_settings(module, index, settings, i) end)
 
     indexes
   end
