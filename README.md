@@ -89,6 +89,22 @@ defmodule People do
 end
 ```
 
+- `build_object/2` does the same but provides the current index name as a second parameter. Can be useful when indexing the same model on multiple indexes (ie. for translations).
+
+```elixir
+defmodule Article do
+  ...
+
+  @impl Algoliax
+  def build_object(author, "article_index_" <> locale) do
+    %{
+      author: article.author,
+      content: article.content[locale]
+    }
+  end
+end
+```
+
 #### Index name at runtime
 
 It's possible to define an index name at runtime, useful if `index_name` depends on environment or comes from an environment variable.
@@ -105,6 +121,21 @@ defmodule People do
   def algoliax_people do
     System.get_env("PEOPLE_INDEX_NAME")
   end
+end
+```
+
+#### Multiple indexes
+
+It's possible to define multiple indexes for a same model.
+
+To do this just specify an array of index names, or in your `index_name/0` runtime function, return an array.
+
+```elixir
+defmodule Article do
+  use Algoliax.Indexer,
+    index_name: [:algoliax_article_fr, :algoliax_article_en],
+    object_id: :reference,
+    algolia: [...]
 end
 ```
 
@@ -235,6 +266,24 @@ use Algoliax.Indexer,
   replicas: [
     [index_name: :algoliax_by_age_asc, inherit: true, algolia: [ranking: ["asc(age)"]]],
     [index_name: :algoliax_by_age_desc, inherit: false, algolia: [ranking: ["desc(age)"]]]
+  ]
+```
+
+If the main index holds multiple indexes, for an index per language for example, replicas needs to hold the same amount of names.
+The order is important to be associated to the correct main index.
+
+```elixir
+use Algoliax.Indexer,
+  index_name: [:algoliax_article_en, :algoliax_article_fr],
+  object_id: :reference,
+  repo: MyApp.Repo,
+  algolia: [
+    attributes_for_faceting: ["published_at"],
+    searchable_attributes: ["content"],
+  ],
+  replicas: [
+    [index_name: [:algoliax_article_by_publication_asc_en, :algoliax_article_by_publication_asc_fr], inherit: true, algolia: [ranking: ["asc(published_at)"]]],
+    [index_name: [:algoliax_article_by_publication_desc_en, :algoliax_article_by_publication_desc_fr], inherit: false, algolia: [ranking: ["desc(published_at)"]]]
   ]
 ```
 
