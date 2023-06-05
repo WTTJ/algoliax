@@ -128,7 +128,7 @@ end
 
 It's possible to define multiple indexes for a same model.
 
-To do this just specify an array of index names, or in your `index_name/0` runtime function, return an array.
+To achieve this, just specify an array of index names, or simply return an array in your `index_name/0` runtime function
 
 ```elixir
 defmodule Article do
