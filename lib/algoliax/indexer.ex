@@ -3,7 +3,7 @@ defmodule Algoliax.Indexer do
 
   ### Usage
 
-  - `:index_name`: specificy the index where the object will be added on. **Required**
+  - `:index_name`: specificy the index or indexes where the object will be added on. **Required**
   - `:object_id`: specify the attribute used to as algolia objectID. Default `:id`.
   - `:repo`: Specify an Ecto repo to be use to fecth records. Default `nil`
   - `:cursor_field`: specify the column to be used to order and go through a given table. Default `:id`
@@ -140,6 +140,10 @@ defmodule Algoliax.Indexer do
       "processingTimeMS" => 1,
       "query" => "john"
       }}
+
+      iex> PeopleWithMultipleIndexes.search("John")
+
+      [{:ok, %{}}, {:ok, %{}}]
   """
 
   @callback search(query :: binary(), params :: map()) ::
@@ -167,6 +171,8 @@ defmodule Algoliax.Indexer do
           ],
           "processingTimeMS" => 1
         }}
+      iex> PeopleWithMultipleIndexes.search_facet("age")
+      [{:ok, %{}}, {:ok, %{}}]
   """
   @callback search_facet(facet_name :: binary(), facet_query :: binary(), params :: map()) ::
               {:ok, Algoliax.Response.t()} | {:not_indexable, model :: map()}
@@ -178,6 +184,9 @@ defmodule Algoliax.Indexer do
       people = %People{reference: 10, last_name: "Doe", first_name: "John", age: 20},
 
       People.save_object(people)
+
+      iex> PeopleWithMultipleIndexes.save_object(people)
+      [{:ok, %{}}, {:ok, %{}}]
   """
   @callback save_object(object :: map() | struct()) ::
               {:ok, Algoliax.Response.t()} | {:not_indexable, model :: map()}
@@ -281,10 +290,20 @@ defmodule Algoliax.Indexer do
 
   @doc """
   Build the object sent to algolia. By default the object contains only `objectID` set by Algoliax.Indexer
+  build_object/2 provides the index name for the ongoing build
 
   ## Example
       @impl Algoliax.Indexer
       def build_object(person) do
+        %{
+          age: person.age,
+          last_name: person.last_name,
+          first_name: person.first_name
+        }
+      end
+
+      @impl Algoliax.Indexer
+      def build_object(person, _index_name) do
         %{
           age: person.age,
           last_name: person.last_name,
