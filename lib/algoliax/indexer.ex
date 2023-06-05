@@ -308,6 +308,7 @@ defmodule Algoliax.Indexer do
       end
   """
   @callback build_object(model :: map()) :: map()
+  @callback build_object(model :: map(), index :: String.t()) :: map()
 
   @doc """
   Check if current object must be indexed or not. By default it's always true. To override this behaviour override this function in your model
@@ -445,6 +446,11 @@ defmodule Algoliax.Indexer do
       end
 
       @impl Algoliax.Indexer
+      def build_object(_, _) do
+        %{}
+      end
+
+      @impl Algoliax.Indexer
       def to_be_indexed?(_) do
         true
       end
@@ -454,7 +460,7 @@ defmodule Algoliax.Indexer do
         :default
       end
 
-      defoverridable(to_be_indexed?: 1, build_object: 1, get_object_id: 1)
+      defoverridable(to_be_indexed?: 1, build_object: 1, build_object: 2, get_object_id: 1)
     end
   end
 end

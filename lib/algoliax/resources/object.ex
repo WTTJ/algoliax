@@ -25,20 +25,27 @@ defmodule Algoliax.Resources.Object do
 
   def save_objects(module, settings, models, opts) do
     objects =
-      Enum.map(models, fn model ->
-        action = get_action(module, model, opts)
+      index_name(module, settings)
+      |> Enum.reduce(%{}, fn index_name, acc ->
+        objects =
+          Enum.map(models, fn model ->
+            action = get_action(module, model, opts)
 
-        if action do
-          build_batch_object(module, settings, model, action)
-        end
+            if action do
+              build_batch_object(module, settings, model, action, index_name)
+            end
+          end)
+          |> Enum.reject(&is_nil/1)
+
+        Map.put(acc, index_name, objects)
       end)
-      |> Enum.reject(&is_nil/1)
+      |> Enum.reject(fn {_index_name, objects} -> Enum.empty?(objects) end)
 
     if Enum.any?(objects) do
       call_indexer(:save_objects, module, settings, models, opts)
 
-      index_name(module, settings)
-      |> Enum.map(fn index_name ->
+      objects
+      |> Enum.map(fn {index_name, objects} ->
         request(%{
           action: :save_objects,
           url_params: [index_name: index_name],
@@ -63,14 +70,14 @@ defmodule Algoliax.Resources.Object do
     end
   end
 
-  defp save_object(module, settings, model, index) do
+  defp save_object(module, settings, model, index_name) do
     if apply(module, :to_be_indexed?, [model]) do
-      object = build_object(module, settings, model)
+      object = build_object(module, settings, model, index_name)
       call_indexer(:save_object, module, settings, model)
 
       request(%{
         action: :save_object,
-        url_params: [index_name: index, object_id: object.objectID],
+        url_params: [index_name: index_name, object_id: object.objectID],
         body: object
       })
     else
@@ -125,22 +132,25 @@ defmodule Algoliax.Resources.Object do
     end
   end
 
-  defp build_batch_object(module, settings, model, "deleteObject" = action) do
+  defp build_batch_object(module, settings, model, "deleteObject" = action, _index_name) do
     %{
       action: action,
       body: %{objectID: get_object_id(module, settings, model)}
     }
   end
 
-  defp build_batch_object(module, settings, model, action) do
+  defp build_batch_object(module, settings, model, action, index_name) do
     %{
       action: action,
-      body: build_object(module, settings, model)
+      body: build_object(module, settings, model, index_name)
     }
   end
 
-  defp build_object(module, settings, model) do
-    apply(module, :build_object, [model])
+  defp build_object(module, settings, model, index_name) do
+    case apply(module, :build_object, [model, index_name]) do
+      object when object == %{} -> apply(module, :build_object, [model])
+      object -> object
+    end
     |> Map.put(:objectID, get_object_id(module, settings, model))
   end
 
