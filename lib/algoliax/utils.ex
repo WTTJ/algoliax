@@ -54,4 +54,11 @@ defmodule Algoliax.Utils do
     |> Atom.to_string()
     |> Inflex.camelize(:lower)
   end
+
+  def render_result(result) do
+    case result do
+      [single_result] -> single_result
+      [_ | _] = multiple_result -> multiple_result
+    end
+  end
 end

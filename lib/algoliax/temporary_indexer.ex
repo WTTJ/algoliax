@@ -3,7 +3,7 @@ defmodule Algoliax.TemporaryIndexer do
   Execute save_object(s) on temporary index to keep it synchronized with main index
   """
 
-  import Algoliax.Utils, only: [index_name: 2]
+  import Algoliax.Utils, only: [index_name: 2, render_result: 1]
 
   alias Algoliax.SettingsStore
   alias Algoliax.Resources.Object
@@ -24,10 +24,7 @@ defmodule Algoliax.TemporaryIndexer do
         execute(action, module, tmp_settings, models, opts)
       end
     end)
-    |> case do
-      [single_result] -> single_result
-      [_ | _] = multiple_result -> multiple_result
-    end
+    |> render_result()
   end
 
   defp execute(:save_objects, module, settings, models, opts) do

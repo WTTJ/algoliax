@@ -19,7 +19,7 @@ defmodule Algoliax.Schemas.PeopleWithAssociationMultipleIndexes do
       custom_ranking: ["desc(updated_at)"]
     ]
 
-  schema "peoples_with_associations_multiple_indexes" do
+  schema "people_with_associations_multiple_indexes" do
     field(:reference, Ecto.UUID)
     field(:last_name)
     field(:first_name)
