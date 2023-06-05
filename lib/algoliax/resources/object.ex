@@ -1,11 +1,13 @@
 defmodule Algoliax.Resources.Object do
   @moduledoc false
 
-  import Algoliax.Utils, only: [index_name: 2, object_id_attribute: 1]
+  import Algoliax.Utils, only: [index_name: 2, object_id_attribute: 1, render_result: 1]
   import Algoliax.Client, only: [request: 1]
 
   alias Algoliax.TemporaryIndexer
 
+  # TODO: mutli-query call
+  # TODO: retour save query
   def get_object(module, settings, model) do
     index_name(module, settings)
     |> Enum.map(fn index_name ->
@@ -17,10 +19,7 @@ defmodule Algoliax.Resources.Object do
         ]
       })
     end)
-    |> case do
-      [single_result] -> single_result
-      [_ | _] = multiple_result -> multiple_result
-    end
+    |> render_result()
   end
 
   def save_objects(module, settings, models, opts) do
@@ -52,10 +51,7 @@ defmodule Algoliax.Resources.Object do
           body: %{requests: objects}
         })
       end)
-      |> case do
-        [single_result] -> single_result
-        [_ | _] = multiple_result -> multiple_result
-      end
+      |> render_result()
     end
   end
 
@@ -64,10 +60,7 @@ defmodule Algoliax.Resources.Object do
     |> Enum.map(fn index_name ->
       save_object(module, settings, model, index_name)
     end)
-    |> case do
-      [single_result] -> single_result
-      [_ | _] = multiple_result -> multiple_result
-    end
+    |> render_result()
   end
 
   defp save_object(module, settings, model, index_name) do
@@ -98,10 +91,7 @@ defmodule Algoliax.Resources.Object do
         ]
       })
     end)
-    |> case do
-      [single_result] -> single_result
-      [_ | _] = multiple_result -> multiple_result
-    end
+    |> render_result()
   end
 
   def delete_by(module, settings, matching_filter) do
@@ -126,10 +116,7 @@ defmodule Algoliax.Resources.Object do
         body: body
       })
     end)
-    |> case do
-      [single_result] -> single_result
-      [_ | _] = multiple_result -> multiple_result
-    end
+    |> render_result()
   end
 
   defp build_batch_object(module, settings, model, "deleteObject" = action, _index_name) do

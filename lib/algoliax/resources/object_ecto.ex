@@ -4,6 +4,7 @@ if Code.ensure_loaded?(Ecto) do
 
     import Ecto.Query
     import Algoliax.Client, only: [request: 1]
+    import Algoliax.Utils, only: [index_name: 2, render_result: 1, schemas: 2]
 
     alias Algoliax.Resources.Object
 
@@ -58,7 +59,7 @@ if Code.ensure_loaded?(Ecto) do
     end
 
     defp fetch_schemas(module, settings) do
-      Algoliax.Utils.schemas(module, settings)
+      schemas(settings, [module])
       |> Enum.map(fn
         m when is_tuple(m) -> m
         m -> {m, []}
@@ -69,7 +70,7 @@ if Code.ensure_loaded?(Ecto) do
     def reindex_atomic(module, settings) do
       Algoliax.UtilsEcto.repo(settings)
 
-      Algoliax.Utils.index_name(module, settings)
+      index_name(module, settings)
       |> Enum.map(fn index_name ->
         tmp_index_name = :"#{index_name}.tmp"
 
@@ -97,10 +98,7 @@ if Code.ensure_loaded?(Ecto) do
           Algoliax.SettingsStore.stop_reindexing(index_name)
         end
       end)
-      |> case do
-        [single_result] -> single_result
-        [_ | _] = multiple_result -> multiple_result
-      end
+      |> render_result()
     end
   end
 end

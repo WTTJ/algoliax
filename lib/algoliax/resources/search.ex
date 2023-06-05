@@ -1,6 +1,6 @@
 defmodule Algoliax.Resources.Search do
   @moduledoc false
-  import Algoliax.Utils, only: [index_name: 2, camelize: 1]
+  import Algoliax.Utils, only: [index_name: 2, camelize: 1, render_result: 1]
   import Algoliax.Client, only: [request: 1]
 
   def search(module, settings, query, params) do
@@ -18,10 +18,7 @@ defmodule Algoliax.Resources.Search do
         body: body
       })
     end)
-    |> case do
-      [single_result] -> single_result
-      [_ | _] = multiple_result -> multiple_result
-    end
+    |> render_result()
   end
 
   def search_facet(module, settings, facet_name, facet_query, params) do
@@ -43,9 +40,6 @@ defmodule Algoliax.Resources.Search do
         body: body
       })
     end)
-    |> case do
-      [single_result] -> single_result
-      [_ | _] = multiple_result -> multiple_result
-    end
+    |> render_result()
   end
 end
