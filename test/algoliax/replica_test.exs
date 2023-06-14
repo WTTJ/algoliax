@@ -38,16 +38,28 @@ defmodule AlgoliaxTest.ReplicaTest do
     end
 
     test "configure_index/0 with multiple indexes" do
-      assert [{:ok, res}, {:ok, res2}] = PeopleWithReplicasMultipleIndexes.configure_index()
+      assert {:ok, [res, res2]} = PeopleWithReplicasMultipleIndexes.configure_index()
 
-      assert %Algoliax.Response{
-               response: %{"taskID" => _, "updatedAt" => _},
-               params: [index_name: :algoliax_people_replicas_en]
+      assert %Algoliax.Responses{
+               index_name: :algoliax_people_replicas_en,
+               responses: [
+                 {:ok,
+                  %Algoliax.Response{
+                    response: %{"taskID" => _, "updatedAt" => _},
+                    params: [index_name: :algoliax_people_replicas_en]
+                  }}
+               ]
              } = res
 
-      assert %Algoliax.Response{
-               response: %{"taskID" => _, "updatedAt" => _},
-               params: [index_name: :algoliax_people_replicas_fr]
+      assert %Algoliax.Responses{
+               index_name: :algoliax_people_replicas_fr,
+               responses: [
+                 {:ok,
+                  %Algoliax.Response{
+                    response: %{"taskID" => _, "updatedAt" => _},
+                    params: [index_name: :algoliax_people_replicas_fr]
+                  }}
+               ]
              } = res2
 
       assert_request("PUT", ~r/algoliax_people_replicas_en/, %{
@@ -124,16 +136,28 @@ defmodule AlgoliaxTest.ReplicaTest do
         age: 77
       }
 
-      assert [{:ok, res}, {:ok, res2}] = PeopleWithReplicasMultipleIndexes.save_object(person)
+      assert {:ok, [res, res2]} = PeopleWithReplicasMultipleIndexes.save_object(person)
 
-      assert %Algoliax.Response{
-               response: %{"taskID" => _, "updatedAt" => _, "objectID" => ^reference},
-               params: [index_name: :algoliax_people_replicas_en, object_id: ^reference]
+      assert %Algoliax.Responses{
+               index_name: :algoliax_people_replicas_en,
+               responses: [
+                 {:ok,
+                  %Algoliax.Response{
+                    response: %{"taskID" => _, "updatedAt" => _, "objectID" => ^reference},
+                    params: [index_name: :algoliax_people_replicas_en, object_id: ^reference]
+                  }}
+               ]
              } = res
 
-      assert %Algoliax.Response{
-               response: %{"taskID" => _, "updatedAt" => _, "objectID" => ^reference},
-               params: [index_name: :algoliax_people_replicas_fr, object_id: ^reference]
+      assert %Algoliax.Responses{
+               index_name: :algoliax_people_replicas_fr,
+               responses: [
+                 {:ok,
+                  %Algoliax.Response{
+                    response: %{"taskID" => _, "updatedAt" => _, "objectID" => ^reference},
+                    params: [index_name: :algoliax_people_replicas_fr, object_id: ^reference]
+                  }}
+               ]
              } = res2
 
       assert_request("PUT", ~r/algoliax_people_replicas_en/, %{
@@ -202,22 +226,34 @@ defmodule AlgoliaxTest.ReplicaTest do
         }
       ]
 
-      assert [{:ok, res}, {:ok, res2}] = PeopleWithReplicasMultipleIndexes.save_objects(people)
+      assert {:ok, [res, res2]} = PeopleWithReplicasMultipleIndexes.save_objects(people)
 
-      assert %Algoliax.Response{
-               response: %{
-                 "taskID" => _,
-                 "objectIDs" => [^reference1, ^reference2]
-               },
-               params: [index_name: :algoliax_people_replicas_en]
+      assert %Algoliax.Responses{
+               index_name: :algoliax_people_replicas_en,
+               responses: [
+                 {:ok,
+                  %Algoliax.Response{
+                    response: %{
+                      "taskID" => _,
+                      "objectIDs" => [^reference1, ^reference2]
+                    },
+                    params: [index_name: :algoliax_people_replicas_en]
+                  }}
+               ]
              } = res
 
-      assert %Algoliax.Response{
-               response: %{
-                 "taskID" => _,
-                 "objectIDs" => [^reference1, ^reference2]
-               },
-               params: [index_name: :algoliax_people_replicas_fr]
+      assert %Algoliax.Responses{
+               index_name: :algoliax_people_replicas_fr,
+               responses: [
+                 {:ok,
+                  %Algoliax.Response{
+                    response: %{
+                      "taskID" => _,
+                      "objectIDs" => [^reference1, ^reference2]
+                    },
+                    params: [index_name: :algoliax_people_replicas_fr]
+                  }}
+               ]
              } = res2
 
       assert_request("POST", ~r/algoliax_people_replicas_en/, %{
@@ -256,16 +292,28 @@ defmodule AlgoliaxTest.ReplicaTest do
         age: 77
       }
 
-      assert [{:ok, res}, {:ok, res2}] = PeopleWithReplicasMultipleIndexes.get_object(person)
+      assert {:ok, [res, res2]} = PeopleWithReplicasMultipleIndexes.get_object(person)
 
-      assert %Algoliax.Response{
-               response: %{"objectID" => "known"},
-               params: [index_name: :algoliax_people_replicas_en, object_id: "known"]
+      assert %Algoliax.Responses{
+               index_name: :algoliax_people_replicas_en,
+               responses: [
+                 {:ok,
+                  %Algoliax.Response{
+                    response: %{"objectID" => "known"},
+                    params: [index_name: :algoliax_people_replicas_en, object_id: "known"]
+                  }}
+               ]
              } = res
 
-      assert %Algoliax.Response{
-               response: %{"objectID" => "known"},
-               params: [index_name: :algoliax_people_replicas_fr, object_id: "known"]
+      assert %Algoliax.Responses{
+               index_name: :algoliax_people_replicas_fr,
+               responses: [
+                 {:ok,
+                  %Algoliax.Response{
+                    response: %{"objectID" => "known"},
+                    params: [index_name: :algoliax_people_replicas_fr, object_id: "known"]
+                  }}
+               ]
              } = res2
 
       assert_request("GET", ~r/algoliax_people_replicas_en/, %{})
@@ -280,7 +328,7 @@ defmodule AlgoliaxTest.ReplicaTest do
         age: 77
       }
 
-      assert {:error, 404, _} = PeopleWithReplicas.get_object(person)
+      assert {:error, 404, _, _} = PeopleWithReplicas.get_object(person)
     end
 
     test "get_object/1 w/ unknown & multiple indexes" do
@@ -291,8 +339,17 @@ defmodule AlgoliaxTest.ReplicaTest do
         age: 77
       }
 
-      assert [{:error, 404, _}, {:error, 404, _}] =
-               PeopleWithReplicasMultipleIndexes.get_object(person)
+      assert {:ok,
+              [
+                %Algoliax.Responses{
+                  index_name: :algoliax_people_replicas_en,
+                  responses: [{:error, 404, "{}", _}]
+                },
+                %Algoliax.Responses{
+                  index_name: :algoliax_people_replicas_fr,
+                  responses: [{:error, 404, "{}", _}]
+                }
+              ]} = PeopleWithReplicasMultipleIndexes.get_object(person)
 
       assert_request("GET", ~r/algoliax_people_replicas_en/, %{})
       assert_request("GET", ~r/algoliax_people_replicas_fr/, %{})
@@ -318,7 +375,12 @@ defmodule AlgoliaxTest.ReplicaTest do
         age: 77
       }
 
-      assert [{:ok, _}, {:ok, _}] = PeopleWithReplicasMultipleIndexes.delete_object(person)
+      assert {:ok,
+              [
+                %Algoliax.Responses{index_name: :algoliax_people_replicas_en},
+                %Algoliax.Responses{index_name: :algoliax_people_replicas_fr}
+              ]} = PeopleWithReplicasMultipleIndexes.delete_object(person)
+
       assert_request("DELETE", ~r/algoliax_people_replicas_en/, %{})
       assert_request("DELETE", ~r/algoliax_people_replicas_fr/, %{})
     end
@@ -329,7 +391,12 @@ defmodule AlgoliaxTest.ReplicaTest do
     end
 
     test "delete_index/0 with multiple indexes" do
-      assert [{:ok, _}, {:ok, _}] = PeopleWithReplicasMultipleIndexes.delete_index()
+      assert {:ok,
+              [
+                %Algoliax.Responses{index_name: :algoliax_people_replicas_en},
+                %Algoliax.Responses{index_name: :algoliax_people_replicas_fr}
+              ]} = PeopleWithReplicasMultipleIndexes.delete_index()
+
       assert_request("DELETE", ~r/algoliax_people_replicas_en/, %{})
       assert_request("DELETE", ~r/algoliax_people_replicas_fr/, %{})
     end
@@ -341,16 +408,28 @@ defmodule AlgoliaxTest.ReplicaTest do
     end
 
     test "get_settings/0 with multiple indexes" do
-      assert [{:ok, res}, {:ok, res2}] = PeopleWithReplicasMultipleIndexes.get_settings()
+      assert {:ok, [res, res2]} = PeopleWithReplicasMultipleIndexes.get_settings()
 
-      assert %Algoliax.Response{
-               response: %{"searchableAttributes" => ["test"]},
-               params: [index_name: :algoliax_people_replicas_en]
+      assert %Algoliax.Responses{
+               index_name: :algoliax_people_replicas_en,
+               responses: [
+                 {:ok,
+                  %Algoliax.Response{
+                    response: %{"searchableAttributes" => ["test"]},
+                    params: [index_name: :algoliax_people_replicas_en]
+                  }}
+               ]
              } = res
 
-      assert %Algoliax.Response{
-               response: %{"searchableAttributes" => ["test"]},
-               params: [index_name: :algoliax_people_replicas_fr]
+      assert %Algoliax.Responses{
+               index_name: :algoliax_people_replicas_fr,
+               responses: [
+                 {:ok,
+                  %Algoliax.Response{
+                    response: %{"searchableAttributes" => ["test"]},
+                    params: [index_name: :algoliax_people_replicas_fr]
+                  }}
+               ]
              } = res2
 
       assert_request("GET", ~r/algoliax_people_replicas_en/, %{})
@@ -363,8 +442,11 @@ defmodule AlgoliaxTest.ReplicaTest do
     end
 
     test "search/2 with multiple indexes" do
-      assert [{:ok, _}, {:ok, _}] =
-               PeopleWithReplicasMultipleIndexes.search("john", %{hitsPerPage: 10})
+      assert {:ok,
+              [
+                %Algoliax.Responses{index_name: :algoliax_people_replicas_en},
+                %Algoliax.Responses{index_name: :algoliax_people_replicas_fr}
+              ]} = PeopleWithReplicasMultipleIndexes.search("john", %{hitsPerPage: 10})
 
       assert_request("POST", ~r/algoliax_people_replicas_en/, %{
         "query" => "john",
@@ -383,7 +465,12 @@ defmodule AlgoliaxTest.ReplicaTest do
     end
 
     test "search_facet/2 with multiple indexes" do
-      assert [{:ok, _}, {:ok, _}] = PeopleWithReplicasMultipleIndexes.search_facet("age", "2")
+      assert {:ok,
+              [
+                %Algoliax.Responses{index_name: :algoliax_people_replicas_en},
+                %Algoliax.Responses{index_name: :algoliax_people_replicas_fr}
+              ]} = PeopleWithReplicasMultipleIndexes.search_facet("age", "2")
+
       assert_request("POST", ~r/algoliax_people_replicas_en/, %{"facetQuery" => "2"})
       assert_request("POST", ~r/algoliax_people_replicas_fr/, %{"facetQuery" => "2"})
     end

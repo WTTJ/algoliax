@@ -211,8 +211,14 @@ defmodule AlgoliaxTest.Schema do
   test "reindex multiple indexes" do
     assert {:ok,
             [
-              [{:ok, %Algoliax.Response{}}, {:ok, %Algoliax.Response{}}],
-              [{:ok, %Algoliax.Response{}}, {:ok, %Algoliax.Response{}}]
+              %Algoliax.Responses{
+                index_name: :algoliax_people_en,
+                responses: [{:ok, %Algoliax.Response{}}, {:ok, %Algoliax.Response{}}]
+              },
+              %Algoliax.Responses{
+                index_name: :algoliax_people_fr,
+                responses: [{:ok, %Algoliax.Response{}}, {:ok, %Algoliax.Response{}}]
+              }
             ]} = PeopleEctoMultipleIndexes.reindex()
 
     assert_request("POST", ~r/algoliax_people_en/, %{
@@ -302,18 +308,22 @@ defmodule AlgoliaxTest.Schema do
   test "reindex multiple indexes with force delete" do
     assert {:ok,
             [
-              [
-                {:ok, %Algoliax.Response{}},
-                {:ok, %Algoliax.Response{}}
-              ],
-              [
-                {:ok, %Algoliax.Response{}},
-                {:ok, %Algoliax.Response{}}
-              ],
-              [
-                {:ok, %Algoliax.Response{}},
-                {:ok, %Algoliax.Response{}}
-              ]
+              %Algoliax.Responses{
+                index_name: :algoliax_people_en,
+                responses: [
+                  {:ok, %Algoliax.Response{}},
+                  {:ok, %Algoliax.Response{}},
+                  {:ok, %Algoliax.Response{}}
+                ]
+              },
+              %Algoliax.Responses{
+                index_name: :algoliax_people_fr,
+                responses: [
+                  {:ok, %Algoliax.Response{}},
+                  {:ok, %Algoliax.Response{}},
+                  {:ok, %Algoliax.Response{}}
+                ]
+              }
             ]} = PeopleEctoMultipleIndexes.reindex(force_delete: true)
 
     assert_request("POST", ~r/algoliax_people_en/, %{
@@ -374,8 +384,21 @@ defmodule AlgoliaxTest.Schema do
         where: p.age == 35
       )
 
-    assert {:ok, [[{:ok, %Algoliax.Response{}}, {:ok, %Algoliax.Response{}}]]} =
-             PeopleEctoMultipleIndexes.reindex(query)
+    assert {:ok,
+            [
+              %Algoliax.Responses{
+                index_name: :algoliax_people_en,
+                responses: [
+                  {:ok, %Algoliax.Response{}}
+                ]
+              },
+              %Algoliax.Responses{
+                index_name: :algoliax_people_fr,
+                responses: [
+                  {:ok, %Algoliax.Response{}}
+                ]
+              }
+            ]} = PeopleEctoMultipleIndexes.reindex(query)
 
     assert_request("POST", ~r/algoliax_people_en/, %{
       "requests" => [
@@ -423,14 +446,20 @@ defmodule AlgoliaxTest.Schema do
 
     assert {:ok,
             [
-              [
-                {:ok, %Algoliax.Response{}},
-                {:ok, %Algoliax.Response{}}
-              ],
-              [
-                {:ok, %Algoliax.Response{}},
-                {:ok, %Algoliax.Response{}}
-              ]
+              %Algoliax.Responses{
+                index_name: :algoliax_people_en,
+                responses: [
+                  {:ok, %Algoliax.Response{}},
+                  {:ok, %Algoliax.Response{}}
+                ]
+              },
+              %Algoliax.Responses{
+                index_name: :algoliax_people_fr,
+                responses: [
+                  {:ok, %Algoliax.Response{}},
+                  {:ok, %Algoliax.Response{}}
+                ]
+              }
             ]} = PeopleEctoMultipleIndexes.reindex(query, force_delete: true)
 
     assert_request("POST", ~r/algoliax_people_en/, %{
@@ -479,7 +508,7 @@ defmodule AlgoliaxTest.Schema do
     })
   end
 
-  test "reindex multiple indeixes atomic" do
+  test "reindex atomic for multiple indexes" do
     assert [{:ok, :completed}, {:ok, :completed}] = PeopleEctoMultipleIndexes.reindex_atomic()
 
     assert_request("POST", ~r/algoliax_people_en/, %{
@@ -566,18 +595,22 @@ defmodule AlgoliaxTest.Schema do
   test "reindex multiple indexes without an id column" do
     assert {:ok,
             [
-              [
-                {:ok, %Algoliax.Response{}},
-                {:ok, %Algoliax.Response{}}
-              ],
-              [
-                {:ok, %Algoliax.Response{}},
-                {:ok, %Algoliax.Response{}}
-              ],
-              [
-                {:ok, %Algoliax.Response{}},
-                {:ok, %Algoliax.Response{}}
-              ]
+              %Algoliax.Responses{
+                index_name: :algoliax_people_without_id_en,
+                responses: [
+                  {:ok, %Algoliax.Response{}},
+                  {:ok, %Algoliax.Response{}},
+                  {:ok, %Algoliax.Response{}}
+                ]
+              },
+              %Algoliax.Responses{
+                index_name: :algoliax_people_without_id_fr,
+                responses: [
+                  {:ok, %Algoliax.Response{}},
+                  {:ok, %Algoliax.Response{}},
+                  {:ok, %Algoliax.Response{}}
+                ]
+              }
             ]} = PeopleWithoutIdEctoMultipleIndexes.reindex()
 
     assert_request("POST", ~r/algoliax_people_without_id_en/, %{
@@ -627,7 +660,7 @@ defmodule AlgoliaxTest.Schema do
   end
 
   test "save_object/1 without attribute(s) and multiple indexes" do
-    assert [{:ok, _}, {:ok, _}] =
+    assert {:ok, [%Algoliax.Responses{}, %Algoliax.Responses{}]} =
              PeopleWithSchemasMultipleIndexes.save_object(%Beer{
                kind: "brune",
                name: "chimay",
@@ -710,7 +743,21 @@ defmodule AlgoliaxTest.Schema do
         where: b.name == "chimay"
       )
 
-    assert {:ok, [[{:ok, _}, {:ok, _}]]} = PeopleWithSchemasMultipleIndexes.reindex(query)
+    assert {:ok,
+            [
+              %Algoliax.Responses{
+                index_name: :algoliax_with_schemas_en,
+                responses: [
+                  {:ok, %Algoliax.Response{}}
+                ]
+              },
+              %Algoliax.Responses{
+                index_name: :algoliax_with_schemas_fr,
+                responses: [
+                  {:ok, %Algoliax.Response{}}
+                ]
+              }
+            ]} = PeopleWithSchemasMultipleIndexes.reindex(query)
 
     assert_request("POST", ~r/algoliax_with_schemas_en/, %{
       "requests" => [
@@ -738,7 +785,22 @@ defmodule AlgoliaxTest.Schema do
 
   test "reindex/1 with schemas, query as keyword list and multiple indexes" do
     query = %{where: [name: "heineken"]}
-    assert {:ok, [[{:ok, _}, {:ok, _}]]} = PeopleWithSchemasMultipleIndexes.reindex(query)
+
+    assert {:ok,
+            [
+              %Algoliax.Responses{
+                index_name: :algoliax_with_schemas_en,
+                responses: [
+                  {:ok, %Algoliax.Response{}}
+                ]
+              },
+              %Algoliax.Responses{
+                index_name: :algoliax_with_schemas_fr,
+                responses: [
+                  {:ok, %Algoliax.Response{}}
+                ]
+              }
+            ]} = PeopleWithSchemasMultipleIndexes.reindex(query)
 
     assert_request("POST", ~r/algoliax_with_schemas_en/, %{
       "requests" => [
@@ -798,9 +860,22 @@ defmodule AlgoliaxTest.Schema do
     test "reindex with multiple indexes" do
       assert {:ok,
               [
-                [{:ok, %Algoliax.Response{}}, {:ok, %Algoliax.Response{}}],
-                [{:ok, %Algoliax.Response{}}, {:ok, %Algoliax.Response{}}],
-                [{:ok, %Algoliax.Response{}}, {:ok, %Algoliax.Response{}}]
+                %Algoliax.Responses{
+                  index_name: :algoliax_people_with_custom_object_id_en,
+                  responses: [
+                    {:ok, %Algoliax.Response{}},
+                    {:ok, %Algoliax.Response{}},
+                    {:ok, %Algoliax.Response{}}
+                  ]
+                },
+                %Algoliax.Responses{
+                  index_name: :algoliax_people_with_custom_object_id_fr,
+                  responses: [
+                    {:ok, %Algoliax.Response{}},
+                    {:ok, %Algoliax.Response{}},
+                    {:ok, %Algoliax.Response{}}
+                  ]
+                }
               ]} = PeopleWithCustomObjectIdMultipleIndexes.reindex()
 
       assert_request("POST", ~r/algoliax_people_with_custom_object_id_en/, %{

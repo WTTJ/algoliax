@@ -57,8 +57,33 @@ defmodule Algoliax.Utils do
 
   def render_result(result) do
     case result do
-      [single_result] -> single_result
-      [_ | _] = multiple_result -> multiple_result
+      [single_result] ->
+        single_result
+
+      [_ | _] = multiple_result ->
+        multiple_result
+        |> List.flatten()
+        |> Enum.reject(&is_nil/1)
+        |> case do
+          [{:ok, :completed} | _] = results ->
+            results
+
+          results ->
+            results =
+              results
+              |> Enum.group_by(fn
+                {:ok, %Algoliax.Response{params: params}} -> params[:index_name]
+                {:error, _, _, %{url_params: params}} -> params[:index_name]
+              end)
+              |> Enum.map(fn {index_name, results} ->
+                %Algoliax.Responses{
+                  index_name: index_name,
+                  responses: results
+                }
+              end)
+
+            {:ok, results}
+        end
     end
   end
 end
