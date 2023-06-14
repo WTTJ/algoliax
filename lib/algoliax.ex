@@ -88,8 +88,7 @@ defmodule Algoliax do
 
   def wait_task({:ok, responses}) when is_list(responses) do
     responses
-    |> Enum.map(fn %Algoliax.Responses{responses: tasks} -> wait_task(tasks) end)
-    |> List.flatten()
+    |> Enum.flat_map(fn %Algoliax.Responses{responses: tasks} -> wait_task(tasks) end)
   end
 
   def wait_task(tasks) when is_list(tasks) do
