@@ -1,7 +1,7 @@
 defmodule Algoliax.Resources.Index do
   @moduledoc false
 
-  import Algoliax.Utils, only: [index_name: 2, algolia_settings: 1, render_result: 1]
+  import Algoliax.Utils, only: [index_name: 2, algolia_settings: 1, render_response: 1]
   import Algoliax.Client, only: [request: 1]
 
   alias Algoliax.{Settings, SettingsStore}
@@ -60,7 +60,7 @@ defmodule Algoliax.Resources.Index do
       SettingsStore.set_settings(index_name, algolia_remote_settings)
       algolia_remote_settings
     end)
-    |> render_result()
+    |> render_response()
   end
 
   def configure_index(module, settings) do
@@ -76,7 +76,7 @@ defmodule Algoliax.Resources.Index do
       configure_replicas(module, settings)
       r
     end)
-    |> render_result()
+    |> render_response()
   end
 
   def configure_replicas(module, settings) do
@@ -107,7 +107,7 @@ defmodule Algoliax.Resources.Index do
     |> Enum.map(fn index_name ->
       request(%{action: :delete_index, url_params: [index_name: index_name]})
     end)
-    |> render_result()
+    |> render_response()
   end
 
   defp settings_to_algolia_settings(module, settings, replica_index) do
