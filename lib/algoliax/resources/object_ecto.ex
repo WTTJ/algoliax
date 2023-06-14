@@ -4,38 +4,17 @@ if Code.ensure_loaded?(Ecto) do
 
     import Ecto.Query
     import Algoliax.Client, only: [request: 1]
-    import Algoliax.Utils, only: [index_name: 2, render_result: 1, schemas: 2]
+    import Algoliax.Utils, only: [index_name: 2, schemas: 2]
 
     alias Algoliax.Resources.Object
 
     def reindex(module, settings, %Ecto.Query{} = query, opts) do
       repo = Algoliax.UtilsEcto.repo(settings)
 
-      acc =
-        Algoliax.UtilsEcto.find_in_batches(repo, query, 0, settings, fn batch ->
-          Object.save_objects(module, settings, batch, opts)
-        end)
-        |> Enum.reject(&is_nil/1)
-        |> case do
-          [{:ok, %Algoliax.Response{}}] = objects ->
-            objects
-
-          [{:ok, %Algoliax.Response{}} | _] = objects ->
-            objects
-
-          objects ->
-            objects
-            |> Enum.reduce([], fn {:ok, responses}, acc -> acc ++ responses end)
-            |> Enum.group_by(& &1.index_name)
-            |> Enum.map(fn {index_name, list} ->
-              %Algoliax.Responses{
-                index_name: index_name,
-                responses: Enum.flat_map(list, & &1.responses)
-              }
-            end)
-        end
-
-      {:ok, acc}
+      Algoliax.UtilsEcto.find_in_batches(repo, query, 0, settings, fn batch ->
+        Object.save_objects(module, settings, batch, opts)
+      end)
+      |> render_reindex()
     end
 
     def reindex(module, settings, nil, opts) do
@@ -45,49 +24,28 @@ if Code.ensure_loaded?(Ecto) do
     def reindex(module, settings, query_filters, opts) when is_map(query_filters) do
       repo = Algoliax.UtilsEcto.repo(settings)
 
-      acc =
-        module
-        |> fetch_schemas(settings)
-        |> Enum.reduce([], fn {mod, preloads}, acc ->
-          where_filters = Map.get(query_filters, :where, [])
+      module
+      |> fetch_schemas(settings)
+      |> Enum.reduce([], fn {mod, preloads}, acc ->
+        where_filters = Map.get(query_filters, :where, [])
 
-          query =
-            from(m in mod)
-            |> where(^where_filters)
-            |> preload(^preloads)
+        query =
+          from(m in mod)
+          |> where(^where_filters)
+          |> preload(^preloads)
 
-          Algoliax.UtilsEcto.find_in_batches(
-            repo,
-            query,
-            0,
-            settings,
-            fn batch ->
-              Object.save_objects(module, settings, batch, opts)
-            end,
-            acc
-          )
-        end)
-        |> Enum.reject(&is_nil/1)
-        |> case do
-          [{:ok, %Algoliax.Response{}}] = objects ->
-            objects
-
-          [{:ok, %Algoliax.Response{}} | _] = objects ->
-            objects
-
-          objects ->
-            objects
-            |> Enum.reduce([], fn {:ok, responses}, acc -> acc ++ responses end)
-            |> Enum.group_by(& &1.index_name)
-            |> Enum.map(fn {index_name, list} ->
-              %Algoliax.Responses{
-                index_name: index_name,
-                responses: Enum.flat_map(list, & &1.responses)
-              }
-            end)
-        end
-
-      {:ok, acc}
+        Algoliax.UtilsEcto.find_in_batches(
+          repo,
+          query,
+          0,
+          settings,
+          fn batch ->
+            Object.save_objects(module, settings, batch, opts)
+          end,
+          acc
+        )
+      end)
+      |> render_reindex()
     end
 
     def reindex(_, _, _, _) do
@@ -134,7 +92,33 @@ if Code.ensure_loaded?(Ecto) do
           Algoliax.SettingsStore.stop_reindexing(index_name)
         end
       end)
-      |> render_result()
+      |> render_reindex_atomic()
     end
+
+    defp render_reindex(responses) do
+      results =
+        responses
+        |> Enum.reject(&is_nil/1)
+        |> case do
+          [{:ok, %Algoliax.Response{}} | _] = single_index_responses ->
+            single_index_responses
+
+          [{:ok, [%Algoliax.Responses{} | _]} | _] = multiple_index_responses ->
+            multiple_index_responses
+            |> Enum.reduce([], fn {:ok, responses}, acc -> acc ++ responses end)
+            |> Enum.group_by(& &1.index_name)
+            |> Enum.map(fn {index_name, list} ->
+              %Algoliax.Responses{
+                index_name: index_name,
+                responses: Enum.flat_map(list, & &1.responses)
+              }
+            end)
+        end
+
+      {:ok, results}
+    end
+
+    defp render_reindex_atomic([response]), do: response
+    defp render_reindex_atomic([_ | _] = responses), do: responses
   end
 end

@@ -1,7 +1,7 @@
 defmodule Algoliax.Resources.Object do
   @moduledoc false
 
-  import Algoliax.Utils, only: [index_name: 2, object_id_attribute: 1, render_result: 1]
+  import Algoliax.Utils, only: [index_name: 2, object_id_attribute: 1, render_response: 1]
   import Algoliax.Client, only: [request: 1]
 
   alias Algoliax.TemporaryIndexer
@@ -19,7 +19,7 @@ defmodule Algoliax.Resources.Object do
         ]
       })
     end)
-    |> render_result()
+    |> render_response()
   end
 
   def save_objects(module, settings, models, opts) do
@@ -51,7 +51,7 @@ defmodule Algoliax.Resources.Object do
           body: %{requests: objects}
         })
       end)
-      |> render_result()
+      |> render_response()
     end
   end
 
@@ -60,7 +60,7 @@ defmodule Algoliax.Resources.Object do
     |> Enum.map(fn index_name ->
       save_object(module, settings, model, index_name)
     end)
-    |> render_result()
+    |> render_response()
   end
 
   defp save_object(module, settings, model, index_name) do
@@ -91,7 +91,7 @@ defmodule Algoliax.Resources.Object do
         ]
       })
     end)
-    |> render_result()
+    |> render_response()
   end
 
   def delete_by(module, settings, matching_filter) do
@@ -116,7 +116,7 @@ defmodule Algoliax.Resources.Object do
         body: body
       })
     end)
-    |> render_result()
+    |> render_response()
   end
 
   defp build_batch_object(module, settings, model, "deleteObject" = action, _index_name) do
