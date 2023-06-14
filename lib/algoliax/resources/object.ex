@@ -6,8 +6,6 @@ defmodule Algoliax.Resources.Object do
 
   alias Algoliax.TemporaryIndexer
 
-  # TODO: mutli-query call
-  # TODO: retour save query
   def get_object(module, settings, model) do
     index_name(module, settings)
     |> Enum.map(fn index_name ->

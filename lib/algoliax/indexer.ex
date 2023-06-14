@@ -157,12 +157,13 @@ defmodule Algoliax.Indexer do
       }}
 
       iex> PeopleWithMultipleIndexes.search("John")
-
-      [{:ok, %{}}, {:ok, %{}}]
+      {:ok, [%{index_name: "people", responses: [%{"exhaustiveNbHits" => true, ...}, ...]}, ...]}
   """
 
   @callback search(query :: binary(), params :: map()) ::
-              {:ok, Algoliax.Response.t()} | {:not_indexable, model :: map()}
+              {:ok, Algoliax.Response.t()}
+              | {:ok, list(Algoliax.Responses.t())}
+              | {:not_indexable, model :: map()}
 
   @doc """
   Search for facet values
@@ -186,11 +187,14 @@ defmodule Algoliax.Indexer do
           ],
           "processingTimeMS" => 1
         }}
+
       iex> PeopleWithMultipleIndexes.search_facet("age")
-      [{:ok, %{}}, {:ok, %{}}]
+      {:ok, [%{index_name: "people", responses: [%{"exhaustiveNbHits" => true, ...}, ...]}, ...]}
   """
   @callback search_facet(facet_name :: binary(), facet_query :: binary(), params :: map()) ::
-              {:ok, Algoliax.Response.t()} | {:not_indexable, model :: map()}
+              {:ok, Algoliax.Response.t()}
+              | {:ok, list(Algoliax.Responses.t())}
+              | {:not_indexable, model :: map()}
 
   @doc """
   Add/update object. The object is added/updated to algolia with the object_id configured.
@@ -201,10 +205,12 @@ defmodule Algoliax.Indexer do
       People.save_object(people)
 
       iex> PeopleWithMultipleIndexes.save_object(people)
-      [{:ok, %{}}, {:ok, %{}}]
+      {:ok, [%{index_name: "people", responses: [%{"exhaustiveNbHits" => true, ...}, ...]}, ...]}
   """
   @callback save_object(object :: map() | struct()) ::
-              {:ok, Algoliax.Response.t()} | {:not_indexable, model :: map()}
+              {:ok, Algoliax.Response.t()}
+              | {:ok, list(Algoliax.Responses.t())}
+              | {:not_indexable, model :: map()}
 
   @doc """
   Save multiple object at once
@@ -224,7 +230,7 @@ defmodule Algoliax.Indexer do
       People.save_objects(peoples, force_delete: true)
   """
   @callback save_objects(models :: list(map()) | list(struct()), opts :: Keyword.t()) ::
-              {:ok, Algoliax.Response.t()} | {:error, map()}
+              {:ok, Algoliax.Response.t()} | {:ok, list(Algoliax.Responses.t())} | {:error, map()}
 
   @doc """
   Fetch object from algolia. By passing the model, the object is retrieved using the object_id configured
@@ -235,7 +241,7 @@ defmodule Algoliax.Indexer do
       People.get_object(people)
   """
   @callback get_object(model :: map() | struct()) ::
-              {:ok, Algoliax.Response.t()} | {:error, map()}
+              {:ok, Algoliax.Response.t()} | {:ok, list(Algoliax.Responses.t())} | {:error, map()}
 
   @doc """
   Delete object from algolia. By passing the model, the object is retrieved using the object_id configured
@@ -246,7 +252,7 @@ defmodule Algoliax.Indexer do
       People.delete_object(people)
   """
   @callback delete_object(model :: map() | struct()) ::
-              {:ok, Algoliax.Response.t()} | {:error, map()}
+              {:ok, Algoliax.Response.t()} | {:ok, list(Algoliax.Responses.t())} | {:error, map()}
 
   @doc """
   Delete objects from algolia. By passing a matching filter query, the records are retrieved and deleted.[Filters](https://www.algolia.com/doc/api-reference/api-parameters/filters/)
@@ -255,7 +261,7 @@ defmodule Algoliax.Indexer do
       People.delete_by("age > 18")
   """
   @callback delete_by(matching_filter :: String.t()) ::
-              {:ok, Algoliax.Response.t()} | {:error, map()}
+              {:ok, Algoliax.Response.t()} | {:ok, list(Algoliax.Responses.t())} | {:error, map()}
 
   if Code.ensure_loaded?(Ecto) do
     @doc """
@@ -282,7 +288,7 @@ defmodule Algoliax.Indexer do
     > NOTE: filters as Map supports only `:where` and equality
     """
     @callback reindex(query :: Ecto.Query.t(), opts :: Keyword.t()) ::
-                {:ok, [Algoliax.Response.t()]}
+                {:ok, [Algoliax.Response.t()]} | {:ok, list(Algoliax.Responses.t())}
 
     @doc """
     Reindex all objects ([Ecto](https://hexdocs.pm/ecto/Ecto.html) specific)
@@ -295,12 +301,13 @@ defmodule Algoliax.Indexer do
 
     - `:force_delete`: delete objects where `to_be_indexed?` is `false`
     """
-    @callback reindex(opts :: Keyword.t()) :: {:ok, [Algoliax.Response.t()]}
+    @callback reindex(opts :: Keyword.t()) ::
+                {:ok, [Algoliax.Response.t()]} | {:ok, list(Algoliax.Responses.t())}
 
     @doc """
     Reindex atomically ([Ecto](https://hexdocs.pm/ecto/Ecto.html) specific)
     """
-    @callback reindex_atomic() :: {:ok, :completed}
+    @callback reindex_atomic() :: {:ok, :completed} | list({:ok, :completed})
   end
 
   @doc """
@@ -366,17 +373,17 @@ defmodule Algoliax.Indexer do
   @doc """
   Get index settings from Algolia
   """
-  @callback get_settings() :: {:ok, map()} | {:error, map()}
+  @callback get_settings() :: {:ok, map()} | {:ok, list(map())} | {:error, map()}
 
   @doc """
   Configure index
   """
-  @callback configure_index() :: {:ok, map()} | {:error, map()}
+  @callback configure_index() :: {:ok, map()} | {:ok, list(map())} | {:error, map()}
 
   @doc """
   Delete index
   """
-  @callback delete_index() :: {:ok, map()} | {:error, map()}
+  @callback delete_index() :: {:ok, map()} | {:ok, list(map())} | {:error, map()}
 
   defmacro __using__(settings) do
     quote do
