@@ -16,6 +16,24 @@ if Code.ensure_loaded?(Ecto) do
           Object.save_objects(module, settings, batch, opts)
         end)
         |> Enum.reject(&is_nil/1)
+        |> case do
+          [{:ok, %Algoliax.Response{}}] = objects ->
+            objects
+
+          [{:ok, %Algoliax.Response{}} | _] = objects ->
+            objects
+
+          objects ->
+            objects
+            |> Enum.reduce([], fn {:ok, responses}, acc -> acc ++ responses end)
+            |> Enum.group_by(& &1.index_name)
+            |> Enum.map(fn {index_name, list} ->
+              %Algoliax.Responses{
+                index_name: index_name,
+                responses: Enum.flat_map(list, & &1.responses)
+              }
+            end)
+        end
 
       {:ok, acc}
     end
@@ -50,6 +68,24 @@ if Code.ensure_loaded?(Ecto) do
           )
         end)
         |> Enum.reject(&is_nil/1)
+        |> case do
+          [{:ok, %Algoliax.Response{}}] = objects ->
+            objects
+
+          [{:ok, %Algoliax.Response{}} | _] = objects ->
+            objects
+
+          objects ->
+            objects
+            |> Enum.reduce([], fn {:ok, responses}, acc -> acc ++ responses end)
+            |> Enum.group_by(& &1.index_name)
+            |> Enum.map(fn {index_name, list} ->
+              %Algoliax.Responses{
+                index_name: index_name,
+                responses: Enum.flat_map(list, & &1.responses)
+              }
+            end)
+        end
 
       {:ok, acc}
     end

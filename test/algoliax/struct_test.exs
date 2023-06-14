@@ -97,7 +97,7 @@ defmodule AlgoliaxTest.StructTest do
 
     test "get_object/1 w/ unknown" do
       person = %PeopleStruct{reference: "unknown", last_name: "Doe", first_name: "John", age: 77}
-      assert {:error, 404, _} = PeopleStruct.get_object(person)
+      assert {:error, 404, _, _} = PeopleStruct.get_object(person)
     end
 
     test "delete_object/1" do
@@ -143,16 +143,28 @@ defmodule AlgoliaxTest.StructTest do
 
   describe "struct with multiple indexes" do
     test "configure_index/0" do
-      assert [{:ok, res}, {:ok, res2}] = PeopleStructMultipleIndexes.configure_index()
+      assert {:ok, [res, res2]} = PeopleStructMultipleIndexes.configure_index()
 
-      assert %Algoliax.Response{
-               response: %{"taskID" => _, "updatedAt" => _},
-               params: [index_name: :algoliax_people_struct_en]
+      assert %Algoliax.Responses{
+               index_name: :algoliax_people_struct_en,
+               responses: [
+                 {:ok,
+                  %Algoliax.Response{
+                    response: %{"taskID" => _, "updatedAt" => _},
+                    params: [index_name: :algoliax_people_struct_en]
+                  }}
+               ]
              } = res
 
-      assert %Algoliax.Response{
-               response: %{"taskID" => _, "updatedAt" => _},
-               params: [index_name: :algoliax_people_struct_fr]
+      assert %Algoliax.Responses{
+               index_name: :algoliax_people_struct_fr,
+               responses: [
+                 {:ok,
+                  %Algoliax.Response{
+                    response: %{"taskID" => _, "updatedAt" => _},
+                    params: [index_name: :algoliax_people_struct_fr]
+                  }}
+               ]
              } = res2
 
       assert_request("PUT", ~r/algoliax_people_struct_en/, %{
@@ -176,16 +188,28 @@ defmodule AlgoliaxTest.StructTest do
         age: 77
       }
 
-      assert [{:ok, res}, {:ok, res2}] = PeopleStructMultipleIndexes.save_object(person)
+      assert {:ok, [res, res2]} = PeopleStructMultipleIndexes.save_object(person)
 
-      assert %Algoliax.Response{
-               response: %{"objectID" => ^reference, "taskID" => _, "updatedAt" => _},
-               params: [index_name: :algoliax_people_struct_en, object_id: ^reference]
+      assert %Algoliax.Responses{
+               index_name: :algoliax_people_struct_en,
+               responses: [
+                 {:ok,
+                  %Algoliax.Response{
+                    response: %{"objectID" => ^reference, "taskID" => _, "updatedAt" => _},
+                    params: [index_name: :algoliax_people_struct_en, object_id: ^reference]
+                  }}
+               ]
              } = res
 
-      assert %Algoliax.Response{
-               response: %{"objectID" => ^reference, "taskID" => _, "updatedAt" => _},
-               params: [index_name: :algoliax_people_struct_fr, object_id: ^reference]
+      assert %Algoliax.Responses{
+               index_name: :algoliax_people_struct_fr,
+               responses: [
+                 {:ok,
+                  %Algoliax.Response{
+                    response: %{"objectID" => ^reference, "taskID" => _, "updatedAt" => _},
+                    params: [index_name: :algoliax_people_struct_fr, object_id: ^reference]
+                  }}
+               ]
              } = res2
 
       assert_request("PUT", ~r/algoliax_people_struct_en/, %{
@@ -228,16 +252,28 @@ defmodule AlgoliaxTest.StructTest do
         }
       ]
 
-      assert [{:ok, res}, {:ok, res2}] = PeopleStructMultipleIndexes.save_objects(people)
+      assert {:ok, [res, res2]} = PeopleStructMultipleIndexes.save_objects(people)
 
-      assert %Algoliax.Response{
-               response: %{"taskID" => _, "objectIDs" => [^reference1]},
-               params: [index_name: :algoliax_people_struct_en]
+      assert %Algoliax.Responses{
+               index_name: :algoliax_people_struct_en,
+               responses: [
+                 {:ok,
+                  %Algoliax.Response{
+                    response: %{"taskID" => _, "objectIDs" => [^reference1]},
+                    params: [index_name: :algoliax_people_struct_en]
+                  }}
+               ]
              } = res
 
-      assert %Algoliax.Response{
-               response: %{"taskID" => _, "objectIDs" => [^reference1]},
-               params: [index_name: :algoliax_people_struct_fr]
+      assert %Algoliax.Responses{
+               index_name: :algoliax_people_struct_fr,
+               responses: [
+                 {:ok,
+                  %Algoliax.Response{
+                    response: %{"taskID" => _, "objectIDs" => [^reference1]},
+                    params: [index_name: :algoliax_people_struct_fr]
+                  }}
+               ]
              } = res2
 
       assert_request("POST", ~r/algoliax_people_struct_en/, %{
@@ -268,17 +304,29 @@ defmodule AlgoliaxTest.StructTest do
         }
       ]
 
-      assert [{:ok, res}, {:ok, res2}] =
+      assert {:ok, [res, res2]} =
                PeopleStructMultipleIndexes.save_objects(people, force_delete: true)
 
-      assert %Algoliax.Response{
-               response: %{"taskID" => _, "objectIDs" => [^reference1, ^reference2]},
-               params: [index_name: :algoliax_people_struct_en]
+      assert %Algoliax.Responses{
+               index_name: :algoliax_people_struct_en,
+               responses: [
+                 {:ok,
+                  %Algoliax.Response{
+                    response: %{"taskID" => _, "objectIDs" => [^reference1, ^reference2]},
+                    params: [index_name: :algoliax_people_struct_en]
+                  }}
+               ]
              } = res
 
-      assert %Algoliax.Response{
-               response: %{"taskID" => _, "objectIDs" => [^reference1, ^reference2]},
-               params: [index_name: :algoliax_people_struct_fr]
+      assert %Algoliax.Responses{
+               index_name: :algoliax_people_struct_fr,
+               responses: [
+                 {:ok,
+                  %Algoliax.Response{
+                    response: %{"taskID" => _, "objectIDs" => [^reference1, ^reference2]},
+                    params: [index_name: :algoliax_people_struct_fr]
+                  }}
+               ]
              } = res2
 
       assert_request("POST", ~r/algoliax_people_struct_en/, %{
@@ -304,16 +352,28 @@ defmodule AlgoliaxTest.StructTest do
         age: 77
       }
 
-      assert [{:ok, res}, {:ok, res2}] = PeopleStructMultipleIndexes.get_object(person)
+      assert {:ok, [res, res2]} = PeopleStructMultipleIndexes.get_object(person)
 
-      assert %Algoliax.Response{
-               response: %{"objectID" => "known"},
-               params: [index_name: :algoliax_people_struct_en, object_id: "known"]
+      assert %Algoliax.Responses{
+               index_name: :algoliax_people_struct_en,
+               responses: [
+                 {:ok,
+                  %Algoliax.Response{
+                    response: %{"objectID" => "known"},
+                    params: [index_name: :algoliax_people_struct_en, object_id: "known"]
+                  }}
+               ]
              } = res
 
-      assert %Algoliax.Response{
-               response: %{"objectID" => "known"},
-               params: [index_name: :algoliax_people_struct_fr, object_id: "known"]
+      assert %Algoliax.Responses{
+               index_name: :algoliax_people_struct_fr,
+               responses: [
+                 {:ok,
+                  %Algoliax.Response{
+                    response: %{"objectID" => "known"},
+                    params: [index_name: :algoliax_people_struct_fr, object_id: "known"]
+                  }}
+               ]
              } = res2
 
       assert_request("GET", ~r/algoliax_people_struct_en/, %{})
@@ -328,7 +388,17 @@ defmodule AlgoliaxTest.StructTest do
         age: 77
       }
 
-      assert [{:error, 404, _}, {:error, 404, _}] = PeopleStructMultipleIndexes.get_object(person)
+      assert {:ok,
+              [
+                %Algoliax.Responses{
+                  index_name: :algoliax_people_struct_en,
+                  responses: [{:error, 404, "{}", _}]
+                },
+                %Algoliax.Responses{
+                  index_name: :algoliax_people_struct_fr,
+                  responses: [{:error, 404, "{}", _}]
+                }
+              ]} = PeopleStructMultipleIndexes.get_object(person)
     end
 
     test "delete_object/1" do
@@ -339,7 +409,12 @@ defmodule AlgoliaxTest.StructTest do
         age: 77
       }
 
-      assert [{:ok, _}, {:ok, _}] = PeopleStructMultipleIndexes.delete_object(person)
+      assert {:ok,
+              [
+                %Algoliax.Responses{index_name: :algoliax_people_struct_en},
+                %Algoliax.Responses{index_name: :algoliax_people_struct_fr}
+              ]} = PeopleStructMultipleIndexes.delete_object(person)
+
       assert_request("DELETE", ~r/algoliax_people_struct_en/, %{})
       assert_request("DELETE", ~r/algoliax_people_struct_fr/, %{})
     end
@@ -349,22 +424,39 @@ defmodule AlgoliaxTest.StructTest do
     end
 
     test "delete_index/0" do
-      assert [{:ok, _}, {:ok, _}] = PeopleStructMultipleIndexes.delete_index()
+      assert {:ok,
+              [
+                %Algoliax.Responses{index_name: :algoliax_people_struct_en},
+                %Algoliax.Responses{index_name: :algoliax_people_struct_fr}
+              ]} = PeopleStructMultipleIndexes.delete_index()
+
       assert_request("DELETE", ~r/algoliax_people_struct_en/, %{})
       assert_request("DELETE", ~r/algoliax_people_struct_fr/, %{})
     end
 
     test "get_settings/0" do
-      assert [{:ok, res}, {:ok, res2}] = PeopleStructMultipleIndexes.get_settings()
+      assert {:ok, [res, res2]} = PeopleStructMultipleIndexes.get_settings()
 
-      assert %Algoliax.Response{
-               response: %{"searchableAttributes" => ["test"]},
-               params: [index_name: :algoliax_people_struct_en]
+      assert %Algoliax.Responses{
+               index_name: :algoliax_people_struct_en,
+               responses: [
+                 {:ok,
+                  %Algoliax.Response{
+                    response: %{"searchableAttributes" => ["test"]},
+                    params: [index_name: :algoliax_people_struct_en]
+                  }}
+               ]
              } = res
 
-      assert %Algoliax.Response{
-               response: %{"searchableAttributes" => ["test"]},
-               params: [index_name: :algoliax_people_struct_fr]
+      assert %Algoliax.Responses{
+               index_name: :algoliax_people_struct_fr,
+               responses: [
+                 {:ok,
+                  %Algoliax.Response{
+                    response: %{"searchableAttributes" => ["test"]},
+                    params: [index_name: :algoliax_people_struct_fr]
+                  }}
+               ]
              } = res2
 
       assert_request("GET", ~r/algoliax_people_struct_en/, %{})
@@ -372,7 +464,11 @@ defmodule AlgoliaxTest.StructTest do
     end
 
     test "search/2" do
-      assert [{:ok, _}, {:ok, _}] = PeopleStructMultipleIndexes.search("john", %{hitsPerPage: 10})
+      assert assert {:ok,
+                     [
+                       %Algoliax.Responses{index_name: :algoliax_people_struct_en},
+                       %Algoliax.Responses{index_name: :algoliax_people_struct_fr}
+                     ]} = PeopleStructMultipleIndexes.search("john", %{hitsPerPage: 10})
 
       assert_request("POST", ~r/algoliax_people_struct_en/, %{
         "query" => "john",
@@ -386,22 +482,39 @@ defmodule AlgoliaxTest.StructTest do
     end
 
     test "search_facet/2" do
-      assert [{:ok, _}, {:ok, _}] = PeopleStructMultipleIndexes.search_facet("age", "2")
+      assert {:ok,
+              [
+                %Algoliax.Responses{index_name: :algoliax_people_struct_en},
+                %Algoliax.Responses{index_name: :algoliax_people_struct_fr}
+              ]} = PeopleStructMultipleIndexes.search_facet("age", "2")
+
       assert_request("POST", ~r/algoliax_people_struct_en/, %{"facetQuery" => "2"})
       assert_request("POST", ~r/algoliax_people_struct_fr/, %{"facetQuery" => "2"})
     end
 
     test "delete_by/1" do
-      assert [{:ok, res}, {:ok, res2}] = PeopleStructMultipleIndexes.delete_by("age > 18")
+      assert {:ok, [res, res2]} = PeopleStructMultipleIndexes.delete_by("age > 18")
 
-      assert %Algoliax.Response{
-               response: %{"taskID" => _, "updatedAt" => _},
-               params: [index_name: :algoliax_people_struct_en]
+      assert %Algoliax.Responses{
+               index_name: :algoliax_people_struct_en,
+               responses: [
+                 {:ok,
+                  %Algoliax.Response{
+                    response: %{"taskID" => _, "updatedAt" => _},
+                    params: [index_name: :algoliax_people_struct_en]
+                  }}
+               ]
              } = res
 
-      assert %Algoliax.Response{
-               response: %{"taskID" => _, "updatedAt" => _},
-               params: [index_name: :algoliax_people_struct_fr]
+      assert %Algoliax.Responses{
+               index_name: :algoliax_people_struct_fr,
+               responses: [
+                 {:ok,
+                  %Algoliax.Response{
+                    response: %{"taskID" => _, "updatedAt" => _},
+                    params: [index_name: :algoliax_people_struct_fr]
+                  }}
+               ]
              } = res2
 
       assert_request("POST", ~r/algoliax_people_struct_en/, %{"params" => "filters=age > 18"})
@@ -435,16 +548,28 @@ defmodule AlgoliaxTest.StructTest do
         age: 77
       }
 
-      assert [{:ok, res}, {:ok, res2}] = PeopleStructRuntimeMultipleIndexes.get_object(person)
+      assert {:ok, [res, res2]} = PeopleStructRuntimeMultipleIndexes.get_object(person)
 
-      assert %Algoliax.Response{
-               response: %{"objectID" => "known"},
-               params: [index_name: :people_runtime_index_name_en, object_id: "known"]
+      assert %Algoliax.Responses{
+               index_name: :people_runtime_index_name_en,
+               responses: [
+                 {:ok,
+                  %Algoliax.Response{
+                    response: %{"objectID" => "known"},
+                    params: [index_name: :people_runtime_index_name_en, object_id: "known"]
+                  }}
+               ]
              } = res
 
-      assert %Algoliax.Response{
-               response: %{"objectID" => "known"},
-               params: [index_name: :people_runtime_index_name_fr, object_id: "known"]
+      assert %Algoliax.Responses{
+               index_name: :people_runtime_index_name_fr,
+               responses: [
+                 {:ok,
+                  %Algoliax.Response{
+                    response: %{"objectID" => "known"},
+                    params: [index_name: :people_runtime_index_name_fr, object_id: "known"]
+                  }}
+               ]
              } = res2
 
       assert_request("PUT", ~r/people_runtime_index_name_en\/settings/, %{})
