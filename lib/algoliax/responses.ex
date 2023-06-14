@@ -1,6 +1,6 @@
 defmodule Algoliax.Responses do
   @moduledoc """
-  Algolia API response
+  Algolia API responses
   """
 
   @type t :: %__MODULE__{
