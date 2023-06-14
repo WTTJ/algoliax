@@ -2,6 +2,17 @@
 
 ## DEV
 
+## v0.8.0 - 2023-06-01
+
+#### Breaking changes
+
+- Errors for `get_object` and `get_objects` are now of arity 4 and retunrs the original request as last attribute
+
+#### New
+
+- Added possibility to have multiple indexes for a model (applies for replicas as well)
+- Added `build_object/2` with the index name as second parameter (useful for translations for example)
+
 ## v0.7.0 - 2022-03-29
 
 #### Breaking changes
