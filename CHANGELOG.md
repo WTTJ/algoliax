@@ -4,7 +4,7 @@
 
 #### Breaking changes
 
-- Errors for `get_object` and `get_objects` are now of arity 4 and retunrs the original request as last attribute
+- Errors for `get_object` and `get_objects` are now of arity 4 and returns the original request as last attribute
 
 #### New
 
