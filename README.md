@@ -269,7 +269,7 @@ use Algoliax.Indexer,
   ]
 ```
 
-If the main index holds multiple indexes, for an index per language for example, replicas needs to hold the same amount of names.
+If the main index holds multiple indexes (e.g for an index per language usecase), replicas need to hold the same amount of names.
 The order is important to be associated to the correct main index.
 
 ```elixir
