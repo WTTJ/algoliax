@@ -3,7 +3,7 @@ defmodule Algoliax.Indexer do
 
   ### Usage
 
-  - `:index_name`: specificy the index or indexes where the object will be added on. **Required**
+  - `:index_name`: specificy the index or a list of indexes where the object will be added on. **Required**
   - `:object_id`: specify the attribute used to as algolia objectID. Default `:id`.
   - `:repo`: Specify an Ecto repo to be use to fecth records. Default `nil`
   - `:cursor_field`: specify the column to be used to order and go through a given table. Default `:id`
