@@ -24,16 +24,7 @@ defmodule Algoliax.Resources.Object do
     objects =
       index_name(module, settings)
       |> Enum.reduce(%{}, fn index_name, acc ->
-        objects =
-          Enum.map(models, fn model ->
-            action = get_action(module, model, opts)
-
-            if action do
-              build_batch_object(module, settings, model, action, index_name)
-            end
-          end)
-          |> Enum.reject(&is_nil/1)
-
+        objects = build_batch_objects(index_name, module, models, settings, opts)
         Map.put(acc, index_name, objects)
       end)
       |> Enum.reject(fn {_index_name, objects} -> Enum.empty?(objects) end)
@@ -51,6 +42,17 @@ defmodule Algoliax.Resources.Object do
       end)
       |> render_response()
     end
+  end
+
+  defp build_batch_objects(index_name, module, models, settings, opts) do
+    Enum.map(models, fn model ->
+      action = get_action(module, model, opts)
+
+      if action do
+        build_batch_object(module, settings, model, action, index_name)
+      end
+    end)
+    |> Enum.reject(&is_nil/1)
   end
 
   def save_object(module, settings, model) do
