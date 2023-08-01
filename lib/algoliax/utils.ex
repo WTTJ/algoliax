@@ -64,6 +64,7 @@ defmodule Algoliax.Utils do
       responses
       |> List.flatten()
       |> Enum.reject(&is_nil/1)
+      |> Enum.reject(&match?({:not_indexable, _model}, &1))
       |> Enum.group_by(fn
         {:ok, %Algoliax.Response{params: params}} -> params[:index_name]
         {:error, _, _, %{url_params: params}} -> params[:index_name]
