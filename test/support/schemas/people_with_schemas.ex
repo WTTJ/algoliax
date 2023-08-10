@@ -8,9 +8,7 @@ defmodule Algoliax.Schemas.PeopleWithSchemas do
   use Algoliax.Indexer,
     index_name: :algoliax_with_schemas,
     repo: Algoliax.Repo,
-    schemas: [
-      Beer
-    ],
+    schemas: :indexer_schemas,
     algolia: [
       attributes_for_faceting: ["age", "gender"],
       searchable_attributes: ["full_name", "gender"],
@@ -26,6 +24,8 @@ defmodule Algoliax.Schemas.PeopleWithSchemas do
 
     timestamps()
   end
+
+  def indexer_schemas, do: [Beer]
 
   def build_object(%Beer{} = beer) do
     %{

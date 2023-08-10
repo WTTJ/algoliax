@@ -58,7 +58,7 @@ if Code.ensure_loaded?(Ecto) do
     end
 
     defp fetch_schemas(module, settings) do
-      Algoliax.Utils.schemas(settings, [module])
+      Algoliax.Utils.schemas(module, settings)
       |> Enum.map(fn
         m when is_tuple(m) -> m
         m -> {m, []}
