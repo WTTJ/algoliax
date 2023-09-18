@@ -4,10 +4,10 @@ defaults: &defaults
 parameters:
   elixir_base_image:
     type: string
-    default: cimg/elixir:1.10.4
+    default: cimg/elixir:1.15.5-erlang-26.0.2
   cache_version:
     type: string
-    default: v1
+    default: v2
 
 version: 2.1
 jobs:
