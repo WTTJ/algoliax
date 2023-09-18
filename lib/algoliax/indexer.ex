@@ -67,6 +67,21 @@ defmodule Algoliax.Indexer do
 
       end
 
+  The example above will introduce a compile-time dependency on `People` and `Animal`, so it is preferable to provide the name of a function that will return the list of modules.
+
+      defmodule Global do
+        use Algoliax.Indexer,
+          index_name: :people,
+          object_id: :reference,
+          schemas: :index_schemas,
+          algolia: [
+            attribute_for_faceting: ["age"],
+            custom_ranking: ["desc(updated_at)"]
+          ]
+
+        def index_schemas, do: [People, Animal]
+      end
+
     This option allows to define also the preloads use during `reindex`/`reindex_atomic` (preload on `save_object` and `save_objects` have to be done manually)
 
         defmodule People do

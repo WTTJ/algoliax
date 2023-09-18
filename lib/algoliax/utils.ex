@@ -30,8 +30,10 @@ defmodule Algoliax.Utils do
     Keyword.get(settings, :object_id, :id)
   end
 
-  def schemas(settings, default) do
-    Keyword.get(settings, :schemas, default)
+  def schemas(module, settings) do
+    with fn_name when is_atom(fn_name) <- Keyword.get(settings, :schemas, [module]) do
+      apply(module, fn_name, [])
+    end
   end
 
   def camelize(params) when is_map(params) do
