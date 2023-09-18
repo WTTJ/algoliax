@@ -39,9 +39,9 @@ defmodule Algoliax.MixProject do
       {:ecto_sql, "~> 3.9", only: [:dev, :test]},
       {:postgrex, ">= 0.0.0", only: [:dev, :test]},
       {:inflex, "~> 2.0.0"},
-      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:faker, "~> 0.12", only: :test},
-      {:plug_cowboy, "~> 2.0", only: :test},
+      {:plug_cowboy, "~> 2.6", only: :test},
       {:mix_test_watch, "~> 1.0", only: :dev, runtime: false},
       {:sobelow, "~> 0.13", only: [:dev, :test]},
       {:mix_audit, "~> 2.0", only: [:dev, :test], runtime: false}
