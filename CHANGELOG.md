@@ -2,7 +2,15 @@
 
 ## DEV
 
-## v0.7.0 - 2022-03-29
+#### Breaking changes
+
+- require Elixir >= 1.15 and OTP 26
+
+## v0.7.1 - 2022-03-29
+
+#### New
+
+- Add wait_task/1 (https://hexdocs.pm/algoliax/Algoliax.html#wait_task/1)
 
 #### Breaking changes
 
