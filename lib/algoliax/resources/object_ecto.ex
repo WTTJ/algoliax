@@ -65,6 +65,7 @@ if Code.ensure_loaded?(Ecto) do
       end)
     end
 
+    # sobelow_skip ["DOS.BinToAtom"]
     def reindex_atomic(module, settings) do
       Algoliax.UtilsEcto.repo(settings)
       index_name = Algoliax.Utils.index_name(module, settings)

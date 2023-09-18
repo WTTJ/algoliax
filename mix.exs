@@ -43,7 +43,7 @@ defmodule Algoliax.MixProject do
       {:faker, "~> 0.12", only: :test},
       {:plug_cowboy, "~> 2.0", only: :test},
       {:mix_test_watch, "~> 1.0", only: :dev, runtime: false},
-      {:sobelow, "~> 0.11", only: [:dev, :test]},
+      {:sobelow, "~> 0.13", only: [:dev, :test]},
       {:mix_audit, "~> 2.0", only: [:dev, :test], runtime: false}
     ]
   end

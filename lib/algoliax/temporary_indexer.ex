@@ -12,6 +12,7 @@ defmodule Algoliax.TemporaryIndexer do
     do_run(action, module, settings, models, opts)
   end
 
+  # sobelow_skip ["DOS.BinToAtom"]
   defp do_run(action, module, settings, models, opts) do
     opts = Keyword.delete(opts, :temporary_only)
 
