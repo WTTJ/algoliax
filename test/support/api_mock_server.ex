@@ -187,15 +187,8 @@ defmodule Algoliax.ApiMockServer do
   end
 
   match _ do
-    Logger.warn(inspect(conn))
+    Logger.warning(inspect(conn))
     send_resp(conn, 404, "oops")
-  end
-
-  defp handle_errors(conn, %{kind: kind, reason: reason, stack: stack}) do
-    Logger.warn(kind, label: :kind)
-    Logger.warn(reason, label: :reason)
-    Logger.warn(stack, label: :stack)
-    send_resp(conn, conn.status, "Something went wrong")
   end
 
   defp save_request(conn, _) do

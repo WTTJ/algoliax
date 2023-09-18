@@ -2,14 +2,14 @@ defmodule Algoliax.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/WTTJ/algoliax"
-  @version "0.7.1"
+  @version "0.8.0"
 
   def project do
     [
       app: :algoliax,
       name: "Algoliax",
       version: @version,
-      elixir: "~> 1.10",
+      elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       aliases: aliases(),
@@ -32,17 +32,18 @@ defmodule Algoliax.MixProject do
   defp deps do
     [
       {:hackney, "~> 1.18"},
+      {:ssl_verify_fun, "~> 1.1.7"},
       {:jason, "~> 1.3"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false, override: true},
-      {:ecto, "~> 3.0", optional: true},
-      {:ecto_sql, "~> 3.0", only: [:dev, :test]},
+      {:ecto, "~> 3.9", optional: true},
+      {:ecto_sql, "~> 3.9", only: [:dev, :test]},
       {:postgrex, ">= 0.0.0", only: [:dev, :test]},
       {:inflex, "~> 2.0.0"},
-      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:faker, "~> 0.12", only: :test},
-      {:plug_cowboy, "~> 2.0", only: :test},
+      {:plug_cowboy, "~> 2.6", only: :test},
       {:mix_test_watch, "~> 1.0", only: :dev, runtime: false},
-      {:sobelow, "~> 0.11", only: [:dev, :test]},
+      {:sobelow, "~> 0.13", only: [:dev, :test]},
       {:mix_audit, "~> 2.0", only: [:dev, :test], runtime: false}
     ]
   end
