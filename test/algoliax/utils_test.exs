@@ -96,7 +96,9 @@ defmodule Algoliax.UtilsTest do
     end
 
     test "multiple indexes with a function" do
-      assert Algoliax.Utils.index_name(MultipleIndexNameFromFunction, index_name: :algoliax_people) ==
+      assert Algoliax.Utils.index_name(MultipleIndexNameFromFunction,
+               index_name: :algoliax_people
+             ) ==
                [:algoliax_people_from_function_en, :algoliax_people_from_function_fr]
     end
 

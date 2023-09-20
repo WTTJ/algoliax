@@ -53,7 +53,7 @@ if Code.ensure_loaded?(Ecto) do
     end
 
     defp fetch_schemas(module, settings) do
-      schemas(settings, [module])
+      schemas(module, settings)
       |> Enum.map(fn
         m when is_tuple(m) -> m
         m -> {m, []}
