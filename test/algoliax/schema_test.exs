@@ -378,6 +378,15 @@ defmodule AlgoliaxTest.Schema do
     })
   end
 
+  test "reindex nothing as no result" do
+    query =
+      from(p in PeopleEcto,
+        where: p.age == 999
+      )
+
+    assert {:ok, []} = PeopleEcto.reindex(query)
+  end
+
   test "reindex multiple indexes with query" do
     query =
       from(p in PeopleEctoMultipleIndexes,

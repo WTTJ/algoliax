@@ -12,10 +12,7 @@ defmodule Algoliax.Utils do
         atom when is_atom(atom) ->
           if module.__info__(:functions) |> Keyword.get(atom) == 0 do
             apply(module, atom, [])
-            |> case do
-              indexes when is_list(indexes) -> indexes
-              index -> [index]
-            end
+            |> to_list()
           else
             [atom]
           end
@@ -77,4 +74,7 @@ defmodule Algoliax.Utils do
 
     {:ok, results}
   end
+
+  defp to_list(indexes) when is_list(indexes), do: indexes
+  defp to_list(index), do: [index]
 end

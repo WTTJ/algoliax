@@ -100,6 +100,9 @@ if Code.ensure_loaded?(Ecto) do
         responses
         |> Enum.reject(&is_nil/1)
         |> case do
+          [] ->
+            []
+
           [{:ok, %Algoliax.Response{}} | _] = single_index_responses ->
             single_index_responses
 
