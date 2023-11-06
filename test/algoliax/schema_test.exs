@@ -385,7 +385,6 @@ defmodule AlgoliaxTest.Schema do
       )
 
     assert {:ok, []} = PeopleEcto.reindex(query)
-
   end
 
   test "reindex multiple indexes with query" do
