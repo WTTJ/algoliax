@@ -56,7 +56,7 @@ defmodule Algoliax.Assertions do
   def equal_path?(nil, _), do: true
 
   def equal_path?(path, request_path) do
-    if Regex.regex?(path) do
+    if Kernel.is_struct(path, Regex) do
       Regex.match?(path, request_path)
     else
       path == request_path

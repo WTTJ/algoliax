@@ -26,7 +26,7 @@ defmodule Algoliax.Client do
         build_response(response, request)
 
       {:ok, code, _, response} when code in 300..499 ->
-        handle_error(code, response, action)
+        handle_error(code, response, action, request)
 
       error ->
         Logger.debug("#{inspect(error)}")
@@ -34,11 +34,11 @@ defmodule Algoliax.Client do
     end
   end
 
-  defp handle_error(404, response, action) when action in [:get_settings, :get_object] do
-    {:error, 404, response}
+  defp handle_error(404, response, action, request) when action in [:get_settings, :get_object] do
+    {:error, 404, response, request}
   end
 
-  defp handle_error(code, response, _action) do
+  defp handle_error(code, response, _action, _request) do
     error =
       case Jason.decode(response) do
         {:ok, response} -> Map.get(response, "message")

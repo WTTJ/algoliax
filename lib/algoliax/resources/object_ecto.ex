@@ -4,19 +4,17 @@ if Code.ensure_loaded?(Ecto) do
 
     import Ecto.Query
     import Algoliax.Client, only: [request: 1]
+    import Algoliax.Utils, only: [index_name: 2, schemas: 2]
 
     alias Algoliax.Resources.Object
 
     def reindex(module, settings, %Ecto.Query{} = query, opts) do
       repo = Algoliax.UtilsEcto.repo(settings)
 
-      acc =
-        Algoliax.UtilsEcto.find_in_batches(repo, query, 0, settings, fn batch ->
-          Object.save_objects(module, settings, batch, opts)
-        end)
-        |> Enum.reject(&is_nil/1)
-
-      {:ok, acc}
+      Algoliax.UtilsEcto.find_in_batches(repo, query, 0, settings, fn batch ->
+        Object.save_objects(module, settings, batch, opts)
+      end)
+      |> render_reindex()
     end
 
     def reindex(module, settings, nil, opts) do
@@ -26,31 +24,28 @@ if Code.ensure_loaded?(Ecto) do
     def reindex(module, settings, query_filters, opts) when is_map(query_filters) do
       repo = Algoliax.UtilsEcto.repo(settings)
 
-      acc =
-        module
-        |> fetch_schemas(settings)
-        |> Enum.reduce([], fn {mod, preloads}, acc ->
-          where_filters = Map.get(query_filters, :where, [])
+      module
+      |> fetch_schemas(settings)
+      |> Enum.reduce([], fn {mod, preloads}, acc ->
+        where_filters = Map.get(query_filters, :where, [])
 
-          query =
-            from(m in mod)
-            |> where(^where_filters)
-            |> preload(^preloads)
+        query =
+          from(m in mod)
+          |> where(^where_filters)
+          |> preload(^preloads)
 
-          Algoliax.UtilsEcto.find_in_batches(
-            repo,
-            query,
-            0,
-            settings,
-            fn batch ->
-              Object.save_objects(module, settings, batch, opts)
-            end,
-            acc
-          )
-        end)
-        |> Enum.reject(&is_nil/1)
-
-      {:ok, acc}
+        Algoliax.UtilsEcto.find_in_batches(
+          repo,
+          query,
+          0,
+          settings,
+          fn batch ->
+            Object.save_objects(module, settings, batch, opts)
+          end,
+          acc
+        )
+      end)
+      |> render_reindex()
     end
 
     def reindex(_, _, _, _) do
@@ -58,7 +53,7 @@ if Code.ensure_loaded?(Ecto) do
     end
 
     defp fetch_schemas(module, settings) do
-      Algoliax.Utils.schemas(module, settings)
+      schemas(module, settings)
       |> Enum.map(fn
         m when is_tuple(m) -> m
         m -> {m, []}
@@ -68,32 +63,65 @@ if Code.ensure_loaded?(Ecto) do
     # sobelow_skip ["DOS.BinToAtom"]
     def reindex_atomic(module, settings) do
       Algoliax.UtilsEcto.repo(settings)
-      index_name = Algoliax.Utils.index_name(module, settings)
-      tmp_index_name = :"#{index_name}.tmp"
 
-      tmp_settings =
-        settings |> Keyword.put(:index_name, tmp_index_name) |> Keyword.delete(:replicas)
+      index_name(module, settings)
+      |> Enum.map(fn index_name ->
+        tmp_index_name = :"#{index_name}.tmp"
 
-      Algoliax.SettingsStore.start_reindexing(index_name)
+        tmp_settings =
+          settings |> Keyword.put(:index_name, tmp_index_name) |> Keyword.delete(:replicas)
 
-      try do
-        reindex(module, tmp_settings, nil, [])
+        Algoliax.SettingsStore.start_reindexing(index_name)
 
-        request(%{
-          action: :move_index,
-          url_params: [index_name: tmp_index_name],
-          body: %{
-            operation: "move",
-            destination: "#{index_name}"
-          }
-        })
+        try do
+          reindex(module, tmp_settings, nil, [])
 
-        {:ok, :completed}
-      after
-        Algoliax.Resources.Index.delete_index(module, tmp_settings)
-        Algoliax.SettingsStore.delete_settings(tmp_index_name)
-        Algoliax.SettingsStore.stop_reindexing(index_name)
-      end
+          request(%{
+            action: :move_index,
+            url_params: [index_name: tmp_index_name],
+            body: %{
+              operation: "move",
+              destination: "#{index_name}"
+            }
+          })
+
+          {:ok, :completed}
+        after
+          Algoliax.Resources.Index.delete_index(module, tmp_settings)
+          Algoliax.SettingsStore.delete_settings(tmp_index_name)
+          Algoliax.SettingsStore.stop_reindexing(index_name)
+        end
+      end)
+      |> render_reindex_atomic()
     end
+
+    defp render_reindex(responses) do
+      results =
+        responses
+        |> Enum.reject(&is_nil/1)
+        |> case do
+          [] ->
+            []
+
+          [{:ok, %Algoliax.Response{}} | _] = single_index_responses ->
+            single_index_responses
+
+          [{:ok, [%Algoliax.Responses{} | _]} | _] = multiple_index_responses ->
+            multiple_index_responses
+            |> Enum.reduce([], fn {:ok, responses}, acc -> acc ++ responses end)
+            |> Enum.group_by(& &1.index_name)
+            |> Enum.map(fn {index_name, list} ->
+              %Algoliax.Responses{
+                index_name: index_name,
+                responses: Enum.flat_map(list, & &1.responses)
+              }
+            end)
+        end
+
+      {:ok, results}
+    end
+
+    defp render_reindex_atomic([response]), do: response
+    defp render_reindex_atomic([_ | _] = responses), do: responses
   end
 end
