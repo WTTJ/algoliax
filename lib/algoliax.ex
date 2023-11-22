@@ -12,6 +12,24 @@ defmodule Algoliax do
   """
 
   @doc """
+  Forward user ip to algolia operations
+
+      Algoliax.with_user_ip("192.168.0.1", fn ->
+        MyIndexer.search("test")
+      end)
+
+  """
+  def with_user_ip(ip \\ nil, fun) do
+    Process.put(:algoliax_user_ip, ip)
+
+    try do
+      fun.()
+    after
+      Process.delete(:algoliax_user_ip)
+    end
+  end
+
+  @doc """
   Generate a secured api key with filter
 
   ## Examples
