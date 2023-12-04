@@ -3,16 +3,11 @@ defmodule Algoliax.Assertions do
 
   alias Algoliax.RequestsStore
 
-  defmacro assert_request(method, path, body) do
-    assert(method, path, body)
-  end
-
-  defmacro assert_request(method, body) do
-    assert(method, nil, body)
-  end
-
-  defp assert(method, path, body) do
-    quote bind_quoted: [method: method, path: path, body: body] do
+  defmacro assert_request(method, data) do
+    quote bind_quoted: [method: method, data: data] do
+      body = Map.get(data, :body)
+      path = Map.get(data, :path)
+      headers = Map.get(data, :headers)
       requests = RequestsStore.get()
 
       request =
@@ -26,7 +21,7 @@ defmodule Algoliax.Assertions do
 
               {res, _} = Code.eval_string("match?(#{inspect(a_body)}, #{inspect(r_body)})")
               res
-            end)
+            end) && has_headers?(headers, r.headers)
         end)
 
       case request do
@@ -36,7 +31,7 @@ defmodule Algoliax.Assertions do
             |> Enum.with_index()
             |> Enum.map_join("\n", fn {r, i} ->
               String.slice(
-                "#{i}: method=#{r.method}, path=#{r.path}, body=#{inspect(r.body)}",
+                "#{i}: method=#{r.method}, path=#{r.path}, body=#{inspect(r.body)}, headers=#{inspect(r.headers)}",
                 0..500
               )
             end)
@@ -53,13 +48,18 @@ defmodule Algoliax.Assertions do
     end
   end
 
+  def has_headers?(nil, _), do: true
+
+  def has_headers?(headers, request_headers) do
+    Enum.all?(headers, &(&1 in request_headers))
+  end
+
   def equal_path?(nil, _), do: true
 
   def equal_path?(path, request_path) do
-    if Regex.regex?(path) do
-      Regex.match?(path, request_path)
-    else
-      path == request_path
+    case path do
+      %Regex{} -> Regex.match?(path, request_path)
+      _ -> path == request_path
     end
   end
 end

@@ -15,27 +15,36 @@ defmodule AlgoliaxTest.ReplicaTest do
       assert {:ok, res} = PeopleWithReplicas.configure_index()
       assert %Algoliax.Response{response: %{"taskID" => _, "updatedAt" => _}} = res
 
-      assert_request("PUT", ~r/algoliax_people_replicas/, %{
-        "searchableAttributes" => ["full_name"],
-        "attributesForFaceting" => ["age"],
-        "replicas" => ["algoliax_people_replicas_asc", "algoliax_people_replicas_desc"]
+      assert_request("PUT", %{
+        path: ~r/algoliax_people_replicas/,
+        body: %{
+          "searchableAttributes" => ["full_name"],
+          "attributesForFaceting" => ["age"],
+          "replicas" => ["algoliax_people_replicas_asc", "algoliax_people_replicas_desc"]
+        }
       })
 
-      assert_request("PUT", ~r/algoliax_people_replicas_asc/, %{
-        "searchableAttributes" => ["age"],
-        "attributesForFaceting" => ["age"],
-        "ranking" => ["asc(age)"]
+      assert_request("PUT", %{
+        path: ~r/algoliax_people_replicas_asc/,
+        body: %{
+          "searchableAttributes" => ["age"],
+          "attributesForFaceting" => ["age"],
+          "ranking" => ["asc(age)"]
+        }
       })
 
-      assert_request("PUT", ~r/algoliax_people_replicas_desc/, %{
-        "searchableAttributes" => nil,
-        "attributesForFaceting" => nil,
-        "ranking" => ["desc(age)"]
+      assert_request("PUT", %{
+        path: ~r/algoliax_people_replicas_desc/,
+        body: %{
+          "searchableAttributes" => nil,
+          "attributesForFaceting" => nil,
+          "ranking" => ["desc(age)"]
+        }
       })
     end
 
     test "save_object/1" do
-      reference = :random.uniform(1_000_000) |> to_string()
+      reference = :rand.uniform(1_000_000) |> to_string()
 
       person = %PeopleWithReplicas{
         reference: reference,
@@ -51,19 +60,21 @@ defmodule AlgoliaxTest.ReplicaTest do
              } = res
 
       assert_request("PUT", %{
-        "age" => 77,
-        "first_name" => "John",
-        "full_name" => "John Doe",
-        "last_name" => "Doe",
-        "nickname" => "john",
-        "objectID" => reference,
-        "updated_at" => 1_546_300_800
+        body: %{
+          "age" => 77,
+          "first_name" => "John",
+          "full_name" => "John Doe",
+          "last_name" => "Doe",
+          "nickname" => "john",
+          "objectID" => reference,
+          "updated_at" => 1_546_300_800
+        }
       })
     end
 
     test "save_objects/1" do
-      reference1 = :random.uniform(1_000_000) |> to_string()
-      reference2 = :random.uniform(1_000_000) |> to_string()
+      reference1 = :rand.uniform(1_000_000) |> to_string()
+      reference2 = :rand.uniform(1_000_000) |> to_string()
 
       people = [
         %PeopleWithReplicas{reference: reference1, last_name: "Doe", first_name: "John", age: 77},
@@ -80,10 +91,12 @@ defmodule AlgoliaxTest.ReplicaTest do
              } = res
 
       assert_request("POST", %{
-        "requests" => [
-          %{"action" => "updateObject", "body" => %{"objectID" => reference1}},
-          %{"action" => "updateObject", "body" => %{"objectID" => reference2}}
-        ]
+        body: %{
+          "requests" => [
+            %{"action" => "updateObject", "body" => %{"objectID" => reference1}},
+            %{"action" => "updateObject", "body" => %{"objectID" => reference2}}
+          ]
+        }
       })
     end
 
@@ -97,7 +110,7 @@ defmodule AlgoliaxTest.ReplicaTest do
 
       assert {:ok, res} = PeopleWithReplicas.get_object(person)
       assert %Algoliax.Response{response: %{"objectID" => "known"}} = res
-      assert_request("GET", %{})
+      assert_request("GET", %{body: %{}})
     end
 
     test "get_object/1 w/ unknown" do
@@ -120,28 +133,28 @@ defmodule AlgoliaxTest.ReplicaTest do
       }
 
       assert {:ok, _} = PeopleWithReplicas.delete_object(person)
-      assert_request("DELETE", %{})
+      assert_request("DELETE", %{body: %{}})
     end
 
     test "delete_index/0" do
       assert {:ok, _} = PeopleWithReplicas.delete_index()
-      assert_request("DELETE", %{})
+      assert_request("DELETE", %{body: %{}})
     end
 
     test "get_settings/0" do
       assert {:ok, res} = PeopleWithReplicas.get_settings()
       assert %Algoliax.Response{response: %{"searchableAttributes" => ["test"]}} = res
-      assert_request("GET", %{})
+      assert_request("GET", %{body: %{}})
     end
 
     test "search/2" do
       assert {:ok, _} = PeopleWithReplicas.search("john", %{hitsPerPage: 10})
-      assert_request("POST", %{"query" => "john", "hitsPerPage" => 10})
+      assert_request("POST", %{body: %{"query" => "john", "hitsPerPage" => 10}})
     end
 
     test "search_facet/2" do
       assert {:ok, _} = PeopleWithReplicas.search_facet("age", "2")
-      assert_request("POST", %{"facetQuery" => "2"})
+      assert_request("POST", %{body: %{"facetQuery" => "2"}})
     end
   end
 end

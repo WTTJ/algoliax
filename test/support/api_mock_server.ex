@@ -196,7 +196,8 @@ defmodule Algoliax.ApiMockServer do
       id: :rand.uniform(100_000),
       method: conn.method,
       path: conn.request_path,
-      body: conn.body_params
+      body: conn.body_params,
+      headers: conn.req_headers
     })
 
     conn
