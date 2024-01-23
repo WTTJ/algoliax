@@ -4,7 +4,7 @@ if Code.ensure_loaded?(Ecto) do
 
     import Ecto.Query
     import Algoliax.Client, only: [request: 1]
-    import Algoliax.Utils, only: [index_name: 2, schemas: 2]
+    import Algoliax.Utils, only: [index_name: 2, schemas: 2, default_filters: 2]
 
     alias Algoliax.Resources.Object
 
@@ -24,13 +24,21 @@ if Code.ensure_loaded?(Ecto) do
     def reindex(module, settings, query_filters, opts) when is_map(query_filters) do
       repo = Algoliax.UtilsEcto.repo(settings)
 
+      # Use the default filters if none are provided
+      filters =
+        if map_size(query_filters) == 0 do
+          default_filters(module, settings)
+        else
+          query_filters
+        end
+
       module
       |> fetch_schemas(settings)
-      |> Enum.reduce([], fn {mod, preloads}, acc ->
-        where_filters = Map.get(query_filters, :where, [])
+      |> Enum.reduce([], fn {schema, preloads}, acc ->
+        where_filters = extract_where_filters_for_schema(filters, schema)
 
         query =
-          from(m in mod)
+          from(m in schema)
           |> where(^where_filters)
           |> preload(^preloads)
 
@@ -50,6 +58,13 @@ if Code.ensure_loaded?(Ecto) do
 
     def reindex(_, _, _, _) do
       {:error, :invalid_query}
+    end
+
+    # Defaults to the root `:where` key if the `schema => :where` key does not exist
+    defp extract_where_filters_for_schema(filters, schema) when is_map(filters) do
+      root_where_filters = Map.get(filters, :where, [])
+      schema_filters = Map.get(filters, schema, %{})
+      Map.get(schema_filters, :where, root_where_filters)
     end
 
     defp fetch_schemas(module, settings) do
