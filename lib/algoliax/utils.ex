@@ -36,6 +36,16 @@ defmodule Algoliax.Utils do
     Keyword.get(settings, :object_id, :id)
   end
 
+  def default_filters(module, settings) do
+    case Keyword.get(settings, :default_filters, %{}) do
+      fn_name when is_atom(fn_name) ->
+        apply(module, fn_name, [])
+
+      default_filters ->
+        default_filters
+    end
+  end
+
   def schemas(module, settings) do
     with fn_name when is_atom(fn_name) <- Keyword.get(settings, :schemas, [module]) do
       apply(module, fn_name, [])
