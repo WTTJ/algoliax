@@ -13,20 +13,20 @@ defmodule BlondeBeerIndexer do
     index_name: :blonde_beers,
     object_id: :name,
     schemas: [Beer],
-    default_filters: %{where: [kind: "blonde"]}
+    default_filters: %{where: [kind: "blonde"]} # <---
 end
 
 defmodule BeerIndexer do
   use Algoliax.Indexer,
     index_name: :various_beers,
     object_id: :name,
-    schemas: [Beer1, Beer2],
-    default_filters: :get_filters
+    schemas: [Beer1, Beer2, Beer3],
+    default_filters: :get_filters # <--- can be a function
     
   def get_filters do
     %{
-      Beer1 => %{where: [kind: "blonde"]}, 
-      Beer2 => %{where: [kind: "brune"]}
+      Beer1 => %{where: [kind: "blonde"]},  # <--- custom filter for Beer1
+      :where => [kind: "brune"] # <--- Will be used for Beer2 and Beer3
     }
   end
 end
