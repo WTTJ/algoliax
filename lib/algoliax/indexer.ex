@@ -131,7 +131,9 @@ defmodule Algoliax.Indexer do
           ]
 
         def get_filters do
-          %{People => where: [age: 18], Animal => where: [kind: "cat"]}
+          %{
+            People => where: [age: 18], # <-- Custom filter for People
+            :where => [kind: "cat"]  # <-- Default filter for other schemas
         end
       end
   """

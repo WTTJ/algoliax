@@ -1,5 +1,81 @@
 # Changelog
 
+## v0.8.1 - 2024-01-23
+
+#### New
+
+- Added new **optional** settings `default_filters` to be applied automatically when calling `reindex` without query
+  or `reindex_atomic`. Defaults to `%{}` which was the previous behavior.
+
+```elixir
+defmodule BlondeBeerIndexer do
+  use Algoliax.Indexer,
+    index_name: :blonde_beers,
+    object_id: :name,
+    schemas: [Beer],
+    default_filters: %{where: [kind: "blonde"]} # <---
+end
+
+defmodule BeerIndexer do
+  use Algoliax.Indexer,
+    index_name: :various_beers,
+    object_id: :name,
+    schemas: [Beer1, Beer2, Beer3],
+    default_filters: :get_filters # <--- can be a function
+
+  def get_filters do
+    %{
+      Beer1 => %{where: [kind: "blonde"]},  # <--- custom filter for Beer1
+      :where => [kind: "brune"] # <--- Will be used for Beer2 and Beer3
+    }
+  end
+end
+```
+
+#### Contributing
+
+- New `CONTRIBUTING.md` file
+- Simplified the `config/test.exs` file
+- Provide a `.env.example` file to help contributors to setup their environment
+
+## v0.8.1 - 2024-01-23
+
+#### New
+
+- Added new **optional** settings `default_filters` to be applied automatically when calling `reindex` without query
+  or `reindex_atomic`. Defaults to `%{}` which was the previous behavior.
+
+```elixir
+defmodule BlondeBeerIndexer do
+  use Algoliax.Indexer,
+    index_name: :blonde_beers,
+    object_id: :name,
+    schemas: [Beer],
+    default_filters: %{where: [kind: "blonde"]} # <---
+end
+
+defmodule BeerIndexer do
+  use Algoliax.Indexer,
+    index_name: :various_beers,
+    object_id: :name,
+    schemas: [Beer1, Beer2, Beer3],
+    default_filters: :get_filters # <--- can be a function
+
+  def get_filters do
+    %{
+      Beer1 => %{where: [kind: "blonde"]},  # <--- custom filter for Beer1
+      :where => [kind: "brune"] # <--- Will be used for Beer2 and Beer3
+    }
+  end
+end
+```
+
+#### Contributing
+
+- New `CONTRIBUTING.md` file
+- Simplified the `config/test.exs` file
+- Provide a `.env.example` file to help contributors to setup their environment
+
 ## v0.8.0 - 2024-09-11
 
 #### Breaking changes
