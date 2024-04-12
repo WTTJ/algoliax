@@ -71,38 +71,59 @@ defmodule AlgoliaxTest.ReplicaTest do
                ]
              } = res2
 
-      assert_request("PUT", %{path: ~r/algoliax_people_replicas_en/, body: %{
-        "searchableAttributes" => ["full_name"],
-        "attributesForFaceting" => ["age"],
-        "replicas" => ["algoliax_people_replicas_asc_en", "algoliax_people_replicas_desc_en"]
-      }})
+      assert_request("PUT", %{
+        path: ~r/algoliax_people_replicas_en/,
+        body: %{
+          "searchableAttributes" => ["full_name"],
+          "attributesForFaceting" => ["age"],
+          "replicas" => ["algoliax_people_replicas_asc_en", "algoliax_people_replicas_desc_en"]
+        }
+      })
 
-      assert_request("PUT", %{path: ~r/algoliax_people_replicas_fr/, body: %{
-        "searchableAttributes" => ["full_name"],
-        "attributesForFaceting" => ["age"],
-        "replicas" => ["algoliax_people_replicas_asc_fr", "algoliax_people_replicas_desc_fr"]
-      }})
+      assert_request("PUT", %{
+        path: ~r/algoliax_people_replicas_fr/,
+        body: %{
+          "searchableAttributes" => ["full_name"],
+          "attributesForFaceting" => ["age"],
+          "replicas" => ["algoliax_people_replicas_asc_fr", "algoliax_people_replicas_desc_fr"]
+        }
+      })
 
-      assert_request("PUT", %{path: ~r/algoliax_people_replicas_asc_en/, body: %{
-        "searchableAttributes" => ["age"],
-        "attributesForFaceting" => ["age"],
-        "ranking" => ["asc(age)"]
-      }})
-      assert_request("PUT", %{path: ~r/algoliax_people_replicas_asc_fr/, body: %{
-        "searchableAttributes" => ["age"],
-        "attributesForFaceting" => ["age"],
-        "ranking" => ["asc(age)"]
-      }})
-      assert_request("PUT", %{path: ~r/algoliax_people_replicas_desc_en/, body: %{
-        "searchableAttributes" => nil,
-        "attributesForFaceting" => nil,
-        "ranking" => ["desc(age)"]
-      }})
-      assert_request("PUT", %{path: ~r/algoliax_people_replicas_desc_fr/, body: %{
-        "searchableAttributes" => nil,
-        "attributesForFaceting" => nil,
-        "ranking" => ["desc(age)"]
-      }})
+      assert_request("PUT", %{
+        path: ~r/algoliax_people_replicas_asc_en/,
+        body: %{
+          "searchableAttributes" => ["age"],
+          "attributesForFaceting" => ["age"],
+          "ranking" => ["asc(age)"]
+        }
+      })
+
+      assert_request("PUT", %{
+        path: ~r/algoliax_people_replicas_asc_fr/,
+        body: %{
+          "searchableAttributes" => ["age"],
+          "attributesForFaceting" => ["age"],
+          "ranking" => ["asc(age)"]
+        }
+      })
+
+      assert_request("PUT", %{
+        path: ~r/algoliax_people_replicas_desc_en/,
+        body: %{
+          "searchableAttributes" => nil,
+          "attributesForFaceting" => nil,
+          "ranking" => ["desc(age)"]
+        }
+      })
+
+      assert_request("PUT", %{
+        path: ~r/algoliax_people_replicas_desc_fr/,
+        body: %{
+          "searchableAttributes" => nil,
+          "attributesForFaceting" => nil,
+          "ranking" => ["desc(age)"]
+        }
+      })
     end
 
     test "save_object/1" do
@@ -168,24 +189,31 @@ defmodule AlgoliaxTest.ReplicaTest do
                ]
              } = res2
 
-      assert_request("PUT", %{path: ~r/algoliax_people_replicas_en/, body: %{
-        "age" => 77,
-        "first_name" => "John",
-        "full_name" => "John Doe",
-        "last_name" => "Doe",
-        "nickname" => "john",
-        "objectID" => reference,
-        "updated_at" => 1_546_300_800
-      }})
-      assert_request("PUT", %{path: ~r/algoliax_people_replicas_fr/, body: %{
-        "age" => 77,
-        "first_name" => "John",
-        "full_name" => "John Doe",
-        "last_name" => "Doe",
-        "nickname" => "john",
-        "objectID" => reference,
-        "updated_at" => 1_546_300_800
-      }})
+      assert_request("PUT", %{
+        path: ~r/algoliax_people_replicas_en/,
+        body: %{
+          "age" => 77,
+          "first_name" => "John",
+          "full_name" => "John Doe",
+          "last_name" => "Doe",
+          "nickname" => "john",
+          "objectID" => reference,
+          "updated_at" => 1_546_300_800
+        }
+      })
+
+      assert_request("PUT", %{
+        path: ~r/algoliax_people_replicas_fr/,
+        body: %{
+          "age" => 77,
+          "first_name" => "John",
+          "full_name" => "John Doe",
+          "last_name" => "Doe",
+          "nickname" => "john",
+          "objectID" => reference,
+          "updated_at" => 1_546_300_800
+        }
+      })
     end
 
     test "save_objects/1" do
@@ -265,18 +293,25 @@ defmodule AlgoliaxTest.ReplicaTest do
                ]
              } = res2
 
-      assert_request("POST", %{path: ~r/algoliax_people_replicas_en/, body: %{
-        "requests" => [
-          %{"action" => "updateObject", "body" => %{"objectID" => reference1}},
-          %{"action" => "updateObject", "body" => %{"objectID" => reference2}}
-        ]
-      }})
-      assert_request("POST", %{path: ~r/algoliax_people_replicas_fr/, body: %{
-        "requests" => [
-          %{"action" => "updateObject", "body" => %{"objectID" => reference1}},
-          %{"action" => "updateObject", "body" => %{"objectID" => reference2}}
-        ]
-      }})
+      assert_request("POST", %{
+        path: ~r/algoliax_people_replicas_en/,
+        body: %{
+          "requests" => [
+            %{"action" => "updateObject", "body" => %{"objectID" => reference1}},
+            %{"action" => "updateObject", "body" => %{"objectID" => reference2}}
+          ]
+        }
+      })
+
+      assert_request("POST", %{
+        path: ~r/algoliax_people_replicas_fr/,
+        body: %{
+          "requests" => [
+            %{"action" => "updateObject", "body" => %{"objectID" => reference1}},
+            %{"action" => "updateObject", "body" => %{"objectID" => reference2}}
+          ]
+        }
+      })
     end
 
     test "get_object/1 " do
@@ -456,8 +491,15 @@ defmodule AlgoliaxTest.ReplicaTest do
                 %Algoliax.Responses{index_name: :algoliax_people_replicas_fr}
               ]} = PeopleWithReplicasMultipleIndexes.search("john", %{hitsPerPage: 10})
 
-      assert_request("POST", %{path: ~r/algoliax_people_replicas_en/, body: %{"query" => "john", "hitsPerPage" => 10}})
-      assert_request("POST", %{path: ~r/algoliax_people_replicas_fr/, body: %{"query" => "john", "hitsPerPage" => 10}})
+      assert_request("POST", %{
+        path: ~r/algoliax_people_replicas_en/,
+        body: %{"query" => "john", "hitsPerPage" => 10}
+      })
+
+      assert_request("POST", %{
+        path: ~r/algoliax_people_replicas_fr/,
+        body: %{"query" => "john", "hitsPerPage" => 10}
+      })
     end
 
     test "search_facet/2" do
@@ -472,8 +514,15 @@ defmodule AlgoliaxTest.ReplicaTest do
                 %Algoliax.Responses{index_name: :algoliax_people_replicas_fr}
               ]} = PeopleWithReplicasMultipleIndexes.search_facet("age", "2")
 
-      assert_request("POST", %{path: ~r/algoliax_people_replicas_en/, body: %{"facetQuery" => "2"}})
-      assert_request("POST", %{path: ~r/algoliax_people_replicas_fr/, body: %{"facetQuery" => "2"}})
+      assert_request("POST", %{
+        path: ~r/algoliax_people_replicas_en/,
+        body: %{"facetQuery" => "2"}
+      })
+
+      assert_request("POST", %{
+        path: ~r/algoliax_people_replicas_fr/,
+        body: %{"facetQuery" => "2"}
+      })
     end
   end
 end

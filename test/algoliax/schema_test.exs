@@ -218,61 +218,73 @@ defmodule AlgoliaxTest.Schema do
               }
             ]} = PeopleEctoMultipleIndexes.reindex()
 
-    assert_request("POST", %{path: ~r/algoliax_people_en/, body: %{
-      "requests" => [
-        %{
-          "action" => "updateObject",
-          "body" => %{
-            "objectID" => @ref1,
-            "last_name" => "Doe",
-            "first_name" => "John",
-            "age" => 77
+    assert_request("POST", %{
+      path: ~r/algoliax_people_en/,
+      body: %{
+        "requests" => [
+          %{
+            "action" => "updateObject",
+            "body" => %{
+              "objectID" => @ref1,
+              "last_name" => "Doe",
+              "first_name" => "John",
+              "age" => 77
+            }
           }
-        }
-      ]
-    }})
+        ]
+      }
+    })
 
-    assert_request("POST", %{path: ~r/algoliax_people_en/, body: %{
-      "requests" => [
-        %{
-          "action" => "updateObject",
-          "body" => %{
-            "objectID" => @ref2,
-            "last_name" => "al",
-            "first_name" => "bert",
-            "age" => 35
+    assert_request("POST", %{
+      path: ~r/algoliax_people_en/,
+      body: %{
+        "requests" => [
+          %{
+            "action" => "updateObject",
+            "body" => %{
+              "objectID" => @ref2,
+              "last_name" => "al",
+              "first_name" => "bert",
+              "age" => 35
+            }
           }
-        }
-      ]
-    }})
+        ]
+      }
+    })
 
-    assert_request("POST", %{path: ~r/algoliax_people_fr/, body: %{
-      "requests" => [
-        %{
-          "action" => "updateObject",
-          "body" => %{
-            "objectID" => @ref1,
-            "last_name" => "Doe",
-            "first_name" => "John",
-            "age" => 77
+    assert_request("POST", %{
+      path: ~r/algoliax_people_fr/,
+      body: %{
+        "requests" => [
+          %{
+            "action" => "updateObject",
+            "body" => %{
+              "objectID" => @ref1,
+              "last_name" => "Doe",
+              "first_name" => "John",
+              "age" => 77
+            }
           }
-        }
-      ]
-    }})
+        ]
+      }
+    })
 
-    assert_request("POST", %{path: ~r/algoliax_people_fr/, body: %{
-      "requests" => [
-        %{
-          "action" => "updateObject",
-          "body" => %{
-            "objectID" => @ref2,
-            "last_name" => "al",
-            "first_name" => "bert",
-            "age" => 35
+    assert_request("POST", %{
+      path: ~r/algoliax_people_fr/,
+      body: %{
+        "requests" => [
+          %{
+            "action" => "updateObject",
+            "body" => %{
+              "objectID" => @ref2,
+              "last_name" => "al",
+              "first_name" => "bert",
+              "age" => 35
+            }
           }
-        }
-      ]
-    }})
+        ]
+      }
+    })
   end
 
   test "reindex with force delete" do
@@ -329,41 +341,59 @@ defmodule AlgoliaxTest.Schema do
               }
             ]} = PeopleEctoMultipleIndexes.reindex(force_delete: true)
 
-    assert_request("POST", %{path: ~r/algoliax_people_en/, body: %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"objectID" => @ref1}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_people_en/,
+      body: %{
+        "requests" => [
+          %{"action" => "updateObject", "body" => %{"objectID" => @ref1}}
+        ]
+      }
+    })
 
-    assert_request("POST", %{path: ~r/algoliax_people_en/, body: %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_people_en/,
+      body: %{
+        "requests" => [
+          %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
+        ]
+      }
+    })
 
-    assert_request("POST", %{path: ~r/algoliax_people_en/, body: %{
-      "requests" => [
-        %{"action" => "deleteObject", "body" => %{"objectID" => @ref3}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_people_en/,
+      body: %{
+        "requests" => [
+          %{"action" => "deleteObject", "body" => %{"objectID" => @ref3}}
+        ]
+      }
+    })
 
-    assert_request("POST", %{path: ~r/algoliax_people_fr/, body: %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"objectID" => @ref1}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_people_fr/,
+      body: %{
+        "requests" => [
+          %{"action" => "updateObject", "body" => %{"objectID" => @ref1}}
+        ]
+      }
+    })
 
-    assert_request("POST", %{path: ~r/algoliax_people_fr/, body: %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_people_fr/,
+      body: %{
+        "requests" => [
+          %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
+        ]
+      }
+    })
 
-    assert_request("POST", %{path: ~r/algoliax_people_fr/, body: %{
-      "requests" => [
-        %{"action" => "deleteObject", "body" => %{"objectID" => @ref3}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_people_fr/,
+      body: %{
+        "requests" => [
+          %{"action" => "deleteObject", "body" => %{"objectID" => @ref3}}
+        ]
+      }
+    })
   end
 
   test "reindex with query" do
@@ -414,17 +444,23 @@ defmodule AlgoliaxTest.Schema do
               }
             ]} = PeopleEctoMultipleIndexes.reindex(query)
 
-    assert_request("POST", %{path: ~r/algoliax_people_en/, body: %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_people_en/,
+      body: %{
+        "requests" => [
+          %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
+        ]
+      }
+    })
 
-    assert_request("POST", %{path: ~r/algoliax_people_fr/, body: %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_people_fr/,
+      body: %{
+        "requests" => [
+          %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
+        ]
+      }
+    })
   end
 
   test "reindex with query and force delete" do
@@ -480,29 +516,41 @@ defmodule AlgoliaxTest.Schema do
               }
             ]} = PeopleEctoMultipleIndexes.reindex(query, force_delete: true)
 
-    assert_request("POST", %{path: ~r/algoliax_people_en/, body: %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_people_en/,
+      body: %{
+        "requests" => [
+          %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
+        ]
+      }
+    })
 
-    assert_request("POST", %{path: ~r/algoliax_people_fr/, body: %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_people_fr/,
+      body: %{
+        "requests" => [
+          %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
+        ]
+      }
+    })
 
-    assert_request("POST", %{path: ~r/algoliax_people_en/, body: %{
-      "requests" => [
-        %{"action" => "deleteObject", "body" => %{"objectID" => @ref3}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_people_en/,
+      body: %{
+        "requests" => [
+          %{"action" => "deleteObject", "body" => %{"objectID" => @ref3}}
+        ]
+      }
+    })
 
-    assert_request("POST", %{path: ~r/algoliax_people_fr/, body: %{
-      "requests" => [
-        %{"action" => "deleteObject", "body" => %{"objectID" => @ref3}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_people_fr/,
+      body: %{
+        "requests" => [
+          %{"action" => "deleteObject", "body" => %{"objectID" => @ref3}}
+        ]
+      }
+    })
   end
 
   test "reindex atomic" do
@@ -536,39 +584,57 @@ defmodule AlgoliaxTest.Schema do
   test "reindex atomic for multiple indexes" do
     assert [{:ok, :completed}, {:ok, :completed}] = PeopleEctoMultipleIndexes.reindex_atomic()
 
-    assert_request("POST", %{path: ~r/algoliax_people_en/, body: %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"objectID" => @ref1}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_people_en/,
+      body: %{
+        "requests" => [
+          %{"action" => "updateObject", "body" => %{"objectID" => @ref1}}
+        ]
+      }
+    })
 
-    assert_request("POST", %{path: ~r/algoliax_people_fr/, body: %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"objectID" => @ref1}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_people_fr/,
+      body: %{
+        "requests" => [
+          %{"action" => "updateObject", "body" => %{"objectID" => @ref1}}
+        ]
+      }
+    })
 
-    assert_request("POST", %{path: ~r/algoliax_people_en/, body: %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_people_en/,
+      body: %{
+        "requests" => [
+          %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
+        ]
+      }
+    })
 
-    assert_request("POST", %{path: ~r/algoliax_people_fr/, body: %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_people_fr/,
+      body: %{
+        "requests" => [
+          %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
+        ]
+      }
+    })
 
-    assert_request("POST", %{path: ~r/algoliax_people_en\.tmp/, body: %{
-      "destination" => "algoliax_people_en",
-      "operation" => "move"
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_people_en\.tmp/,
+      body: %{
+        "destination" => "algoliax_people_en",
+        "operation" => "move"
+      }
+    })
 
-    assert_request("POST", %{path: ~r/algoliax_people_fr\.tmp/, body: %{
-      "destination" => "algoliax_people_fr",
-      "operation" => "move"
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_people_fr\.tmp/,
+      body: %{
+        "destination" => "algoliax_people_fr",
+        "operation" => "move"
+      }
+    })
   end
 
   test "reindex atomic with fail" do
@@ -644,41 +710,59 @@ defmodule AlgoliaxTest.Schema do
               }
             ]} = PeopleWithoutIdEctoMultipleIndexes.reindex()
 
-    assert_request("POST", %{path: ~r/algoliax_people_without_id_en/, body: %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"objectID" => @ref1}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_people_without_id_en/,
+      body: %{
+        "requests" => [
+          %{"action" => "updateObject", "body" => %{"objectID" => @ref1}}
+        ]
+      }
+    })
 
-    assert_request("POST", %{path: ~r/algoliax_people_without_id_en/, body: %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_people_without_id_en/,
+      body: %{
+        "requests" => [
+          %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
+        ]
+      }
+    })
 
-    assert_request("POST", %{path: ~r/algoliax_people_without_id_en/, body: %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"objectID" => @ref3}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_people_without_id_en/,
+      body: %{
+        "requests" => [
+          %{"action" => "updateObject", "body" => %{"objectID" => @ref3}}
+        ]
+      }
+    })
 
-    assert_request("POST", %{path: ~r/algoliax_people_without_id_fr/, body: %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"objectID" => @ref1}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_people_without_id_fr/,
+      body: %{
+        "requests" => [
+          %{"action" => "updateObject", "body" => %{"objectID" => @ref1}}
+        ]
+      }
+    })
 
-    assert_request("POST", %{path: ~r/algoliax_people_without_id_fr/, body: %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_people_without_id_fr/,
+      body: %{
+        "requests" => [
+          %{"action" => "updateObject", "body" => %{"objectID" => @ref2}}
+        ]
+      }
+    })
 
-    assert_request("POST", %{path: ~r/algoliax_people_without_id_fr/, body: %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"objectID" => @ref3}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_people_without_id_fr/,
+      body: %{
+        "requests" => [
+          %{"action" => "updateObject", "body" => %{"objectID" => @ref3}}
+        ]
+      }
+    })
   end
 
   test "save_object/1 without attribute(s)" do
@@ -700,15 +784,21 @@ defmodule AlgoliaxTest.Schema do
                id: 1
              })
 
-    assert_request("PUT", %{path: ~r/algoliax_with_schemas_en/, body: %{
-      "name" => "chimay",
-      "objectID" => 1
-    }})
+    assert_request("PUT", %{
+      path: ~r/algoliax_with_schemas_en/,
+      body: %{
+        "name" => "chimay",
+        "objectID" => 1
+      }
+    })
 
-    assert_request("PUT", %{path: ~r/algoliax_with_schemas_fr/, body: %{
-      "name" => "chimay",
-      "objectID" => 1
-    }})
+    assert_request("PUT", %{
+      path: ~r/algoliax_with_schemas_fr/,
+      body: %{
+        "name" => "chimay",
+        "objectID" => 1
+      }
+    })
   end
 
   test "reindex/1 with schemas" do
@@ -734,29 +824,41 @@ defmodule AlgoliaxTest.Schema do
   test "reindex/1 with schemas and multiple indexes" do
     assert PeopleWithSchemasMultipleIndexes.reindex()
 
-    assert_request("POST", %{path: ~r/algoliax_with_schemas_en/, body: %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"name" => "chimay", "objectID" => 1}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_with_schemas_en/,
+      body: %{
+        "requests" => [
+          %{"action" => "updateObject", "body" => %{"name" => "chimay", "objectID" => 1}}
+        ]
+      }
+    })
 
-    assert_request("POST", %{path: ~r/algoliax_with_schemas_en/, body: %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"name" => "jupiler", "objectID" => 2}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_with_schemas_en/,
+      body: %{
+        "requests" => [
+          %{"action" => "updateObject", "body" => %{"name" => "jupiler", "objectID" => 2}}
+        ]
+      }
+    })
 
-    assert_request("POST", %{path: ~r/algoliax_with_schemas_fr/, body: %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"name" => "chimay", "objectID" => 1}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_with_schemas_fr/,
+      body: %{
+        "requests" => [
+          %{"action" => "updateObject", "body" => %{"name" => "chimay", "objectID" => 1}}
+        ]
+      }
+    })
 
-    assert_request("POST", %{path: ~r/algoliax_with_schemas_fr/, body: %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"name" => "jupiler", "objectID" => 2}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_with_schemas_fr/,
+      body: %{
+        "requests" => [
+          %{"action" => "updateObject", "body" => %{"name" => "jupiler", "objectID" => 2}}
+        ]
+      }
+    })
   end
 
   test "reindex/1 with schemas and query" do
@@ -798,17 +900,23 @@ defmodule AlgoliaxTest.Schema do
               }
             ]} = PeopleWithSchemasMultipleIndexes.reindex(query)
 
-    assert_request("POST", %{path: ~r/algoliax_with_schemas_en/, body: %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"name" => "chimay", "objectID" => 1}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_with_schemas_en/,
+      body: %{
+        "requests" => [
+          %{"action" => "updateObject", "body" => %{"name" => "chimay", "objectID" => 1}}
+        ]
+      }
+    })
 
-    assert_request("POST", %{path: ~r/algoliax_with_schemas_fr/, body: %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"name" => "chimay", "objectID" => 1}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_with_schemas_fr/,
+      body: %{
+        "requests" => [
+          %{"action" => "updateObject", "body" => %{"name" => "chimay", "objectID" => 1}}
+        ]
+      }
+    })
   end
 
   test "reindex/1 with schemas and query as keyword list" do
@@ -843,17 +951,23 @@ defmodule AlgoliaxTest.Schema do
               }
             ]} = PeopleWithSchemasMultipleIndexes.reindex(query)
 
-    assert_request("POST", %{path: ~r/algoliax_with_schemas_en/, body: %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"name" => "heineken", "objectID" => 3}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_with_schemas_en/,
+      body: %{
+        "requests" => [
+          %{"action" => "updateObject", "body" => %{"name" => "heineken", "objectID" => 3}}
+        ]
+      }
+    })
 
-    assert_request("POST", %{path: ~r/algoliax_with_schemas_fr/, body: %{
-      "requests" => [
-        %{"action" => "updateObject", "body" => %{"name" => "heineken", "objectID" => 3}}
-      ]
-    }})
+    assert_request("POST", %{
+      path: ~r/algoliax_with_schemas_fr/,
+      body: %{
+        "requests" => [
+          %{"action" => "updateObject", "body" => %{"name" => "heineken", "objectID" => 3}}
+        ]
+      }
+    })
   end
 
   test "reindex/1 with association" do
@@ -923,77 +1037,95 @@ defmodule AlgoliaxTest.Schema do
                 }
               ]} = PeopleWithCustomObjectIdMultipleIndexes.reindex()
 
-      assert_request("POST", %{path: ~r/algoliax_people_with_custom_object_id_en/, body: %{
-        "requests" => [
-          %{
-            "action" => "updateObject",
-            "body" => %{
-              "objectID" => "people-" <> @ref1,
-              "last_name" => "Doe"
+      assert_request("POST", %{
+        path: ~r/algoliax_people_with_custom_object_id_en/,
+        body: %{
+          "requests" => [
+            %{
+              "action" => "updateObject",
+              "body" => %{
+                "objectID" => "people-" <> @ref1,
+                "last_name" => "Doe"
+              }
             }
-          }
-        ]
-      }})
+          ]
+        }
+      })
 
-      assert_request("POST", %{path: ~r/algoliax_people_with_custom_object_id_fr/, body: %{
-        "requests" => [
-          %{
-            "action" => "updateObject",
-            "body" => %{
-              "objectID" => "people-" <> @ref1,
-              "last_name" => "Doe"
+      assert_request("POST", %{
+        path: ~r/algoliax_people_with_custom_object_id_fr/,
+        body: %{
+          "requests" => [
+            %{
+              "action" => "updateObject",
+              "body" => %{
+                "objectID" => "people-" <> @ref1,
+                "last_name" => "Doe"
+              }
             }
-          }
-        ]
-      }})
+          ]
+        }
+      })
 
-      assert_request("POST", %{path: ~r/algoliax_people_with_custom_object_id_en/, body: %{
-        "requests" => [
-          %{
-            "action" => "updateObject",
-            "body" => %{
-              "objectID" => "people-" <> @ref2,
-              "last_name" => "al"
+      assert_request("POST", %{
+        path: ~r/algoliax_people_with_custom_object_id_en/,
+        body: %{
+          "requests" => [
+            %{
+              "action" => "updateObject",
+              "body" => %{
+                "objectID" => "people-" <> @ref2,
+                "last_name" => "al"
+              }
             }
-          }
-        ]
-      }})
+          ]
+        }
+      })
 
-      assert_request("POST", %{path: ~r/algoliax_people_with_custom_object_id_fr/, body: %{
-        "requests" => [
-          %{
-            "action" => "updateObject",
-            "body" => %{
-              "objectID" => "people-" <> @ref2,
-              "last_name" => "al"
+      assert_request("POST", %{
+        path: ~r/algoliax_people_with_custom_object_id_fr/,
+        body: %{
+          "requests" => [
+            %{
+              "action" => "updateObject",
+              "body" => %{
+                "objectID" => "people-" <> @ref2,
+                "last_name" => "al"
+              }
             }
-          }
-        ]
-      }})
+          ]
+        }
+      })
 
-      assert_request("POST", %{path: ~r/algoliax_people_with_custom_object_id_en/, body: %{
-        "requests" => [
-          %{
-            "action" => "updateObject",
-            "body" => %{
-              "objectID" => "people-" <> @ref3,
-              "last_name" => "Vador"
+      assert_request("POST", %{
+        path: ~r/algoliax_people_with_custom_object_id_en/,
+        body: %{
+          "requests" => [
+            %{
+              "action" => "updateObject",
+              "body" => %{
+                "objectID" => "people-" <> @ref3,
+                "last_name" => "Vador"
+              }
             }
-          }
-        ]
-      }})
+          ]
+        }
+      })
 
-      assert_request("POST", %{path: ~r/algoliax_people_with_custom_object_id_fr/, body: %{
-        "requests" => [
-          %{
-            "action" => "updateObject",
-            "body" => %{
-              "objectID" => "people-" <> @ref3,
-              "last_name" => "Vador"
+      assert_request("POST", %{
+        path: ~r/algoliax_people_with_custom_object_id_fr/,
+        body: %{
+          "requests" => [
+            %{
+              "action" => "updateObject",
+              "body" => %{
+                "objectID" => "people-" <> @ref3,
+                "last_name" => "Vador"
+              }
             }
-          }
-        ]
-      }})
+          ]
+        }
+      })
     end
   end
 end

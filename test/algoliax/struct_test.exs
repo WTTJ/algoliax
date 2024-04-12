@@ -187,15 +187,21 @@ defmodule AlgoliaxTest.StructTest do
                ]
              } = res2
 
-      assert_request("PUT", %{path: ~r/algoliax_people_struct_en\/settings/, body: %{
-        "searchableAttributes" => ["full_name"],
-        "attributesForFaceting" => ["age"]
-      }})
+      assert_request("PUT", %{
+        path: ~r/algoliax_people_struct_en\/settings/,
+        body: %{
+          "searchableAttributes" => ["full_name"],
+          "attributesForFaceting" => ["age"]
+        }
+      })
 
-      assert_request("PUT", %{path: ~r/algoliax_people_struct_fr\/settings/, body: %{
-        "searchableAttributes" => ["full_name"],
-        "attributesForFaceting" => ["age"]
-      }})
+      assert_request("PUT", %{
+        path: ~r/algoliax_people_struct_fr\/settings/,
+        body: %{
+          "searchableAttributes" => ["full_name"],
+          "attributesForFaceting" => ["age"]
+        }
+      })
     end
 
     test "save_object/1" do
@@ -233,28 +239,30 @@ defmodule AlgoliaxTest.StructTest do
              } = res2
 
       assert_request("PUT", %{
-path: ~r/algoliax_people_struct_en/, body: %{
-        "age" => 77,
-        "first_name" => "John",
-        "full_name" => "John Doe",
-        "last_name" => "Doe",
-        "nickname" => "john",
-        "objectID" => reference,
-        "updated_at" => 1_546_300_800
-      }
-                            })
+        path: ~r/algoliax_people_struct_en/,
+        body: %{
+          "age" => 77,
+          "first_name" => "John",
+          "full_name" => "John Doe",
+          "last_name" => "Doe",
+          "nickname" => "john",
+          "objectID" => reference,
+          "updated_at" => 1_546_300_800
+        }
+      })
 
       assert_request("PUT", %{
-path: ~r/algoliax_people_struct_fr/, body: %{
-        "age" => 77,
-        "first_name" => "John",
-        "full_name" => "John Doe",
-        "last_name" => "Doe",
-        "nickname" => "john",
-        "objectID" => reference,
-        "updated_at" => 1_546_300_800
-      }
-                            })
+        path: ~r/algoliax_people_struct_fr/,
+        body: %{
+          "age" => 77,
+          "first_name" => "John",
+          "full_name" => "John Doe",
+          "last_name" => "Doe",
+          "nickname" => "john",
+          "objectID" => reference,
+          "updated_at" => 1_546_300_800
+        }
+      })
     end
 
     test "save_objects/1" do
@@ -300,13 +308,19 @@ path: ~r/algoliax_people_struct_fr/, body: %{
                ]
              } = res2
 
-      assert_request("POST", %{path: ~r/algoliax_people_struct_en/, body: %{
-        "requests" => [%{"action" => "updateObject", "body" => %{"objectID" => reference1}}]
-      }})
+      assert_request("POST", %{
+        path: ~r/algoliax_people_struct_en/,
+        body: %{
+          "requests" => [%{"action" => "updateObject", "body" => %{"objectID" => reference1}}]
+        }
+      })
 
-      assert_request("POST", %{path: ~r/algoliax_people_struct_fr/, body: %{
-        "requests" => [%{"action" => "updateObject", "body" => %{"objectID" => reference1}}]
-      }})
+      assert_request("POST", %{
+        path: ~r/algoliax_people_struct_fr/,
+        body: %{
+          "requests" => [%{"action" => "updateObject", "body" => %{"objectID" => reference1}}]
+        }
+      })
     end
 
     test "save_objects/1 w/ force_delete: true" do
@@ -353,18 +367,25 @@ path: ~r/algoliax_people_struct_fr/, body: %{
                ]
              } = res2
 
-      assert_request("POST", %{path: ~r/algoliax_people_struct_en/, body: %{
-        "requests" => [
-          %{"action" => "updateObject", "body" => %{"objectID" => reference1}},
-          %{"action" => "deleteObject", "body" => %{"objectID" => reference2}}
-        ]
-      }})
-      assert_request("POST", %{path: ~r/algoliax_people_struct_fr/, body: %{
-        "requests" => [
-          %{"action" => "updateObject", "body" => %{"objectID" => reference1}},
-          %{"action" => "deleteObject", "body" => %{"objectID" => reference2}}
-        ]
-      }})
+      assert_request("POST", %{
+        path: ~r/algoliax_people_struct_en/,
+        body: %{
+          "requests" => [
+            %{"action" => "updateObject", "body" => %{"objectID" => reference1}},
+            %{"action" => "deleteObject", "body" => %{"objectID" => reference2}}
+          ]
+        }
+      })
+
+      assert_request("POST", %{
+        path: ~r/algoliax_people_struct_fr/,
+        body: %{
+          "requests" => [
+            %{"action" => "updateObject", "body" => %{"objectID" => reference1}},
+            %{"action" => "deleteObject", "body" => %{"objectID" => reference2}}
+          ]
+        }
+      })
     end
 
     test "get_object/1" do
@@ -493,14 +514,21 @@ path: ~r/algoliax_people_struct_fr/, body: %{
                        %Algoliax.Responses{index_name: :algoliax_people_struct_fr}
                      ]} = PeopleStructMultipleIndexes.search("john", %{hitsPerPage: 10})
 
-      assert_request("POST", %{path: ~r/algoliax_people_struct_en/, body: %{
-        "query" => "john",
-        "hitsPerPage" => 10
-      }})
-      assert_request("POST", %{path: ~r/algoliax_people_struct_fr/, body: %{
-        "query" => "john",
-        "hitsPerPage" => 10
-      }})
+      assert_request("POST", %{
+        path: ~r/algoliax_people_struct_en/,
+        body: %{
+          "query" => "john",
+          "hitsPerPage" => 10
+        }
+      })
+
+      assert_request("POST", %{
+        path: ~r/algoliax_people_struct_fr/,
+        body: %{
+          "query" => "john",
+          "hitsPerPage" => 10
+        }
+      })
     end
 
     test "search_facet/2" do
@@ -539,8 +567,15 @@ path: ~r/algoliax_people_struct_fr/, body: %{
                ]
              } = res2
 
-      assert_request("POST", %{path: ~r/algoliax_people_struct_en/, body: %{"params" => "filters=age > 18"}})
-      assert_request("POST", %{path: ~r/algoliax_people_struct_fr/, body: %{"params" => "filters=age > 18"}})
+      assert_request("POST", %{
+        path: ~r/algoliax_people_struct_en/,
+        body: %{"params" => "filters=age > 18"}
+      })
+
+      assert_request("POST", %{
+        path: ~r/algoliax_people_struct_fr/,
+        body: %{"params" => "filters=age > 18"}
+      })
     end
   end
 
