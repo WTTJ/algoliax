@@ -18,22 +18,31 @@ defmodule AlgoliaxTest.ReplicaTest do
       assert {:ok, res} = PeopleWithReplicas.configure_index()
       assert %Algoliax.Response{response: %{"taskID" => _, "updatedAt" => _}} = res
 
-      assert_request("PUT", ~r/algoliax_people_replicas/, %{
-        "searchableAttributes" => ["full_name"],
-        "attributesForFaceting" => ["age"],
-        "replicas" => ["algoliax_people_replicas_asc", "algoliax_people_replicas_desc"]
+      assert_request("PUT", %{
+        path: ~r/algoliax_people_replicas/,
+        body: %{
+          "searchableAttributes" => ["full_name"],
+          "attributesForFaceting" => ["age"],
+          "replicas" => ["algoliax_people_replicas_asc", "algoliax_people_replicas_desc"]
+        }
       })
 
-      assert_request("PUT", ~r/algoliax_people_replicas_asc/, %{
-        "searchableAttributes" => ["age"],
-        "attributesForFaceting" => ["age"],
-        "ranking" => ["asc(age)"]
+      assert_request("PUT", %{
+        path: ~r/algoliax_people_replicas_asc/,
+        body: %{
+          "searchableAttributes" => ["age"],
+          "attributesForFaceting" => ["age"],
+          "ranking" => ["asc(age)"]
+        }
       })
 
-      assert_request("PUT", ~r/algoliax_people_replicas_desc/, %{
-        "searchableAttributes" => nil,
-        "attributesForFaceting" => nil,
-        "ranking" => ["desc(age)"]
+      assert_request("PUT", %{
+        path: ~r/algoliax_people_replicas_desc/,
+        body: %{
+          "searchableAttributes" => nil,
+          "attributesForFaceting" => nil,
+          "ranking" => ["desc(age)"]
+        }
       })
     end
 
@@ -62,41 +71,38 @@ defmodule AlgoliaxTest.ReplicaTest do
                ]
              } = res2
 
-      assert_request("PUT", ~r/algoliax_people_replicas_en/, %{
+      assert_request("PUT", %{path: ~r/algoliax_people_replicas_en/, body: %{
         "searchableAttributes" => ["full_name"],
         "attributesForFaceting" => ["age"],
         "replicas" => ["algoliax_people_replicas_asc_en", "algoliax_people_replicas_desc_en"]
-      })
+      }})
 
-      assert_request("PUT", ~r/algoliax_people_replicas_fr/, %{
+      assert_request("PUT", %{path: ~r/algoliax_people_replicas_fr/, body: %{
         "searchableAttributes" => ["full_name"],
         "attributesForFaceting" => ["age"],
         "replicas" => ["algoliax_people_replicas_asc_fr", "algoliax_people_replicas_desc_fr"]
-      })
+      }})
 
-      assert_request("PUT", ~r/algoliax_people_replicas_asc_en/, %{
+      assert_request("PUT", %{path: ~r/algoliax_people_replicas_asc_en/, body: %{
         "searchableAttributes" => ["age"],
         "attributesForFaceting" => ["age"],
         "ranking" => ["asc(age)"]
-      })
-
-      assert_request("PUT", ~r/algoliax_people_replicas_asc_fr/, %{
+      }})
+      assert_request("PUT", %{path: ~r/algoliax_people_replicas_asc_fr/, body: %{
         "searchableAttributes" => ["age"],
         "attributesForFaceting" => ["age"],
         "ranking" => ["asc(age)"]
-      })
-
-      assert_request("PUT", ~r/algoliax_people_replicas_desc_en/, %{
+      }})
+      assert_request("PUT", %{path: ~r/algoliax_people_replicas_desc_en/, body: %{
         "searchableAttributes" => nil,
         "attributesForFaceting" => nil,
         "ranking" => ["desc(age)"]
-      })
-
-      assert_request("PUT", ~r/algoliax_people_replicas_desc_fr/, %{
+      }})
+      assert_request("PUT", %{path: ~r/algoliax_people_replicas_desc_fr/, body: %{
         "searchableAttributes" => nil,
         "attributesForFaceting" => nil,
         "ranking" => ["desc(age)"]
-      })
+      }})
     end
 
     test "save_object/1" do
@@ -116,13 +122,15 @@ defmodule AlgoliaxTest.ReplicaTest do
              } = res
 
       assert_request("PUT", %{
-        "age" => 77,
-        "first_name" => "John",
-        "full_name" => "John Doe",
-        "last_name" => "Doe",
-        "nickname" => "john",
-        "objectID" => reference,
-        "updated_at" => 1_546_300_800
+        body: %{
+          "age" => 77,
+          "first_name" => "John",
+          "full_name" => "John Doe",
+          "last_name" => "Doe",
+          "nickname" => "john",
+          "objectID" => reference,
+          "updated_at" => 1_546_300_800
+        }
       })
     end
 
@@ -160,7 +168,7 @@ defmodule AlgoliaxTest.ReplicaTest do
                ]
              } = res2
 
-      assert_request("PUT", ~r/algoliax_people_replicas_en/, %{
+      assert_request("PUT", %{path: ~r/algoliax_people_replicas_en/, body: %{
         "age" => 77,
         "first_name" => "John",
         "full_name" => "John Doe",
@@ -168,9 +176,8 @@ defmodule AlgoliaxTest.ReplicaTest do
         "nickname" => "john",
         "objectID" => reference,
         "updated_at" => 1_546_300_800
-      })
-
-      assert_request("PUT", ~r/algoliax_people_replicas_fr/, %{
+      }})
+      assert_request("PUT", %{path: ~r/algoliax_people_replicas_fr/, body: %{
         "age" => 77,
         "first_name" => "John",
         "full_name" => "John Doe",
@@ -178,7 +185,7 @@ defmodule AlgoliaxTest.ReplicaTest do
         "nickname" => "john",
         "objectID" => reference,
         "updated_at" => 1_546_300_800
-      })
+      }})
     end
 
     test "save_objects/1" do
@@ -200,10 +207,12 @@ defmodule AlgoliaxTest.ReplicaTest do
              } = res
 
       assert_request("POST", %{
-        "requests" => [
-          %{"action" => "updateObject", "body" => %{"objectID" => reference1}},
-          %{"action" => "updateObject", "body" => %{"objectID" => reference2}}
-        ]
+        body: %{
+          "requests" => [
+            %{"action" => "updateObject", "body" => %{"objectID" => reference1}},
+            %{"action" => "updateObject", "body" => %{"objectID" => reference2}}
+          ]
+        }
       })
     end
 
@@ -256,19 +265,18 @@ defmodule AlgoliaxTest.ReplicaTest do
                ]
              } = res2
 
-      assert_request("POST", ~r/algoliax_people_replicas_en/, %{
+      assert_request("POST", %{path: ~r/algoliax_people_replicas_en/, body: %{
         "requests" => [
           %{"action" => "updateObject", "body" => %{"objectID" => reference1}},
           %{"action" => "updateObject", "body" => %{"objectID" => reference2}}
         ]
-      })
-
-      assert_request("POST", ~r/algoliax_people_replicas_fr/, %{
+      }})
+      assert_request("POST", %{path: ~r/algoliax_people_replicas_fr/, body: %{
         "requests" => [
           %{"action" => "updateObject", "body" => %{"objectID" => reference1}},
           %{"action" => "updateObject", "body" => %{"objectID" => reference2}}
         ]
-      })
+      }})
     end
 
     test "get_object/1 " do
@@ -281,7 +289,7 @@ defmodule AlgoliaxTest.ReplicaTest do
 
       assert {:ok, res} = PeopleWithReplicas.get_object(person)
       assert %Algoliax.Response{response: %{"objectID" => "known"}} = res
-      assert_request("GET", %{})
+      assert_request("GET", %{body: %{}})
     end
 
     test "get_object/1 with multiple indexes" do
@@ -316,8 +324,8 @@ defmodule AlgoliaxTest.ReplicaTest do
                ]
              } = res2
 
-      assert_request("GET", ~r/algoliax_people_replicas_en/, %{})
-      assert_request("GET", ~r/algoliax_people_replicas_fr/, %{})
+      assert_request("GET", %{path: ~r/algoliax_people_replicas_en/, body: %{}})
+      assert_request("GET", %{path: ~r/algoliax_people_replicas_fr/, body: %{}})
     end
 
     test "get_object/1 w/ unknown" do
@@ -351,8 +359,8 @@ defmodule AlgoliaxTest.ReplicaTest do
                 }
               ]} = PeopleWithReplicasMultipleIndexes.get_object(person)
 
-      assert_request("GET", ~r/algoliax_people_replicas_en/, %{})
-      assert_request("GET", ~r/algoliax_people_replicas_fr/, %{})
+      assert_request("GET", %{path: ~r/algoliax_people_replicas_en/, body: %{}})
+      assert_request("GET", %{path: ~r/algoliax_people_replicas_fr/, body: %{}})
     end
 
     test "delete_object/1" do
@@ -364,7 +372,7 @@ defmodule AlgoliaxTest.ReplicaTest do
       }
 
       assert {:ok, _} = PeopleWithReplicas.delete_object(person)
-      assert_request("DELETE", %{})
+      assert_request("DELETE", %{body: %{}})
     end
 
     test "delete_object/1 with multiple indexes" do
@@ -381,13 +389,13 @@ defmodule AlgoliaxTest.ReplicaTest do
                 %Algoliax.Responses{index_name: :algoliax_people_replicas_fr}
               ]} = PeopleWithReplicasMultipleIndexes.delete_object(person)
 
-      assert_request("DELETE", ~r/algoliax_people_replicas_en/, %{})
-      assert_request("DELETE", ~r/algoliax_people_replicas_fr/, %{})
+      assert_request("DELETE", %{path: ~r/algoliax_people_replicas_en/, body: %{}})
+      assert_request("DELETE", %{path: ~r/algoliax_people_replicas_fr/, body: %{}})
     end
 
     test "delete_index/0" do
       assert {:ok, _} = PeopleWithReplicas.delete_index()
-      assert_request("DELETE", %{})
+      assert_request("DELETE", %{body: %{}})
     end
 
     test "delete_index/0 with multiple indexes" do
@@ -397,14 +405,14 @@ defmodule AlgoliaxTest.ReplicaTest do
                 %Algoliax.Responses{index_name: :algoliax_people_replicas_fr}
               ]} = PeopleWithReplicasMultipleIndexes.delete_index()
 
-      assert_request("DELETE", ~r/algoliax_people_replicas_en/, %{})
-      assert_request("DELETE", ~r/algoliax_people_replicas_fr/, %{})
+      assert_request("DELETE", %{path: ~r/algoliax_people_replicas_en/, body: %{}})
+      assert_request("DELETE", %{path: ~r/algoliax_people_replicas_fr/, body: %{}})
     end
 
     test "get_settings/0" do
       assert {:ok, res} = PeopleWithReplicas.get_settings()
       assert %Algoliax.Response{response: %{"searchableAttributes" => ["test"]}} = res
-      assert_request("GET", %{})
+      assert_request("GET", %{body: %{}})
     end
 
     test "get_settings/0 with multiple indexes" do
@@ -432,13 +440,13 @@ defmodule AlgoliaxTest.ReplicaTest do
                ]
              } = res2
 
-      assert_request("GET", ~r/algoliax_people_replicas_en/, %{})
-      assert_request("GET", ~r/algoliax_people_replicas_fr/, %{})
+      assert_request("GET", %{path: ~r/algoliax_people_replicas_en/, body: %{}})
+      assert_request("GET", %{path: ~r/algoliax_people_replicas_fr/, body: %{}})
     end
 
     test "search/2" do
       assert {:ok, _} = PeopleWithReplicas.search("john", %{hitsPerPage: 10})
-      assert_request("POST", %{"query" => "john", "hitsPerPage" => 10})
+      assert_request("POST", %{body: %{"query" => "john", "hitsPerPage" => 10}})
     end
 
     test "search/2 with multiple indexes" do
@@ -448,20 +456,13 @@ defmodule AlgoliaxTest.ReplicaTest do
                 %Algoliax.Responses{index_name: :algoliax_people_replicas_fr}
               ]} = PeopleWithReplicasMultipleIndexes.search("john", %{hitsPerPage: 10})
 
-      assert_request("POST", ~r/algoliax_people_replicas_en/, %{
-        "query" => "john",
-        "hitsPerPage" => 10
-      })
-
-      assert_request("POST", ~r/algoliax_people_replicas_fr/, %{
-        "query" => "john",
-        "hitsPerPage" => 10
-      })
+      assert_request("POST", %{path: ~r/algoliax_people_replicas_en/, body: %{"query" => "john", "hitsPerPage" => 10}})
+      assert_request("POST", %{path: ~r/algoliax_people_replicas_fr/, body: %{"query" => "john", "hitsPerPage" => 10}})
     end
 
     test "search_facet/2" do
       assert {:ok, _} = PeopleWithReplicas.search_facet("age", "2")
-      assert_request("POST", %{"facetQuery" => "2"})
+      assert_request("POST", %{body: %{"facetQuery" => "2"}})
     end
 
     test "search_facet/2 with multiple indexes" do
@@ -471,8 +472,8 @@ defmodule AlgoliaxTest.ReplicaTest do
                 %Algoliax.Responses{index_name: :algoliax_people_replicas_fr}
               ]} = PeopleWithReplicasMultipleIndexes.search_facet("age", "2")
 
-      assert_request("POST", ~r/algoliax_people_replicas_en/, %{"facetQuery" => "2"})
-      assert_request("POST", ~r/algoliax_people_replicas_fr/, %{"facetQuery" => "2"})
+      assert_request("POST", %{path: ~r/algoliax_people_replicas_en/, body: %{"facetQuery" => "2"}})
+      assert_request("POST", %{path: ~r/algoliax_people_replicas_fr/, body: %{"facetQuery" => "2"}})
     end
   end
 end

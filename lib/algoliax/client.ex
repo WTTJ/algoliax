@@ -60,7 +60,15 @@ defmodule Algoliax.Client do
       {"Content-type", "application/json"},
       {"X-Algolia-API-Key", Config.api_key()},
       {"X-Algolia-Application-Id", Config.application_id()}
-    ]
+    ] ++ x_forwarded_for()
+  end
+
+  defp x_forwarded_for do
+    if remote_ip = Process.get(:algoliax_user_ip, nil) do
+      [{"X-Forwarded-For", remote_ip}]
+    else
+      []
+    end
   end
 
   defp log(action, method, url, body) do
