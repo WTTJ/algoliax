@@ -1131,108 +1131,126 @@ defmodule AlgoliaxTest.Schema do
       assert {:ok, [{:ok, %Algoliax.Response{}}, {:ok, %Algoliax.Response{}}]} =
                BeerWithFilters.reindex()
 
-      assert_request("POST", %{body: %{
-        "requests" => [
-          %{
-            "action" => "updateObject",
-            "body" => %{
-              "kind" => "blonde",
-              "name" => "heineken",
-              "objectID" => 3
+      assert_request("POST", %{
+        body: %{
+          "requests" => [
+            %{
+              "action" => "updateObject",
+              "body" => %{
+                "kind" => "blonde",
+                "name" => "heineken",
+                "objectID" => 3
+              }
             }
-          }
-        ]
-      }})
+          ]
+        }
+      })
 
-      assert_request("POST", %{body: %{
-        "requests" => [
-          %{
-            "action" => "updateObject",
-            "body" => %{
-              "kind" => "blonde",
-              "name" => "jupiler",
-              "objectID" => 2
+      assert_request("POST", %{
+        body: %{
+          "requests" => [
+            %{
+              "action" => "updateObject",
+              "body" => %{
+                "kind" => "blonde",
+                "name" => "jupiler",
+                "objectID" => 2
+              }
             }
-          }
-        ]
-      }})
+          ]
+        }
+      })
     end
 
     test "reindex with default filters per schemas" do
       # Expect 1 brune
       assert {:ok, [{:ok, %Algoliax.Response{}}]} = BeerWithSchemaFilters.reindex()
 
-      assert_request("POST", %{body: %{
-        "requests" => [
-          %{
-            "action" => "updateObject",
-            "body" => %{
-              "kind" => "brune",
-              "name" => "chimay",
-              "objectID" => 1
+      assert_request("POST", %{
+        body: %{
+          "requests" => [
+            %{
+              "action" => "updateObject",
+              "body" => %{
+                "kind" => "brune",
+                "name" => "chimay",
+                "objectID" => 1
+              }
             }
-          }
-        ]
-      }})
+          ]
+        }
+      })
     end
 
     test "reindex_atomic with default filters" do
       # Expect 2 blondes
       assert {:ok, :completed} = BeerWithFilters.reindex_atomic()
 
-      assert_request("POST", %{body: %{
-        "requests" => [
-          %{
-            "action" => "updateObject",
-            "body" => %{
-              "kind" => "blonde",
-              "name" => "heineken",
-              "objectID" => 3
+      assert_request("POST", %{
+        body: %{
+          "requests" => [
+            %{
+              "action" => "updateObject",
+              "body" => %{
+                "kind" => "blonde",
+                "name" => "heineken",
+                "objectID" => 3
+              }
             }
-          }
-        ]
-      }})
+          ]
+        }
+      })
 
-      assert_request("POST", %{body: %{
-        "requests" => [
-          %{
-            "action" => "updateObject",
-            "body" => %{
-              "kind" => "blonde",
-              "name" => "jupiler",
-              "objectID" => 2
+      assert_request("POST", %{
+        body: %{
+          "requests" => [
+            %{
+              "action" => "updateObject",
+              "body" => %{
+                "kind" => "blonde",
+                "name" => "jupiler",
+                "objectID" => 2
+              }
             }
-          }
-        ]
-      }})
+          ]
+        }
+      })
 
-      assert_request("POST", %{path: ~r/algoliax_beer_with_filters\.tmp/, body: %{
-        "destination" => "algoliax_beer_with_filters",
-        "operation" => "move"
-      }})
+      assert_request("POST", %{
+        path: ~r/algoliax_beer_with_filters\.tmp/,
+        body: %{
+          "destination" => "algoliax_beer_with_filters",
+          "operation" => "move"
+        }
+      })
     end
 
     test "reindex_atomic with default filters per schemas" do
       # Expect 1 brune
       assert {:ok, :completed} = BeerWithSchemaFilters.reindex_atomic()
 
-      assert_request("POST", %{body: %{
-        "requests" => [
-          %{
-            "action" => "updateObject",
-            "body" => %{
-              "kind" => "brune",
-              "name" => "chimay",
-              "objectID" => 1
+      assert_request("POST", %{
+        body: %{
+          "requests" => [
+            %{
+              "action" => "updateObject",
+              "body" => %{
+                "kind" => "brune",
+                "name" => "chimay",
+                "objectID" => 1
+              }
             }
-          }
-        ]
-      }})
+          ]
+        }
+      })
 
-      assert_request("POST", %{path: ~r/algoliax_beer_with_schema_filters\.tmp/, body: %{
-        "destination" => "algoliax_beer_with_schema_filters",
-        "operation" => "move"
-      }})
+      assert_request("POST", %{
+        path: ~r/algoliax_beer_with_schema_filters\.tmp/,
+        body: %{
+          "destination" => "algoliax_beer_with_schema_filters",
+          "operation" => "move"
+        }
+      })
     end
 
     test "reindex ignore default filters if query is provided" do
@@ -1240,18 +1258,20 @@ defmodule AlgoliaxTest.Schema do
       query = from(b in Beer, where: b.kind == "brune")
       assert {:ok, [{:ok, %Algoliax.Response{}}]} = BeerWithFilters.reindex(query)
 
-      assert_request("POST", %{body: %{
-        "requests" => [
-          %{
-            "action" => "updateObject",
-            "body" => %{
-              "kind" => "brune",
-              "name" => "chimay",
-              "objectID" => 1
+      assert_request("POST", %{
+        body: %{
+          "requests" => [
+            %{
+              "action" => "updateObject",
+              "body" => %{
+                "kind" => "brune",
+                "name" => "chimay",
+                "objectID" => 1
+              }
             }
-          }
-        ]
-      }})
+          ]
+        }
+      })
     end
 
     test "reindex ignore default filters if query (keyword list) is provided" do
@@ -1259,18 +1279,20 @@ defmodule AlgoliaxTest.Schema do
       query = %{where: [id: 2]}
       assert {:ok, [{:ok, %Algoliax.Response{}}]} = BeerWithSchemaFilters.reindex(query)
 
-      assert_request("POST", %{body: %{
-        "requests" => [
-          %{
-            "action" => "updateObject",
-            "body" => %{
-              "kind" => "blonde",
-              "name" => "jupiler",
-              "objectID" => 2
+      assert_request("POST", %{
+        body: %{
+          "requests" => [
+            %{
+              "action" => "updateObject",
+              "body" => %{
+                "kind" => "blonde",
+                "name" => "jupiler",
+                "objectID" => 2
+              }
             }
-          }
-        ]
-      }})
+          ]
+        }
+      })
     end
   end
 end
