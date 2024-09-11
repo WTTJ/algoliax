@@ -13,7 +13,7 @@ defmodule BlondeBeerIndexer do
     index_name: :blonde_beers,
     object_id: :name,
     schemas: [Beer],
-    default_filters: %{where: [kind: "blonde"]} # <---
+    default_filters: %{where: [kind: "blonde"]} # <--- can be a map
 end
 
 defmodule BeerIndexer do
