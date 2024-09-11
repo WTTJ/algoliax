@@ -2,8 +2,6 @@ version: 2
 updates:
   - package-ecosystem: mix
     directory: "/"
-    registries:
-      - github-octocat
     schedule:
       interval: "weekly"
     groups:
