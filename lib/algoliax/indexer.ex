@@ -8,6 +8,7 @@ defmodule Algoliax.Indexer do
   - `:repo`: Specify an Ecto repo to be use to fecth records. Default `nil`
   - `:cursor_field`: specify the column to be used to order and go through a given table. Default `:id`
   - `:schemas`: Specify which schemas used to populate index, Default: `[__CALLER__]`
+  - `:default_filters`: Specify default filters to be used when reindex without providing a query. Must be a map or a function name (that returns a map). Default: `%{}`.
   - `:algolia`: Any valid Algolia settings, using snake case or camel case. Ex: Algolia `attributeForFaceting` can be configured with `:attribute_for_faceting`
 
   On first call to Algolia, we check that the settings on Algolia are up to date.
@@ -98,6 +99,43 @@ defmodule Algoliax.Indexer do
 
         end
 
+  ### Default filters
+
+  `:default_filters` allows you to define a list of filters that will be automatically applied when performing `reindex` without query, or `reindex_atomic`.
+   If not provided, it defaults to `%{}`, meaning it will not apply any filter and fetch the entire repo for all schemas.
+   You can provide either a map or a function name that returns a map.
+
+      defmodule Global do
+        use Algoliax.Indexer,
+          index_name: :people,
+          object_id: :reference,
+          schemas: [People, Animal],
+          default_filters: %{where: [age: 18]},
+          algolia: [
+            attribute_for_faceting: ["age"],
+            custom_ranking: ["desc(updated_at)"]
+          ]
+      end
+
+  The map must be a valid Ecto query but can be customized/nested by schema:
+
+      defmodule Global do
+        use Algoliax.Indexer,
+          index_name: :people,
+          object_id: :reference,
+          schemas: [People, Animal],
+          default_filters: :get_filters,
+          algolia: [
+            attribute_for_faceting: ["age"],
+            custom_ranking: ["desc(updated_at)"]
+          ]
+
+        def get_filters do
+          %{
+            People => where: [age: 18], # <-- Custom filter for People
+            :where => [kind: "cat"]  # <-- Default filter for other schemas
+        end
+      end
   """
 
   alias Algoliax.Resources.{Index, Object, Search}

@@ -53,6 +53,39 @@ defmodule Algoliax.UtilsTest do
       object_id: :reference
   end
 
+  defmodule NoDefaultFilters do
+    use Algoliax.Indexer,
+      index_name: :algoliax_people,
+      attributes_for_faceting: ["age"],
+      searchable_attributes: ["full_name"],
+      custom_ranking: ["desc(updated_at)"],
+      object_id: :reference
+  end
+
+  defmodule DefaultFiltersInSettings do
+    use Algoliax.Indexer,
+      index_name: :algoliax_people,
+      attributes_for_faceting: ["age"],
+      searchable_attributes: ["full_name"],
+      custom_ranking: ["desc(updated_at)"],
+      object_id: :reference,
+      default_filters: %{where: [age: 42]}
+  end
+
+  defmodule DefaultFiltersWithFunction do
+    use Algoliax.Indexer,
+      index_name: :algoliax_people,
+      attributes_for_faceting: ["age"],
+      searchable_attributes: ["full_name"],
+      custom_ranking: ["desc(updated_at)"],
+      object_id: :reference,
+      default_filters: :default_filters
+
+    def default_filters do
+      %{where: [age: 43]}
+    end
+  end
+
   describe "Raise exception if trying Ecto specific methods" do
     test "Algoliax.MissingRepoError" do
       assert_raise(Algoliax.MissingRepoError, fn ->
@@ -107,6 +140,24 @@ defmodule Algoliax.UtilsTest do
                index_name: [:algoliax_people_en, :algoliax_people_fr]
              ) ==
                [:algoliax_people_en, :algoliax_people_fr]
+    end
+  end
+
+  describe "default_filters/2" do
+    test "not provided" do
+      assert Algoliax.Utils.default_filters(NoDefaultFilters, []) == %{}
+    end
+
+    test "provided in settings" do
+      assert Algoliax.Utils.default_filters(DefaultFiltersInSettings,
+               default_filters: %{where: [age: 42]}
+             ) == %{where: [age: 42]}
+    end
+
+    test "provided as a function" do
+      assert Algoliax.Utils.default_filters(DefaultFiltersWithFunction,
+               default_filters: :default_filters
+             ) == %{where: [age: 43]}
     end
   end
 end
