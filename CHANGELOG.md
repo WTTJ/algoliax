@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.8.0 - 2023-09-20
+## v0.8.0 - 2024-09-11
 
 #### Breaking changes
 
@@ -21,7 +21,7 @@
 
 #### New
 
-- Add wait_task/1 (https://hexdocs.pm/algoliax/Algoliax.html#wait_task/1)
+- Add wait_task/1 (<https://hexdocs.pm/algoliax/Algoliax.html#wait_task/1>)
 
 ## v0.7.0 - 2022-03-29
 
