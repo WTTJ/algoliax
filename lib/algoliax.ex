@@ -102,7 +102,12 @@ defmodule Algoliax do
 
       MyApp.People.save_object(%MyApp.People{id: 1}) |> Algoliax.wait_task()
   """
-  def wait_task({:ok, response}), do: wait_task(response)
+  def wait_task({:ok, %Algoliax.Response{} = response}), do: wait_task(response)
+
+  def wait_task({:ok, responses}) when is_list(responses) do
+    responses
+    |> Enum.flat_map(fn %Algoliax.Responses{responses: tasks} -> wait_task(tasks) end)
+  end
 
   def wait_task(tasks) when is_list(tasks) do
     tasks
@@ -121,6 +126,18 @@ defmodule Algoliax do
     case Algoliax.Resources.Task.task(response) do
       {:ok, %Algoliax.Response{response: %{"status" => "published"}}} ->
         {:ok, response}
+
+      {:ok, responses} when is_list(responses) ->
+        responses
+        |> Enum.all?(fn %Algoliax.Response{} = response -> response["status"] == "published" end)
+        |> case do
+          true ->
+            {:ok, responses}
+
+          false ->
+            :timer.sleep(min(100 * retry, 1000))
+            do_wait_task(response, retry)
+        end
 
       _ ->
         :timer.sleep(min(100 * retry, 1000))

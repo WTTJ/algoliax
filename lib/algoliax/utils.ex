@@ -4,22 +4,28 @@ defmodule Algoliax.Utils do
   alias Algoliax.Resources.Index
 
   def index_name(module, settings) do
-    index_name_opt = Keyword.get(settings, :index_name)
+    indexes =
+      case Keyword.get(settings, :index_name) do
+        nil ->
+          raise Algoliax.MissingIndexNameError
 
-    if index_name_opt do
-      index_name =
-        if module.__info__(:functions)
-           |> Keyword.get(index_name_opt) == 0 do
-          apply(module, index_name_opt, [])
-        else
-          index_name_opt
-        end
+        atom when is_atom(atom) ->
+          if module.__info__(:functions) |> Keyword.get(atom) == 0 do
+            apply(module, atom, [])
+            |> to_list()
+          else
+            [atom]
+          end
 
-      Index.ensure_settings(module, index_name, settings)
-      index_name
-    else
-      raise Algoliax.MissingIndexNameError
-    end
+        list when is_list(list) ->
+          list
+      end
+
+    indexes
+    |> Enum.with_index()
+    |> Enum.each(fn {index, i} -> Index.ensure_settings(module, index, settings, i) end)
+
+    indexes
   end
 
   def algolia_settings(settings) do
@@ -47,4 +53,28 @@ defmodule Algoliax.Utils do
     |> Atom.to_string()
     |> Inflex.camelize(:lower)
   end
+
+  def render_response([response]), do: response
+
+  def render_response([_ | _] = responses) do
+    results =
+      responses
+      |> List.flatten()
+      |> Enum.reject(&(match?({:not_indexable, _model}, &1) or is_nil(&1)))
+      |> Enum.group_by(fn
+        {:ok, %Algoliax.Response{params: params}} -> params[:index_name]
+        {:error, _, _, %{url_params: params}} -> params[:index_name]
+      end)
+      |> Enum.map(fn {index_name, results} ->
+        %Algoliax.Responses{
+          index_name: index_name,
+          responses: results
+        }
+      end)
+
+    {:ok, results}
+  end
+
+  defp to_list(indexes) when is_list(indexes), do: indexes
+  defp to_list(index), do: [index]
 end
