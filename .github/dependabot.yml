@@ -1,0 +1,13 @@
+version: 2
+updates:
+  - package-ecosystem: mix
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      patches:
+        update-types: ["patch"]
+      minors:
+        update-types: ["minor"]
+      majors:
+        update-types: ["major"]
