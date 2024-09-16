@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.8.2 - 2024-09-16
+
+- Upgrading all dependencies
+- Added `dependabot` to the repository
+
 ## v0.8.1 - 2024-09-11
 
 #### New
