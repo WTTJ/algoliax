@@ -31,6 +31,19 @@ defmodule Algoliax.MissingIndexNameError do
   end
 end
 
+defmodule Algoliax.InvalidReplicaConfigurationError do
+  @moduledoc "Raise when a replica has an invalid configuration"
+
+  defexception [:message]
+
+  @impl true
+  def exception(%{index_name: index_name, error: error}) do
+    %__MODULE__{
+      message: "Invalid configuration for replica #{index_name}: #{error}"
+    }
+  end
+end
+
 defmodule Algoliax.AlgoliaApiError do
   @moduledoc "Raise Algolia API error"
 
