@@ -8,7 +8,7 @@ New `to_be_deployed?` option for replicas which decides if they should be deploy
 - Must be `nil|true|false` or the name (atom) of a arity-0 func which returns a boolean
 - If provided, the replica will be deployed only if the value is `true` or the function returns `true`
 
-Useful for deploying replicas only under certain conditions, like on specific environments.
+Useful for Algolia's A/B testing which requires replicas and only deploy them in production.
 
 ## v0.8.2 - 2024-09-16
 

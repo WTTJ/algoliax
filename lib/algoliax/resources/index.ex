@@ -35,7 +35,7 @@ defmodule Algoliax.Resources.Index do
   def replicas_settings(module, settings) do
     settings
     |> Keyword.get(:replicas, [])
-    |> Enum.filter(fn replica -> maybe_filter_replica(module, replica) end)
+    |> Enum.filter(fn replica -> should_be_deployed?(module, replica) end)
     |> Enum.map(fn replica ->
       case Keyword.get(replica, :inherit, true) do
         true ->
@@ -54,34 +54,36 @@ defmodule Algoliax.Resources.Index do
     end)
   end
 
-  defp maybe_filter_replica(module, replica) do
+  defp should_be_deployed?(module, replica) do
     index_name = Keyword.get(replica, :index_name, nil)
 
     error_message =
       "`to_be_deployed?` must be `nil|true|false` or be the name of a 0-arity func which returns a boolean."
 
-    case Keyword.get(replica, :to_be_deployed?, nil) do
-      nil ->
+    to_be_deployed? = Keyword.get(replica, :to_be_deployed?, nil)
+
+    cond do
+      # No config, defaults to true
+      is_nil(to_be_deployed?) ->
         true
 
-      atom when is_atom(atom) ->
-        is_valid_func = module.__info__(:functions) |> Keyword.get(atom) == 0
+      # Boolean, use this value
+      to_be_deployed? == true || to_be_deployed? == false ->
+        to_be_deployed?
 
-        cond do
-          is_valid_func ->
-            apply(module, atom, []) == true
-
-          atom == true or atom == false ->
-            atom
-
-          true ->
-            raise Algoliax.InvalidReplicaConfigurationError, %{
-              index_name: index_name,
-              error: error_message
-            }
+      # Name of a 0-arity func
+      is_atom(to_be_deployed?) ->
+        if module.__info__(:functions) |> Keyword.get(to_be_deployed?) == 0 do
+          apply(module, to_be_deployed?, []) == true
+        else
+          raise Algoliax.InvalidReplicaConfigurationError, %{
+            index_name: index_name,
+            error: error_message
+          }
         end
 
-      _ ->
+      # Any other value, raise an error
+      true ->
         raise Algoliax.InvalidReplicaConfigurationError, %{
           index_name: index_name,
           error: error_message
