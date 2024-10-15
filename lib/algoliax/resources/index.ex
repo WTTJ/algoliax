@@ -35,7 +35,7 @@ defmodule Algoliax.Resources.Index do
   def replicas_settings(module, settings) do
     settings
     |> Keyword.get(:replicas, [])
-    |> Enum.filter(fn replica -> should_be_deployed?(module, replica) end)
+    |> Enum.filter(fn replica -> should_be_updated?(module, replica) end)
     |> Enum.map(fn replica ->
       case Keyword.get(replica, :inherit, true) do
         true ->
@@ -54,7 +54,7 @@ defmodule Algoliax.Resources.Index do
     end)
   end
 
-  defp should_be_deployed?(module, replica) do
+  defp should_be_updated?(module, replica) do
     index_name = Keyword.get(replica, :index_name, nil)
 
     error_message =
