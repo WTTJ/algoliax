@@ -17,7 +17,7 @@ defmodule Algoliax.Schemas.PeopleWithInvalidReplicas do
           searchable_attributes: ["age"],
           ranking: ["asc(age)"]
         ],
-        to_be_deployed?: :ok
+        if: :ok
       ]
     ]
 

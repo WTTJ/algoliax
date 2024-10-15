@@ -22,7 +22,7 @@ defmodule Algoliax.Schemas.PeopleWithReplicasMultipleIndexes do
         index_name: [:algoliax_people_replicas_desc_en, :algoliax_people_replicas_desc_fr],
         inherit: false,
         algolia: [ranking: ["desc(age)"]],
-        to_be_deployed?: true
+        if: true
       ],
       [
         index_name: [:algoliax_people_replicas_skipped_en, :algoliax_people_replicas_skipped_fr],
@@ -31,7 +31,7 @@ defmodule Algoliax.Schemas.PeopleWithReplicasMultipleIndexes do
           searchable_attributes: ["age"],
           ranking: ["asc(age)"]
         ],
-        to_be_deployed?: :do_not_deploy
+        if: :do_not_deploy
       ],
       [
         index_name: [
@@ -43,7 +43,7 @@ defmodule Algoliax.Schemas.PeopleWithReplicasMultipleIndexes do
           searchable_attributes: ["age"],
           ranking: ["asc(age)"]
         ],
-        to_be_deployed?: false
+        if: false
       ],
       [
         index_name: [
@@ -55,7 +55,7 @@ defmodule Algoliax.Schemas.PeopleWithReplicasMultipleIndexes do
           searchable_attributes: ["age"],
           ranking: ["asc(age)"]
         ],
-        to_be_deployed?: :do_deploy
+        if: :do_deploy
       ]
     ]
 

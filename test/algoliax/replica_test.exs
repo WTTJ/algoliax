@@ -555,7 +555,7 @@ defmodule AlgoliaxTest.ReplicaTest do
     test "should raise error on invalid replica config" do
       assert_raise(
         Algoliax.InvalidReplicaConfigurationError,
-        "Invalid configuration for replica algoliax_people_replicas_asc: `to_be_deployed?` must be `nil|true|false` or be the name of a 0-arity func which returns a boolean.",
+        "Invalid configuration for replica algoliax_people_replicas_asc: `if` must be `nil|true|false` or be the name of a 0-arity func which returns a boolean.",
         fn ->
           PeopleWithInvalidReplicas.configure_index()
         end

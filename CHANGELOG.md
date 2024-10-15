@@ -1,8 +1,8 @@
 # Changelog
 
-## v0.8.3 - TBD
+## v0.8.3 - 2024-10-18
 
-New `to_be_deployed?` option for replicas which decides if they should be deployed or not.
+New `if` option for replicas which decides if they should be deployed or not.
 
 - **If not provided**, the replica will be deployed (so no impact on existing configurations)
 - Must be `nil|true|false` or the name (atom) of a arity-0 func which returns a boolean

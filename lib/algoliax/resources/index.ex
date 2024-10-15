@@ -58,23 +58,23 @@ defmodule Algoliax.Resources.Index do
     index_name = Keyword.get(replica, :index_name, nil)
 
     error_message =
-      "`to_be_deployed?` must be `nil|true|false` or be the name of a 0-arity func which returns a boolean."
+      "`if` must be `nil|true|false` or be the name of a 0-arity func which returns a boolean."
 
-    to_be_deployed? = Keyword.get(replica, :to_be_deployed?, nil)
+    value = Keyword.get(replica, :if, nil)
 
     cond do
       # No config, defaults to true
-      is_nil(to_be_deployed?) ->
+      is_nil(value) ->
         true
 
       # Boolean, use this value
-      to_be_deployed? == true || to_be_deployed? == false ->
-        to_be_deployed?
+      value == true || value == false ->
+        value
 
       # Name of a 0-arity func
-      is_atom(to_be_deployed?) ->
-        if module.__info__(:functions) |> Keyword.get(to_be_deployed?) == 0 do
-          apply(module, to_be_deployed?, []) == true
+      is_atom(value) ->
+        if module.__info__(:functions) |> Keyword.get(value) == 0 do
+          apply(module, value, []) == true
         else
           raise Algoliax.InvalidReplicaConfigurationError, %{
             index_name: index_name,
