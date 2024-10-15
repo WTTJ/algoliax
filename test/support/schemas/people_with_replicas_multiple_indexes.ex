@@ -21,7 +21,41 @@ defmodule Algoliax.Schemas.PeopleWithReplicasMultipleIndexes do
       [
         index_name: [:algoliax_people_replicas_desc_en, :algoliax_people_replicas_desc_fr],
         inherit: false,
-        algolia: [ranking: ["desc(age)"]]
+        algolia: [ranking: ["desc(age)"]],
+        if: true
+      ],
+      [
+        index_name: [:algoliax_people_replicas_skipped_en, :algoliax_people_replicas_skipped_fr],
+        inherit: true,
+        algolia: [
+          searchable_attributes: ["age"],
+          ranking: ["asc(age)"]
+        ],
+        if: :do_not_deploy
+      ],
+      [
+        index_name: [
+          :algoliax_people_replicas_skipped_too_en,
+          :algoliax_people_replicas_skipped_too_fr
+        ],
+        inherit: true,
+        algolia: [
+          searchable_attributes: ["age"],
+          ranking: ["asc(age)"]
+        ],
+        if: false
+      ],
+      [
+        index_name: [
+          :algoliax_people_replicas_not_skipped_en,
+          :algoliax_people_replicas_not_skipped_fr
+        ],
+        inherit: true,
+        algolia: [
+          searchable_attributes: ["age"],
+          ranking: ["asc(age)"]
+        ],
+        if: :do_deploy
       ]
     ]
 
@@ -37,4 +71,7 @@ defmodule Algoliax.Schemas.PeopleWithReplicasMultipleIndexes do
       nickname: Map.get(people, :first_name, "") |> String.downcase()
     }
   end
+
+  def do_not_deploy, do: false
+  def do_deploy, do: true
 end

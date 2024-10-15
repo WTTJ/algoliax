@@ -25,6 +25,7 @@ Then run `mix test` to run the tests.
 ## CI/CD
 
 We use CircleCI to:
+
 - Run the code_analysis (format/credo)
 - Check for vulnerabilities
 - Run the tests

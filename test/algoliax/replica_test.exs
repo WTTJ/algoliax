@@ -3,6 +3,7 @@ defmodule AlgoliaxTest.ReplicaTest do
 
   alias Algoliax.Schemas.PeopleWithReplicas
   alias Algoliax.Schemas.PeopleWithReplicasMultipleIndexes
+  alias Algoliax.Schemas.PeopleWithInvalidReplicas
 
   setup do
     Algoliax.SettingsStore.set_settings(:algoliax_people_replicas, %{})
@@ -76,7 +77,11 @@ defmodule AlgoliaxTest.ReplicaTest do
         body: %{
           "searchableAttributes" => ["full_name"],
           "attributesForFaceting" => ["age"],
-          "replicas" => ["algoliax_people_replicas_asc_en", "algoliax_people_replicas_desc_en"]
+          "replicas" => [
+            "algoliax_people_replicas_asc_en",
+            "algoliax_people_replicas_desc_en",
+            "algoliax_people_replicas_not_skipped_en"
+          ]
         }
       })
 
@@ -85,7 +90,11 @@ defmodule AlgoliaxTest.ReplicaTest do
         body: %{
           "searchableAttributes" => ["full_name"],
           "attributesForFaceting" => ["age"],
-          "replicas" => ["algoliax_people_replicas_asc_fr", "algoliax_people_replicas_desc_fr"]
+          "replicas" => [
+            "algoliax_people_replicas_asc_fr",
+            "algoliax_people_replicas_desc_fr",
+            "algoliax_people_replicas_not_skipped_fr"
+          ]
         }
       })
 
@@ -122,6 +131,24 @@ defmodule AlgoliaxTest.ReplicaTest do
           "searchableAttributes" => nil,
           "attributesForFaceting" => nil,
           "ranking" => ["desc(age)"]
+        }
+      })
+
+      assert_request("PUT", %{
+        path: ~r/algoliax_people_replicas_not_skipped_en/,
+        body: %{
+          "searchableAttributes" => ["age"],
+          "attributesForFaceting" => ["age"],
+          "ranking" => ["asc(age)"]
+        }
+      })
+
+      assert_request("PUT", %{
+        path: ~r/algoliax_people_replicas_not_skipped_fr/,
+        body: %{
+          "searchableAttributes" => ["age"],
+          "attributesForFaceting" => ["age"],
+          "ranking" => ["asc(age)"]
         }
       })
     end
@@ -523,6 +550,16 @@ defmodule AlgoliaxTest.ReplicaTest do
         path: ~r/algoliax_people_replicas_fr/,
         body: %{"facetQuery" => "2"}
       })
+    end
+
+    test "should raise error on invalid replica config" do
+      assert_raise(
+        Algoliax.InvalidReplicaConfigurationError,
+        "Invalid configuration for replica algoliax_people_replicas_asc: `if` must be `nil|true|false` or be the name of a 0-arity func which returns a boolean.",
+        fn ->
+          PeopleWithInvalidReplicas.configure_index()
+        end
+      )
     end
   end
 end

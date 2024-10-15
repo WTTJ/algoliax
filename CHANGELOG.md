@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.8.3 - 2024-10-18
+
+New `if` option for replicas which decides if they should be updated or not.
+
+- **If not provided**, the replica will be updated (so no impact on existing configurations)
+- Must be `nil|true|false` or the name (atom) of a arity-0 func which returns a boolean
+- If provided, the replica will be updated only if the value is `true` or the function returns `true`
+
+Useful for Algolia's A/B testing which requires replicas and only deploy them in production.
+
 ## v0.8.2 - 2024-09-16
 
 - Upgrading all dependencies
