@@ -3,11 +3,8 @@ updates:
   - package-ecosystem: mix
     directory: "/"
     schedule:
-      interval: "weekly"
-    groups:
-      patches:
-        update-types: ["patch"]
-      minors:
-        update-types: ["minor"]
-      majors:
-        update-types: ["major"]
+      interval: daily
+      time: "06:00"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 100
+    rebase-strategy: "disabled"
