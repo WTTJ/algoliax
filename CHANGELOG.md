@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.9.0 - 2024-11-26
+
+`ALGOLIA_API_KEY` and `ALGOLIA_APPLICATION_ID` aren't read anymore from system env variables
+inside the code. Only application config is now used (as documented).
+
+If you used these env vars, you should now read them inside the config:
+
+```elixir
+config :algoliax,
+  api_key: System.get_env("ALGOLIA_API_KEY"),
+  application_id: System.get_env("ALGOLIA_APPLICATION_ID)
+```
+
 ## v0.8.3 - 2024-10-18
 
 New `if` option for replicas which decides if they should be updated or not.
