@@ -60,17 +60,17 @@ defmodule Algoliax.Routes do
 
   if Mix.env() == :test do
     defp url_read do
-      port = System.get_env("SLACK_MOCK_API_PORT", "8002")
+      port = Application.get_env(:algoliax, :mock_api_port)
       "http://localhost:#{port}/{{application_id}}/read"
     end
 
     defp url_write do
-      port = System.get_env("SLACK_MOCK_API_PORT", "8002")
+      port = Application.get_env(:algoliax, :mock_api_port)
       "http://localhost:#{port}/{{application_id}}/write"
     end
 
     defp url_retry do
-      port = System.get_env("SLACK_MOCK_API_PORT", "8002")
+      port = Application.get_env(:algoliax, :mock_api_port)
       "http://localhost:#{port}/{{application_id}}/retry/{{retry}}"
     end
   else
