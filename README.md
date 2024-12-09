@@ -287,6 +287,22 @@ use Algoliax.Indexer,
   ]
 ```
 
+## Configure index name at runtime
+
+To support code for multiple environments, you can also define the index name at runtime. To achieve this, create a function within your indexer module and reference it using its atom in the Indexer configuration.
+
+```elixir
+defmodule People do
+  use Algoliax.Indexer,
+    index_name: :runtime_index_name,
+    #....
+
+  def runtime_index_name do
+    System.get_env("INDEX_NAME")
+  end
+end
+```
+
 ## Copyright and License
 
 Copyright (c) 2020 CORUSCANT (welcome to the jungle) - https://www.welcometothejungle.com
