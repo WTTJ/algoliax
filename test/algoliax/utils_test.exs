@@ -102,9 +102,6 @@ defmodule Algoliax.UtilsTest do
     end
   end
 
-  defmodule FakeModule do
-  end
-
   defmodule AlgoliaSettingsFunction do
     def valid_func do
       [
@@ -181,11 +178,11 @@ defmodule Algoliax.UtilsTest do
 
   describe "algolia_settings/2" do
     test "with a nothing" do
-      assert Algoliax.Utils.algolia_settings(FakeModule, []) == []
+      assert Algoliax.Utils.algolia_settings(%{}, []) == []
     end
 
     test "with a list" do
-      assert Algoliax.Utils.algolia_settings(FakeModule,
+      assert Algoliax.Utils.algolia_settings(%{},
                algolia: [
                  attributes_for_faceting: ["age"],
                  searchable_attributes: ["full_name"]
