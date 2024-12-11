@@ -32,7 +32,7 @@ defmodule Algoliax.MissingIndexNameError do
 end
 
 defmodule Algoliax.InvalidAlgoliaSettingsFunctionError do
-  @moduledoc "Raise when algolia settings are invalid"
+  @moduledoc "Raise when dynamic `:algolia` settings are invalid"
 
   defexception [:message]
 
@@ -45,7 +45,7 @@ defmodule Algoliax.InvalidAlgoliaSettingsFunctionError do
 end
 
 defmodule Algoliax.InvalidAlgoliaSettingsConfigurationError do
-  @moduledoc "Raise when algolia settings are invalid"
+  @moduledoc "Raise when the `:algolia` settings are unsupported"
 
   defexception [:message]
 
