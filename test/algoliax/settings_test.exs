@@ -1,6 +1,15 @@
 defmodule Algoliax.SettingsTest do
   use ExUnit.Case, async: true
 
+  defmodule ModuleWithAlgoliaSettingsFunc do
+    def algolia_settings do
+      [
+        attributes_for_faceting: ["location"],
+        searchable_attributes: ["first_name"]
+      ]
+    end
+  end
+
   test "settings/0" do
     assert Algoliax.Settings.settings() == [
              :searchable_attributes,
@@ -131,6 +140,34 @@ defmodule Algoliax.SettingsTest do
 
       assert result["attributesForFaceting"] == ["age"]
       assert result["searchableAttributes"] == nil
+      assert result["ranking"] == ["asc(age)"]
+    end
+
+    test "with algolia settings func" do
+      replica_settings = [
+        name: :algoliax_people_by_age_asc,
+        attributes_for_faceting: ["age"],
+        ranking: ["asc(age)"],
+        inherit: true
+      ]
+
+      settings = [
+        index_name: :algoliax_people,
+        object_id: :reference,
+        repo: MyApp.Repo,
+        algolia: :algolia_settings,
+        replicas: [replica_settings]
+      ]
+
+      assert result =
+               Algoliax.Settings.replica_settings(
+                 ModuleWithAlgoliaSettingsFunc,
+                 settings,
+                 replica_settings
+               )
+
+      assert result["attributesForFaceting"] == ["age"]
+      assert result["searchableAttributes"] == ["first_name"]
       assert result["ranking"] == ["asc(age)"]
     end
   end

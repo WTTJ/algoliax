@@ -9,7 +9,7 @@ defmodule Algoliax.Indexer do
   - `:cursor_field`: specify the column to be used to order and go through a given table. Default `:id`
   - `:schemas`: Specify which schemas used to populate index, Default: `[__CALLER__]`
   - `:default_filters`: Specify default filters to be used when reindex without providing a query. Must be a map or a function name (that returns a map). Default: `%{}`.
-  - `:algolia`: Any valid Algolia settings, using snake case or camel case. Ex: Algolia `attributeForFaceting` can be configured with `:attribute_for_faceting`
+  - `:algolia`: Any valid Algolia settings (using snake case or camel case, ie `attributeForFaceting` can be configured with `:attribute_for_faceting`) or the name of 0-arity function that returns those settings.
 
   On first call to Algolia, we check that the settings on Algolia are up to date.
 
@@ -137,21 +137,26 @@ defmodule Algoliax.Indexer do
         end
       end
 
-  ### Configure index name at runtime
+  ### Configure index name and algolia settings at runtime
 
-  To support code for multiple environments, you can also define the index name at runtime. To achieve this, create a function within your indexer module and reference it using its atom in the Indexer configuration.
+  To support code for multiple environments, you can also define things like index_name or algolia settings at runtime.
+  To achieve this, create a function within your indexer module and reference it using its atom in the Indexer configuration.
 
   ```elixir
   defmodule People do
     use Algoliax.Indexer,
       index_name: :runtime_index_name,
       #....
+      algolia: :runtime_algolia
 
     def runtime_index_name do
       System.get_env("INDEX_NAME")
     end
+
+    def runtime_algolia do
+      [attribute_for_faceting: ["age"]]
+    end
   end
-  ```
   """
 
   alias Algoliax.Resources.{Index, Object, Search}
