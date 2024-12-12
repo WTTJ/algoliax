@@ -16,7 +16,7 @@ The package can be installed by adding `:algoliax` to your list of dependencies 
 ```elixir
 def deps do
   [
-    {:algoliax, "~> 0.9.0"}
+    {:algoliax, "~> 0.9.1"}
   ]
 end
 ```
@@ -305,6 +305,6 @@ end
 
 ## Copyright and License
 
-Copyright (c) 2020 CORUSCANT (welcome to the jungle) - https://www.welcometothejungle.com
+Copyright (c) 2020 CORUSCANT (welcome to the jungle) - <https://www.welcometothejungle.com>
 
 This library is licensed under the [BSD-2-Clause](./LICENSE.md).

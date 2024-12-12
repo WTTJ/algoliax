@@ -2,7 +2,7 @@ defmodule Algoliax.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/WTTJ/algoliax"
-  @version "0.9.0"
+  @version "0.9.1"
 
   def project do
     [
