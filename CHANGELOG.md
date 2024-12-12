@@ -1,5 +1,38 @@
 # Changelog
 
+## TBD
+
+### New
+
+The `Algoliax.Indexer` now supports dynamic definition for the `:algolia` settings. It can supports 2 types of configurations:
+
+- (Existing) Keyword list
+- (New) Name of a 0-arity function that returns a keyword list
+
+```elixir
+defmodule People do
+  use Algoliax.Indexer,
+    index_name: :people,
+    object_id: :reference,
+    schemas: [People],
+    algolia: :runtime_algolia
+
+  def runtime_algolia do
+    [
+      attribute_for_faceting: ["age"],
+      custom_ranking: ["desc(updated_at)"]
+    ]
+  end
+end
+```
+
+Also added 2 new exceptions for the `:algolia` configuration: `InvalidAlgoliaSettingsFunctionError` and `InvalidAlgoliaSettingsConfigurationError`
+
+### Other changes
+
+Existing direct calls to `Algoliax.Settings.replica_settings/2` will still work but will not benefit from
+the dynamic `:algolia` configuration. Please use `Algoliax.Settings.replica_settings/3` instead.
+
 ## v0.9.0 - 2024-11-26
 
 `ALGOLIA_API_KEY` and `ALGOLIA_APPLICATION_ID` aren't read anymore from system env variables

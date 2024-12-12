@@ -28,8 +28,28 @@ defmodule Algoliax.Utils do
     indexes
   end
 
-  def algolia_settings(settings) do
-    Keyword.get(settings, :algolia, [])
+  def algolia_settings(module, settings) do
+    case Keyword.get(settings, :algolia, []) do
+      # Could be a 0-arity function that returns a list
+      atom when is_atom(atom) ->
+        with 0 <- Keyword.get(module.__info__(:functions), atom),
+             result when is_list(result) <- apply(module, atom, []) do
+          result
+        else
+          _any ->
+            raise Algoliax.InvalidAlgoliaSettingsFunctionError, %{
+              function_name: inspect(atom)
+            }
+        end
+
+      # Could be a list
+      list when is_list(list) ->
+        list
+
+      # Refuse anything else
+      _other ->
+        raise Algoliax.InvalidAlgoliaSettingsConfigurationError
+    end
   end
 
   def object_id_attribute(settings) do

@@ -4,19 +4,12 @@ defmodule Algoliax.Schemas.PeopleWithReplicas do
   use Algoliax.Indexer,
     index_name: :algoliax_people_replicas,
     object_id: :reference,
-    algolia: [
-      attributes_for_faceting: ["age"],
-      searchable_attributes: ["full_name"],
-      custom_ranking: ["desc(update_at)"]
-    ],
+    algolia: :runtime_algolia_settings,
     replicas: [
       [
         index_name: :algoliax_people_replicas_asc,
         inherit: true,
-        algolia: [
-          searchable_attributes: ["age"],
-          ranking: ["asc(age)"]
-        ]
+        algolia: :runtime_replica_algolia_settings
       ],
       [
         index_name: :algoliax_people_replicas_desc,
@@ -36,5 +29,20 @@ defmodule Algoliax.Schemas.PeopleWithReplicas do
       full_name: Map.get(people, :first_name, "") <> " " <> Map.get(people, :last_name, ""),
       nickname: Map.get(people, :first_name, "") |> String.downcase()
     }
+  end
+
+  def runtime_algolia_settings do
+    [
+      attributes_for_faceting: ["age"],
+      searchable_attributes: ["full_name"],
+      custom_ranking: ["desc(update_at)"]
+    ]
+  end
+
+  def runtime_replica_algolia_settings do
+    [
+      searchable_attributes: ["age"],
+      ranking: ["asc(age)"]
+    ]
   end
 end

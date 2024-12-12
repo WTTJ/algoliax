@@ -31,6 +31,33 @@ defmodule Algoliax.MissingIndexNameError do
   end
 end
 
+defmodule Algoliax.InvalidAlgoliaSettingsFunctionError do
+  @moduledoc "Raise when dynamic `:algolia` settings are invalid"
+
+  defexception [:message]
+
+  @impl true
+  def exception(%{function_name: function_name}) do
+    %__MODULE__{
+      message: "Expected #{function_name} to be a 0-arity function that returns a list"
+    }
+  end
+end
+
+defmodule Algoliax.InvalidAlgoliaSettingsConfigurationError do
+  @moduledoc "Raise when the `:algolia` settings are unsupported"
+
+  defexception [:message]
+
+  @impl true
+  def exception(_) do
+    %__MODULE__{
+      message:
+        "Settings must either be a keyword list or the name of a 0-arity function that returns a list"
+    }
+  end
+end
+
 defmodule Algoliax.InvalidReplicaConfigurationError do
   @moduledoc "Raise when a replica has an invalid configuration"
 

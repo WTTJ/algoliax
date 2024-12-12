@@ -4,18 +4,22 @@ defmodule Algoliax.UtilsTest do
   defmodule NoRepo do
     use Algoliax.Indexer,
       index_name: :algoliax_people,
-      attributes_for_faceting: ["age"],
-      searchable_attributes: ["full_name"],
-      custom_ranking: ["desc(updated_at)"],
+      algolia: [
+        attributes_for_faceting: ["age"],
+        searchable_attributes: ["full_name"],
+        custom_ranking: ["desc(updated_at)"]
+      ],
       object_id: :reference
   end
 
   defmodule IndexNameFromFunction do
     use Algoliax.Indexer,
       index_name: :algoliax_people,
-      attributes_for_faceting: ["age"],
-      searchable_attributes: ["full_name"],
-      custom_ranking: ["desc(updated_at)"],
+      algolia: [
+        attributes_for_faceting: ["age"],
+        searchable_attributes: ["full_name"],
+        custom_ranking: ["desc(updated_at)"]
+      ],
       object_id: :reference
 
     def algoliax_people do
@@ -26,18 +30,22 @@ defmodule Algoliax.UtilsTest do
   defmodule MultipleIndexNames do
     use Algoliax.Indexer,
       index_name: [:algoliax_people_en, :algoliax_people_fr],
-      attributes_for_faceting: ["age"],
-      searchable_attributes: ["full_name"],
-      custom_ranking: ["desc(updated_at)"],
+      algolia: [
+        attributes_for_faceting: ["age"],
+        searchable_attributes: ["full_name"],
+        custom_ranking: ["desc(updated_at)"]
+      ],
       object_id: :reference
   end
 
   defmodule MultipleIndexNameFromFunction do
     use Algoliax.Indexer,
       index_name: :algoliax_people,
-      attributes_for_faceting: ["age"],
-      searchable_attributes: ["full_name"],
-      custom_ranking: ["desc(updated_at)"],
+      algolia: [
+        attributes_for_faceting: ["age"],
+        searchable_attributes: ["full_name"],
+        custom_ranking: ["desc(updated_at)"]
+      ],
       object_id: :reference
 
     def algoliax_people do
@@ -47,27 +55,33 @@ defmodule Algoliax.UtilsTest do
 
   defmodule NoIndexName do
     use Algoliax.Indexer,
-      attributes_for_faceting: ["age"],
-      searchable_attributes: ["full_name"],
-      custom_ranking: ["desc(updated_at)"],
+      algolia: [
+        attributes_for_faceting: ["age"],
+        searchable_attributes: ["full_name"],
+        custom_ranking: ["desc(updated_at)"]
+      ],
       object_id: :reference
   end
 
   defmodule NoDefaultFilters do
     use Algoliax.Indexer,
       index_name: :algoliax_people,
-      attributes_for_faceting: ["age"],
-      searchable_attributes: ["full_name"],
-      custom_ranking: ["desc(updated_at)"],
+      algolia: [
+        attributes_for_faceting: ["age"],
+        searchable_attributes: ["full_name"],
+        custom_ranking: ["desc(updated_at)"]
+      ],
       object_id: :reference
   end
 
   defmodule DefaultFiltersInSettings do
     use Algoliax.Indexer,
       index_name: :algoliax_people,
-      attributes_for_faceting: ["age"],
-      searchable_attributes: ["full_name"],
-      custom_ranking: ["desc(updated_at)"],
+      algolia: [
+        attributes_for_faceting: ["age"],
+        searchable_attributes: ["full_name"],
+        custom_ranking: ["desc(updated_at)"]
+      ],
       object_id: :reference,
       default_filters: %{where: [age: 42]}
   end
@@ -75,14 +89,33 @@ defmodule Algoliax.UtilsTest do
   defmodule DefaultFiltersWithFunction do
     use Algoliax.Indexer,
       index_name: :algoliax_people,
-      attributes_for_faceting: ["age"],
-      searchable_attributes: ["full_name"],
-      custom_ranking: ["desc(updated_at)"],
+      algolia: [
+        attributes_for_faceting: ["age"],
+        searchable_attributes: ["full_name"],
+        custom_ranking: ["desc(updated_at)"]
+      ],
       object_id: :reference,
       default_filters: :default_filters
 
     def default_filters do
       %{where: [age: 43]}
+    end
+  end
+
+  defmodule AlgoliaSettingsFunction do
+    def valid_func do
+      [
+        attributes_for_faceting: ["age2"],
+        searchable_attributes: ["full_name2"]
+      ]
+    end
+
+    def invalid_return_func do
+      :invalid
+    end
+
+    def invalid_arity_func(arg) do
+      arg
     end
   end
 
@@ -140,6 +173,55 @@ defmodule Algoliax.UtilsTest do
                index_name: [:algoliax_people_en, :algoliax_people_fr]
              ) ==
                [:algoliax_people_en, :algoliax_people_fr]
+    end
+  end
+
+  describe "algolia_settings/2" do
+    test "with a nothing" do
+      assert Algoliax.Utils.algolia_settings(%{}, []) == []
+    end
+
+    test "with a list" do
+      assert Algoliax.Utils.algolia_settings(%{},
+               algolia: [
+                 attributes_for_faceting: ["age"],
+                 searchable_attributes: ["full_name"]
+               ]
+             ) == [
+               attributes_for_faceting: ["age"],
+               searchable_attributes: ["full_name"]
+             ]
+    end
+
+    test "with a function" do
+      assert Algoliax.Utils.algolia_settings(AlgoliaSettingsFunction, algolia: :valid_func) == [
+               attributes_for_faceting: ["age2"],
+               searchable_attributes: ["full_name2"]
+             ]
+    end
+
+    test "with a function with invalid return" do
+      assert_raise(Algoliax.InvalidAlgoliaSettingsFunctionError, fn ->
+        Algoliax.Utils.algolia_settings(AlgoliaSettingsFunction, algolia: :invalid_return_func)
+      end)
+    end
+
+    test "with an unknown function" do
+      assert_raise(Algoliax.InvalidAlgoliaSettingsFunctionError, fn ->
+        Algoliax.Utils.algolia_settings(AlgoliaSettingsFunction, algolia: :unknown_func)
+      end)
+    end
+
+    test "with an non-0-arity function" do
+      assert_raise(Algoliax.InvalidAlgoliaSettingsFunctionError, fn ->
+        Algoliax.Utils.algolia_settings(AlgoliaSettingsFunction, algolia: :invalid_arity_func)
+      end)
+    end
+
+    test "with a map" do
+      assert_raise(Algoliax.InvalidAlgoliaSettingsConfigurationError, fn ->
+        Algoliax.Utils.algolia_settings(AlgoliaSettingsFunction, algolia: 42)
+      end)
     end
   end
 

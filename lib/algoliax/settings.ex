@@ -1,7 +1,7 @@
 defmodule Algoliax.Settings do
   @moduledoc false
 
-  import Algoliax.Utils, only: [camelize: 1, algolia_settings: 1]
+  import Algoliax.Utils, only: [camelize: 1, algolia_settings: 2]
 
   @algolia_settings [
     :searchable_attributes,
@@ -60,10 +60,13 @@ defmodule Algoliax.Settings do
     @algolia_settings
   end
 
-  def replica_settings(settings, replica_settings) do
+  def replica_settings(settings, replica_settings),
+    do: replica_settings(%{}, settings, replica_settings)
+
+  def replica_settings(module, settings, replica_settings) do
     replica_settings =
       case Keyword.get(replica_settings, :inherit, true) do
-        true -> replica_settings ++ algolia_settings(settings)
+        true -> replica_settings ++ algolia_settings(module, settings)
         false -> replica_settings
       end
 

@@ -1,7 +1,7 @@
 defmodule Algoliax.Resources.Index do
   @moduledoc false
 
-  import Algoliax.Utils, only: [index_name: 2, algolia_settings: 1, render_response: 1]
+  import Algoliax.Utils, only: [index_name: 2, algolia_settings: 2, render_response: 1]
   import Algoliax.Client, only: [request: 1]
 
   alias Algoliax.{Settings, SettingsStore}
@@ -39,8 +39,8 @@ defmodule Algoliax.Resources.Index do
     |> Enum.map(fn replica ->
       case Keyword.get(replica, :inherit, true) do
         true ->
-          replica_algolia_settings = algolia_settings(replica)
-          primary_algolia_settings = algolia_settings(settings)
+          replica_algolia_settings = algolia_settings(module, replica)
+          primary_algolia_settings = algolia_settings(module, settings)
 
           Keyword.put(
             replica,
@@ -149,8 +149,8 @@ defmodule Algoliax.Resources.Index do
   end
 
   defp settings_to_algolia_settings(module, settings, replica_index) do
-    settings
-    |> algolia_settings()
+    module
+    |> algolia_settings(settings)
     |> Settings.map_algolia_settings()
     |> add_replicas_to_algolia_settings(module, settings, replica_index)
   end
