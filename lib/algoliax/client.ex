@@ -3,7 +3,7 @@ defmodule Algoliax.Client do
 
   require Logger
 
-  alias Algoliax.{Config, Routes}
+  alias Algoliax.Routes
 
   def request(request, retry \\ 0)
 
@@ -17,7 +17,7 @@ defmodule Algoliax.Client do
     log(action, method, url, body)
 
     method
-    |> :hackney.request(url, request_headers(), Jason.encode!(body), [
+    |> :hackney.request(url, request_headers(request), Jason.encode!(body), [
       :with_body,
       recv_timeout: recv_timeout()
     ])
@@ -50,16 +50,16 @@ defmodule Algoliax.Client do
 
   defp build_response(response, request) do
     case Jason.decode(response) do
-      {:ok, response} -> Algoliax.Response.new(response, request[:url_params])
+      {:ok, response} -> Algoliax.Response.new(response, request)
       error -> error
     end
   end
 
-  defp request_headers do
+  defp request_headers(request) do
     [
       {"Content-type", "application/json"},
-      {"X-Algolia-API-Key", Config.api_key()},
-      {"X-Algolia-Application-Id", Config.application_id()}
+      {"X-Algolia-API-Key", request.api_key},
+      {"X-Algolia-Application-Id", request.application_id}
     ] ++ x_forwarded_for()
   end
 

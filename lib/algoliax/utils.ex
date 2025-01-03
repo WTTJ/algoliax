@@ -1,7 +1,42 @@
 defmodule Algoliax.Utils do
   @moduledoc false
 
+  alias Algoliax.Config
   alias Algoliax.Resources.Index
+
+  @spec api_key(module(), keyword()) :: binary()
+  def api_key(module, settings) do
+    case Keyword.get(settings, :api_key) do
+      nil ->
+        Config.api_key()
+
+      atom when is_atom(atom) ->
+        if module.__info__(:functions) |> Keyword.get(atom) == 0 do
+          apply(module, atom, [])
+        else
+          raise Algoliax.InvalidAlgoliaCredentialsFunctionError, %{
+            function_name: inspect(atom)
+          }
+        end
+    end
+  end
+
+  @spec application_id(module(), keyword()) :: binary()
+  def application_id(module, settings) do
+    case Keyword.get(settings, :application_id) do
+      nil ->
+        Config.application_id()
+
+      atom when is_atom(atom) ->
+        if module.__info__(:functions) |> Keyword.get(atom) == 0 do
+          apply(module, atom, [])
+        else
+          raise Algoliax.InvalidAlgoliaCredentialsFunctionError, %{
+            function_name: inspect(atom)
+          }
+        end
+    end
+  end
 
   def index_name(module, settings) do
     indexes =

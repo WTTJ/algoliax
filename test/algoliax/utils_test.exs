@@ -63,6 +63,27 @@ defmodule Algoliax.UtilsTest do
       object_id: :reference
   end
 
+  defmodule CredentialsFromFunction do
+    use Algoliax.Indexer,
+      index_name: :algoliax_people,
+      algolia: [
+        attributes_for_faceting: ["age"],
+        searchable_attributes: ["full_name"],
+        custom_ranking: ["desc(updated_at)"]
+      ],
+      object_id: :reference,
+      api_key: :api_key,
+      application_id: :application_id
+
+    def api_key do
+      "fn_api_key"
+    end
+
+    def application_id do
+      "fn_application_id"
+    end
+  end
+
   defmodule NoDefaultFilters do
     use Algoliax.Indexer,
       index_name: :algoliax_people,
@@ -147,6 +168,46 @@ defmodule Algoliax.UtilsTest do
     test "a map" do
       a = %{foo_bar: "test", bar_foo: "test"}
       assert Algoliax.Utils.camelize(a) == %{"fooBar" => "test", "barFoo" => "test"}
+    end
+  end
+
+  describe "api_key/2" do
+    test "with a function" do
+      assert Algoliax.Utils.api_key(CredentialsFromFunction, api_key: :api_key) ==
+               "fn_api_key"
+    end
+
+    test "without a function (uses Algoliax.Config)" do
+      assert Algoliax.Utils.api_key(CredentialsFromFunction, []) ==
+               "api_key"
+    end
+
+    test "missing function" do
+      assert_raise(Algoliax.InvalidAlgoliaCredentialsFunctionError, fn ->
+        Algoliax.Utils.api_key(CredentialsFromFunction, api_key: :invalid_api_key)
+      end)
+    end
+  end
+
+  describe "application_id/2" do
+    test "with a function" do
+      assert Algoliax.Utils.application_id(CredentialsFromFunction,
+               application_id: :application_id
+             ) ==
+               "fn_application_id"
+    end
+
+    test "without a function (uses Algoliax.Config)" do
+      assert Algoliax.Utils.application_id(CredentialsFromFunction, []) ==
+               "APPLICATION_ID"
+    end
+
+    test "missing function" do
+      assert_raise(Algoliax.InvalidAlgoliaCredentialsFunctionError, fn ->
+        Algoliax.Utils.application_id(CredentialsFromFunction,
+          application_id: :invalid_application_id
+        )
+      end)
     end
   end
 

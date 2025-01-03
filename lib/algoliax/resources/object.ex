@@ -1,26 +1,43 @@
 defmodule Algoliax.Resources.Object do
   @moduledoc false
 
-  import Algoliax.Utils, only: [index_name: 2, object_id_attribute: 1, render_response: 1]
   import Algoliax.Client, only: [request: 1]
+
+  import Algoliax.Utils,
+    only: [
+      api_key: 2,
+      application_id: 2,
+      index_name: 2,
+      object_id_attribute: 1,
+      render_response: 1
+    ]
 
   alias Algoliax.TemporaryIndexer
 
   def get_object(module, settings, model) do
+    api_key = api_key(module, settings)
+    application_id = application_id(module, settings)
+
     index_name(module, settings)
     |> Enum.map(fn index_name ->
       request(%{
         action: :get_object,
         url_params: [
           index_name: index_name,
-          object_id: get_object_id(module, settings, model)
-        ]
+          object_id: get_object_id(module, settings, model),
+          application_id: application_id
+        ],
+        api_key: api_key,
+        application_id: application_id
       })
     end)
     |> render_response()
   end
 
   def save_objects(module, settings, models, opts) do
+    api_key = api_key(module, settings)
+    application_id = application_id(module, settings)
+
     objects =
       index_name(module, settings)
       |> Enum.reduce(%{}, fn index_name, acc ->
@@ -36,8 +53,13 @@ defmodule Algoliax.Resources.Object do
       |> Enum.map(fn {index_name, objects} ->
         request(%{
           action: :save_objects,
-          url_params: [index_name: index_name],
-          body: %{requests: objects}
+          url_params: [
+            index_name: index_name,
+            application_id: application_id
+          ],
+          body: %{requests: objects},
+          api_key: api_key,
+          application_id: application_id
         })
       end)
       |> render_response()
@@ -65,13 +87,22 @@ defmodule Algoliax.Resources.Object do
 
   defp save_object(module, settings, model, index_name) do
     if apply(module, :to_be_indexed?, [model]) do
+      api_key = api_key(module, settings)
+      application_id = application_id(module, settings)
+
       object = build_object(module, settings, model, index_name)
       call_indexer(:save_object, module, settings, model)
 
       request(%{
         action: :save_object,
-        url_params: [index_name: index_name, object_id: object.objectID],
-        body: object
+        url_params: [
+          index_name: index_name,
+          object_id: object.objectID,
+          application_id: application_id
+        ],
+        body: object,
+        api_key: api_key,
+        application_id: application_id
       })
     else
       {:not_indexable, model}
@@ -79,6 +110,9 @@ defmodule Algoliax.Resources.Object do
   end
 
   def delete_object(module, settings, model) do
+    api_key = api_key(module, settings)
+    application_id = application_id(module, settings)
+
     call_indexer(:delete_object, module, settings, model)
 
     index_name(module, settings)
@@ -87,14 +121,20 @@ defmodule Algoliax.Resources.Object do
         action: :delete_object,
         url_params: [
           index_name: index_name,
-          object_id: get_object_id(module, settings, model)
-        ]
+          object_id: get_object_id(module, settings, model),
+          application_id: application_id
+        ],
+        api_key: api_key,
+        application_id: application_id
       })
     end)
     |> render_response()
   end
 
   def delete_by(module, settings, matching_filter) do
+    api_key = api_key(module, settings)
+    application_id = application_id(module, settings)
+
     call_indexer(:delete_by, module, settings, matching_filter)
 
     body =
@@ -111,9 +151,12 @@ defmodule Algoliax.Resources.Object do
       request(%{
         action: :delete_by,
         url_params: [
-          index_name: index_name
+          index_name: index_name,
+          application_id: application_id
         ],
-        body: body
+        body: body,
+        api_key: api_key,
+        application_id: application_id
       })
     end)
     |> render_response()

@@ -4,9 +4,13 @@ defmodule AlgoliaxTest.StructTest do
   alias Algoliax.Schemas.{
     PeopleStruct,
     PeopleStructMultipleIndexes,
-    PeopleStructRuntimeMultipleIndexes,
-    PeopleStructRuntimeIndexName
+    PeopleStructRuntimeCredentials,
+    PeopleStructRuntimeIndexName,
+    PeopleStructRuntimeMultipleIndexes
   }
+
+  @application_id "APPLICATION_ID"
+  @api_key "api_key"
 
   setup do
     Algoliax.SettingsStore.set_settings(:algoliax_people_struct, %{})
@@ -171,7 +175,12 @@ defmodule AlgoliaxTest.StructTest do
                  {:ok,
                   %Algoliax.Response{
                     response: %{"taskID" => _, "updatedAt" => _},
-                    params: [index_name: :algoliax_people_struct_en]
+                    params: [
+                      index_name: :algoliax_people_struct_en,
+                      application_id: @application_id
+                    ],
+                    application_id: @application_id,
+                    api_key: @api_key
                   }}
                ]
              } = res
@@ -182,7 +191,12 @@ defmodule AlgoliaxTest.StructTest do
                  {:ok,
                   %Algoliax.Response{
                     response: %{"taskID" => _, "updatedAt" => _},
-                    params: [index_name: :algoliax_people_struct_fr]
+                    params: [
+                      index_name: :algoliax_people_struct_fr,
+                      application_id: @application_id
+                    ],
+                    application_id: @application_id,
+                    api_key: @api_key
                   }}
                ]
              } = res2
@@ -222,7 +236,13 @@ defmodule AlgoliaxTest.StructTest do
                  {:ok,
                   %Algoliax.Response{
                     response: %{"objectID" => ^reference, "taskID" => _, "updatedAt" => _},
-                    params: [index_name: :algoliax_people_struct_en, object_id: ^reference]
+                    params: [
+                      index_name: :algoliax_people_struct_en,
+                      object_id: ^reference,
+                      application_id: @application_id
+                    ],
+                    application_id: @application_id,
+                    api_key: @api_key
                   }}
                ]
              } = res
@@ -233,7 +253,13 @@ defmodule AlgoliaxTest.StructTest do
                  {:ok,
                   %Algoliax.Response{
                     response: %{"objectID" => ^reference, "taskID" => _, "updatedAt" => _},
-                    params: [index_name: :algoliax_people_struct_fr, object_id: ^reference]
+                    params: [
+                      index_name: :algoliax_people_struct_fr,
+                      object_id: ^reference,
+                      application_id: @application_id
+                    ],
+                    application_id: @application_id,
+                    api_key: @api_key
                   }}
                ]
              } = res2
@@ -292,7 +318,12 @@ defmodule AlgoliaxTest.StructTest do
                  {:ok,
                   %Algoliax.Response{
                     response: %{"taskID" => _, "objectIDs" => [^reference1]},
-                    params: [index_name: :algoliax_people_struct_en]
+                    params: [
+                      index_name: :algoliax_people_struct_en,
+                      application_id: @application_id
+                    ],
+                    application_id: @application_id,
+                    api_key: @api_key
                   }}
                ]
              } = res
@@ -303,7 +334,12 @@ defmodule AlgoliaxTest.StructTest do
                  {:ok,
                   %Algoliax.Response{
                     response: %{"taskID" => _, "objectIDs" => [^reference1]},
-                    params: [index_name: :algoliax_people_struct_fr]
+                    params: [
+                      index_name: :algoliax_people_struct_fr,
+                      application_id: @application_id
+                    ],
+                    application_id: @application_id,
+                    api_key: @api_key
                   }}
                ]
              } = res2
@@ -351,7 +387,12 @@ defmodule AlgoliaxTest.StructTest do
                  {:ok,
                   %Algoliax.Response{
                     response: %{"taskID" => _, "objectIDs" => [^reference1, ^reference2]},
-                    params: [index_name: :algoliax_people_struct_en]
+                    params: [
+                      index_name: :algoliax_people_struct_en,
+                      application_id: @application_id
+                    ],
+                    application_id: @application_id,
+                    api_key: @api_key
                   }}
                ]
              } = res
@@ -362,7 +403,12 @@ defmodule AlgoliaxTest.StructTest do
                  {:ok,
                   %Algoliax.Response{
                     response: %{"taskID" => _, "objectIDs" => [^reference1, ^reference2]},
-                    params: [index_name: :algoliax_people_struct_fr]
+                    params: [
+                      index_name: :algoliax_people_struct_fr,
+                      application_id: @application_id
+                    ],
+                    application_id: @application_id,
+                    api_key: @api_key
                   }}
                ]
              } = res2
@@ -404,7 +450,13 @@ defmodule AlgoliaxTest.StructTest do
                  {:ok,
                   %Algoliax.Response{
                     response: %{"objectID" => "known"},
-                    params: [index_name: :algoliax_people_struct_en, object_id: "known"]
+                    params: [
+                      index_name: :algoliax_people_struct_en,
+                      object_id: "known",
+                      application_id: @application_id
+                    ],
+                    application_id: @application_id,
+                    api_key: @api_key
                   }}
                ]
              } = res
@@ -415,7 +467,13 @@ defmodule AlgoliaxTest.StructTest do
                  {:ok,
                   %Algoliax.Response{
                     response: %{"objectID" => "known"},
-                    params: [index_name: :algoliax_people_struct_fr, object_id: "known"]
+                    params: [
+                      index_name: :algoliax_people_struct_fr,
+                      object_id: "known",
+                      application_id: @application_id
+                    ],
+                    application_id: @application_id,
+                    api_key: @api_key
                   }}
                ]
              } = res2
@@ -487,7 +545,12 @@ defmodule AlgoliaxTest.StructTest do
                  {:ok,
                   %Algoliax.Response{
                     response: %{"searchableAttributes" => ["test"]},
-                    params: [index_name: :algoliax_people_struct_en]
+                    params: [
+                      index_name: :algoliax_people_struct_en,
+                      application_id: @application_id
+                    ],
+                    application_id: @application_id,
+                    api_key: @api_key
                   }}
                ]
              } = res
@@ -498,7 +561,12 @@ defmodule AlgoliaxTest.StructTest do
                  {:ok,
                   %Algoliax.Response{
                     response: %{"searchableAttributes" => ["test"]},
-                    params: [index_name: :algoliax_people_struct_fr]
+                    params: [
+                      index_name: :algoliax_people_struct_fr,
+                      application_id: @application_id
+                    ],
+                    application_id: @application_id,
+                    api_key: @api_key
                   }}
                ]
              } = res2
@@ -551,7 +619,12 @@ defmodule AlgoliaxTest.StructTest do
                  {:ok,
                   %Algoliax.Response{
                     response: %{"taskID" => _, "updatedAt" => _},
-                    params: [index_name: :algoliax_people_struct_en]
+                    params: [
+                      index_name: :algoliax_people_struct_en,
+                      application_id: @application_id
+                    ],
+                    application_id: @application_id,
+                    api_key: @api_key
                   }}
                ]
              } = res
@@ -562,7 +635,12 @@ defmodule AlgoliaxTest.StructTest do
                  {:ok,
                   %Algoliax.Response{
                     response: %{"taskID" => _, "updatedAt" => _},
-                    params: [index_name: :algoliax_people_struct_fr]
+                    params: [
+                      index_name: :algoliax_people_struct_fr,
+                      application_id: @application_id
+                    ],
+                    application_id: @application_id,
+                    api_key: @api_key
                   }}
                ]
              } = res2
@@ -613,7 +691,13 @@ defmodule AlgoliaxTest.StructTest do
                  {:ok,
                   %Algoliax.Response{
                     response: %{"objectID" => "known"},
-                    params: [index_name: :people_runtime_index_name_en, object_id: "known"]
+                    params: [
+                      index_name: :people_runtime_index_name_en,
+                      object_id: "known",
+                      application_id: @application_id
+                    ],
+                    application_id: @application_id,
+                    api_key: @api_key
                   }}
                ]
              } = res
@@ -624,7 +708,13 @@ defmodule AlgoliaxTest.StructTest do
                  {:ok,
                   %Algoliax.Response{
                     response: %{"objectID" => "known"},
-                    params: [index_name: :people_runtime_index_name_fr, object_id: "known"]
+                    params: [
+                      index_name: :people_runtime_index_name_fr,
+                      object_id: "known",
+                      application_id: @application_id
+                    ],
+                    application_id: @application_id,
+                    api_key: @api_key
                   }}
                ]
              } = res2
@@ -635,6 +725,67 @@ defmodule AlgoliaxTest.StructTest do
       assert_request("PUT", %{path: ~r/people_runtime_index_name_fr\/settings/, body: %{}})
       assert_request("GET", %{path: ~r/people_runtime_index_name_fr\/settings/, body: %{}})
       assert_request("GET", %{path: ~r/people_runtime_index_name_fr\/known/, body: %{}})
+    end
+  end
+
+  describe "runtime credentials" do
+    test "get_object/1" do
+      person = %PeopleStructRuntimeCredentials{
+        reference: "known",
+        last_name: "Doe",
+        first_name: "John",
+        age: 77
+      }
+
+      assert {:ok, res} = PeopleStructRuntimeCredentials.get_object(person)
+
+      assert %Algoliax.Response{
+               response: %{"objectID" => "known"},
+               params: [
+                 index_name: :people_runtime_index,
+                 object_id: "known",
+                 application_id: "fn_application_id"
+               ],
+               application_id: "fn_application_id",
+               api_key: "fn_api_key"
+             } ==
+               res
+
+      assert_request(
+        "GET",
+        %{
+          path: "/fn_application_id/read/people_runtime_index/known",
+          body: %{},
+          headers: [
+            {"x-algolia-api-key", "fn_api_key"},
+            {"x-algolia-application-id", "fn_application_id"}
+          ]
+        }
+      )
+
+      assert_request(
+        "GET",
+        %{
+          path: "/fn_application_id/read/people_runtime_index/settings",
+          body: %{},
+          headers: [
+            {"x-algolia-api-key", "fn_api_key"},
+            {"x-algolia-application-id", "fn_application_id"}
+          ]
+        }
+      )
+
+      assert_request(
+        "PUT",
+        %{
+          path: "/fn_application_id/write/people_runtime_index/settings",
+          body: %{},
+          headers: [
+            {"x-algolia-api-key", "fn_api_key"},
+            {"x-algolia-application-id", "fn_application_id"}
+          ]
+        }
+      )
     end
   end
 
@@ -669,12 +820,20 @@ defmodule AlgoliaxTest.StructTest do
 
     assert %Algoliax.Response{
              response: %{"objectID" => ^reference, "taskID" => task_id, "updatedAt" => _},
-             params: [index_name: :algoliax_people_struct_en, object_id: ^reference]
+             params: [
+               index_name: :algoliax_people_struct_en,
+               object_id: ^reference,
+               application_id: "APPLICATION_ID"
+             ]
            } = res
 
     assert %Algoliax.Response{
              response: %{"objectID" => ^reference, "taskID" => task_id2, "updatedAt" => _},
-             params: [index_name: :algoliax_people_struct_fr, object_id: ^reference]
+             params: [
+               index_name: :algoliax_people_struct_fr,
+               object_id: ^reference,
+               application_id: "APPLICATION_ID"
+             ]
            } = res2
 
     # Assert that there are 4 calls to check task status per index

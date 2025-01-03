@@ -44,6 +44,19 @@ defmodule Algoliax.InvalidAlgoliaSettingsFunctionError do
   end
 end
 
+defmodule Algoliax.InvalidAlgoliaCredentialsFunctionError do
+  @moduledoc "Raise when dynamic `:api_key` or `:application_id` credentials are invalid"
+
+  defexception [:message]
+
+  @impl true
+  def exception(%{function_name: function_name}) do
+    %__MODULE__{
+      message: "Expected #{function_name} to be a 0-arity function that returns a binary"
+    }
+  end
+end
+
 defmodule Algoliax.InvalidAlgoliaSettingsConfigurationError do
   @moduledoc "Raise when the `:algolia` settings are unsupported"
 

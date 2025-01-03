@@ -4,7 +4,15 @@ if Code.ensure_loaded?(Ecto) do
 
     import Ecto.Query
     import Algoliax.Client, only: [request: 1]
-    import Algoliax.Utils, only: [index_name: 2, schemas: 2, default_filters: 2]
+
+    import Algoliax.Utils,
+      only: [
+        api_key: 2,
+        application_id: 2,
+        default_filters: 2,
+        index_name: 2,
+        schemas: 2
+      ]
 
     alias Algoliax.Resources.Object
 
@@ -77,6 +85,9 @@ if Code.ensure_loaded?(Ecto) do
 
     # sobelow_skip ["DOS.BinToAtom"]
     def reindex_atomic(module, settings) do
+      api_key = api_key(module, settings)
+      application_id = application_id(module, settings)
+
       Algoliax.UtilsEcto.repo(settings)
 
       index_name(module, settings)
@@ -93,11 +104,16 @@ if Code.ensure_loaded?(Ecto) do
 
           request(%{
             action: :move_index,
-            url_params: [index_name: tmp_index_name],
+            url_params: [
+              index_name: tmp_index_name,
+              application_id: application_id
+            ],
             body: %{
               operation: "move",
               destination: "#{index_name}"
-            }
+            },
+            api_key: api_key,
+            application_id: application_id
           })
 
           {:ok, :completed}

@@ -1,6 +1,5 @@
 defmodule Algoliax.Routes do
   @moduledoc false
-  alias Algoliax.Config
 
   @paths %{
     search: {"/{index_name}/query", :post},
@@ -23,14 +22,15 @@ defmodule Algoliax.Routes do
       |> Map.get(action)
 
     url =
-      action_path
-      |> build_path(url_params)
-      |> build_url(method, retry)
+      method
+      |> build_url(retry)
+      |> Kernel.<>(action_path)
+      |> interpolate_path(url_params)
 
     {method, url}
   end
 
-  defp build_path(path, args) do
+  defp interpolate_path(path, args) do
     args
     |> Keyword.keys()
     |> Enum.reduce(path, fn key, path ->
@@ -39,51 +39,45 @@ defmodule Algoliax.Routes do
     end)
   end
 
-  defp build_url(path, :get, 0) do
+  defp build_url(:get, 0) do
     url_read()
-    |> String.replace(~r/{{application_id}}/, Config.application_id())
-    |> Kernel.<>(path)
   end
 
-  defp build_url(path, _method, 0) do
+  defp build_url(_method, 0) do
     url_write()
-    |> String.replace(~r/{{application_id}}/, Config.application_id())
-    |> Kernel.<>(path)
   end
 
-  defp build_url(path, _method, retry) do
+  defp build_url(_method, retry) do
     url_retry()
-    |> String.replace(~r/{{application_id}}/, Config.application_id())
     |> String.replace(~r/{{retry}}/, to_string(retry))
-    |> Kernel.<>(path)
   end
 
   if Mix.env() == :test do
     defp url_read do
       port = Application.get_env(:algoliax, :mock_api_port)
-      "http://localhost:#{port}/{{application_id}}/read"
+      "http://localhost:#{port}/{application_id}/read"
     end
 
     defp url_write do
       port = Application.get_env(:algoliax, :mock_api_port)
-      "http://localhost:#{port}/{{application_id}}/write"
+      "http://localhost:#{port}/{application_id}/write"
     end
 
     defp url_retry do
       port = Application.get_env(:algoliax, :mock_api_port)
-      "http://localhost:#{port}/{{application_id}}/retry/{{retry}}"
+      "http://localhost:#{port}/{application_id}/retry/{{retry}}"
     end
   else
     defp url_read do
-      "https://{{application_id}}-dsn.algolia.net/1/indexes"
+      "https://{application_id}-dsn.algolia.net/1/indexes"
     end
 
     defp url_write do
-      "https://{{application_id}}.algolia.net/1/indexes"
+      "https://{application_id}.algolia.net/1/indexes"
     end
 
     defp url_retry do
-      "https://{{application_id}}-{{retry}}.algolianet.com/1/indexes"
+      "https://{application_id}-{{retry}}.algolianet.com/1/indexes"
     end
   end
 end
