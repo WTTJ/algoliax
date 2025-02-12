@@ -170,8 +170,7 @@ defmodule Algoliax.UtilsTest do
 
   describe "application_id/1" do
     test "with a config" do
-      assert Algoliax.Utils.application_id(credentials: :custom_1
-             ) ==
+      assert Algoliax.Utils.application_id(credentials: :custom_1) ==
                "APPLICATION_ID_1"
     end
 
