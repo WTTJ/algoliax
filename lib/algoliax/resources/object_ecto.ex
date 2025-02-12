@@ -7,8 +7,8 @@ if Code.ensure_loaded?(Ecto) do
 
     import Algoliax.Utils,
       only: [
-        api_key: 2,
-        application_id: 2,
+        api_key: 1,
+        application_id: 1,
         default_filters: 2,
         index_name: 2,
         schemas: 2
@@ -85,8 +85,8 @@ if Code.ensure_loaded?(Ecto) do
 
     # sobelow_skip ["DOS.BinToAtom"]
     def reindex_atomic(module, settings) do
-      api_key = api_key(module, settings)
-      application_id = application_id(module, settings)
+      api_key = api_key(settings)
+      application_id = application_id(settings)
 
       Algoliax.UtilsEcto.repo(settings)
 

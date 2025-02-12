@@ -5,8 +5,8 @@ defmodule Algoliax.Resources.Object do
 
   import Algoliax.Utils,
     only: [
-      api_key: 2,
-      application_id: 2,
+      api_key: 1,
+      application_id: 1,
       index_name: 2,
       object_id_attribute: 1,
       render_response: 1
@@ -15,8 +15,8 @@ defmodule Algoliax.Resources.Object do
   alias Algoliax.TemporaryIndexer
 
   def get_object(module, settings, model) do
-    api_key = api_key(module, settings)
-    application_id = application_id(module, settings)
+    api_key = api_key(settings)
+    application_id = application_id(settings)
 
     index_name(module, settings)
     |> Enum.map(fn index_name ->
@@ -35,8 +35,8 @@ defmodule Algoliax.Resources.Object do
   end
 
   def save_objects(module, settings, models, opts) do
-    api_key = api_key(module, settings)
-    application_id = application_id(module, settings)
+    api_key = api_key(settings)
+    application_id = application_id(settings)
 
     objects =
       index_name(module, settings)
@@ -87,8 +87,8 @@ defmodule Algoliax.Resources.Object do
 
   defp save_object(module, settings, model, index_name) do
     if apply(module, :to_be_indexed?, [model]) do
-      api_key = api_key(module, settings)
-      application_id = application_id(module, settings)
+      api_key = api_key(settings)
+      application_id = application_id(settings)
 
       object = build_object(module, settings, model, index_name)
       call_indexer(:save_object, module, settings, model)
@@ -110,8 +110,8 @@ defmodule Algoliax.Resources.Object do
   end
 
   def delete_object(module, settings, model) do
-    api_key = api_key(module, settings)
-    application_id = application_id(module, settings)
+    api_key = api_key(settings)
+    application_id = application_id(settings)
 
     call_indexer(:delete_object, module, settings, model)
 
@@ -132,8 +132,8 @@ defmodule Algoliax.Resources.Object do
   end
 
   def delete_by(module, settings, matching_filter) do
-    api_key = api_key(module, settings)
-    application_id = application_id(module, settings)
+    api_key = api_key(settings)
+    application_id = application_id(settings)
 
     call_indexer(:delete_by, module, settings, matching_filter)
 

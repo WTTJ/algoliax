@@ -1,4 +1,4 @@
-defmodule Algoliax.Schemas.PeopleStructRuntimeCredentials do
+defmodule Algoliax.Schemas.PeopleStructCredentials do
   @moduledoc false
 
   use Algoliax.Indexer,
@@ -9,16 +9,7 @@ defmodule Algoliax.Schemas.PeopleStructRuntimeCredentials do
       searchable_attributes: ["full_name"],
       custom_ranking: ["desc(update_at)"]
     ],
-    api_key: :api_key,
-    application_id: :application_id
+    credentials: :custom_1
 
   defstruct reference: nil, last_name: nil, first_name: nil, age: nil
-
-  def api_key do
-    "fn_api_key"
-  end
-
-  def application_id do
-    "fn_application_id"
-  end
 end

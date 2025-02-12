@@ -5,16 +5,16 @@ defmodule Algoliax.Resources.Search do
 
   import Algoliax.Utils,
     only: [
-      api_key: 2,
-      application_id: 2,
+      api_key: 1,
+      application_id: 1,
       camelize: 1,
       index_name: 2,
       render_response: 1
     ]
 
   def search(module, settings, query, params) do
-    api_key = api_key(module, settings)
-    application_id = application_id(module, settings)
+    api_key = api_key(settings)
+    application_id = application_id(settings)
 
     index_name(module, settings)
     |> Enum.map(fn index_name ->
@@ -39,8 +39,8 @@ defmodule Algoliax.Resources.Search do
   end
 
   def search_facet(module, settings, facet_name, facet_query, params) do
-    api_key = api_key(module, settings)
-    application_id = application_id(module, settings)
+    api_key = api_key(settings)
+    application_id = application_id(settings)
 
     index_name(module, settings)
     |> Enum.map(fn index_name ->

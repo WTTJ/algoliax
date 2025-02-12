@@ -63,27 +63,6 @@ defmodule Algoliax.UtilsTest do
       object_id: :reference
   end
 
-  defmodule CredentialsFromFunction do
-    use Algoliax.Indexer,
-      index_name: :algoliax_people,
-      algolia: [
-        attributes_for_faceting: ["age"],
-        searchable_attributes: ["full_name"],
-        custom_ranking: ["desc(updated_at)"]
-      ],
-      object_id: :reference,
-      api_key: :api_key,
-      application_id: :application_id
-
-    def api_key do
-      "fn_api_key"
-    end
-
-    def application_id do
-      "fn_application_id"
-    end
-  end
-
   defmodule NoDefaultFilters do
     use Algoliax.Indexer,
       index_name: :algoliax_people,
@@ -171,42 +150,39 @@ defmodule Algoliax.UtilsTest do
     end
   end
 
-  describe "api_key/2" do
+  describe "api_key/1" do
     test "with a function" do
-      assert Algoliax.Utils.api_key(CredentialsFromFunction, api_key: :api_key) ==
-               "fn_api_key"
+      assert Algoliax.Utils.api_key(credentials: :custom_1) ==
+               "api_key_1"
     end
 
     test "without a function (uses Algoliax.Config)" do
-      assert Algoliax.Utils.api_key(CredentialsFromFunction, []) ==
+      assert Algoliax.Utils.api_key([]) ==
                "api_key"
     end
 
-    test "missing function" do
-      assert_raise(Algoliax.InvalidAlgoliaCredentialsFunctionError, fn ->
-        Algoliax.Utils.api_key(CredentialsFromFunction, api_key: :invalid_api_key)
+    test "missing config" do
+      assert_raise(Algoliax.InvalidAlgoliaCredentialsError, fn ->
+        Algoliax.Utils.api_key(credentials: :custom_unknown)
       end)
     end
   end
 
-  describe "application_id/2" do
-    test "with a function" do
-      assert Algoliax.Utils.application_id(CredentialsFromFunction,
-               application_id: :application_id
+  describe "application_id/1" do
+    test "with a config" do
+      assert Algoliax.Utils.application_id(credentials: :custom_1
              ) ==
-               "fn_application_id"
+               "APPLICATION_ID_1"
     end
 
-    test "without a function (uses Algoliax.Config)" do
-      assert Algoliax.Utils.application_id(CredentialsFromFunction, []) ==
+    test "without a config (uses Algoliax.Config)" do
+      assert Algoliax.Utils.application_id([]) ==
                "APPLICATION_ID"
     end
 
-    test "missing function" do
-      assert_raise(Algoliax.InvalidAlgoliaCredentialsFunctionError, fn ->
-        Algoliax.Utils.application_id(CredentialsFromFunction,
-          application_id: :invalid_application_id
-        )
+    test "missing config" do
+      assert_raise(Algoliax.InvalidAlgoliaCredentialsError, fn ->
+        Algoliax.Utils.application_id(credentials: :custom_unknown)
       end)
     end
   end

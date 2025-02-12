@@ -4,7 +4,7 @@ defmodule AlgoliaxTest.StructTest do
   alias Algoliax.Schemas.{
     PeopleStruct,
     PeopleStructMultipleIndexes,
-    PeopleStructRuntimeCredentials,
+    PeopleStructCredentials,
     PeopleStructRuntimeIndexName,
     PeopleStructRuntimeMultipleIndexes
   }
@@ -728,37 +728,37 @@ defmodule AlgoliaxTest.StructTest do
     end
   end
 
-  describe "runtime credentials" do
+  describe "configured credentials" do
     test "get_object/1" do
-      person = %PeopleStructRuntimeCredentials{
+      person = %PeopleStructCredentials{
         reference: "known",
         last_name: "Doe",
         first_name: "John",
         age: 77
       }
 
-      assert {:ok, res} = PeopleStructRuntimeCredentials.get_object(person)
+      assert {:ok, res} = PeopleStructCredentials.get_object(person)
 
       assert %Algoliax.Response{
                response: %{"objectID" => "known"},
                params: [
                  index_name: :people_runtime_index,
                  object_id: "known",
-                 application_id: "fn_application_id"
+                 application_id: "APPLICATION_ID_1"
                ],
-               application_id: "fn_application_id",
-               api_key: "fn_api_key"
+               application_id: "APPLICATION_ID_1",
+               api_key: "api_key_1"
              } ==
                res
 
       assert_request(
         "GET",
         %{
-          path: "/fn_application_id/read/people_runtime_index/known",
+          path: "/APPLICATION_ID_1/read/people_runtime_index/known",
           body: %{},
           headers: [
-            {"x-algolia-api-key", "fn_api_key"},
-            {"x-algolia-application-id", "fn_application_id"}
+            {"x-algolia-api-key", "api_key_1"},
+            {"x-algolia-application-id", "APPLICATION_ID_1"}
           ]
         }
       )
@@ -766,11 +766,11 @@ defmodule AlgoliaxTest.StructTest do
       assert_request(
         "GET",
         %{
-          path: "/fn_application_id/read/people_runtime_index/settings",
+          path: "/APPLICATION_ID_1/read/people_runtime_index/settings",
           body: %{},
           headers: [
-            {"x-algolia-api-key", "fn_api_key"},
-            {"x-algolia-application-id", "fn_application_id"}
+            {"x-algolia-api-key", "api_key_1"},
+            {"x-algolia-application-id", "APPLICATION_ID_1"}
           ]
         }
       )
@@ -778,11 +778,11 @@ defmodule AlgoliaxTest.StructTest do
       assert_request(
         "PUT",
         %{
-          path: "/fn_application_id/write/people_runtime_index/settings",
+          path: "/APPLICATION_ID_1/write/people_runtime_index/settings",
           body: %{},
           headers: [
-            {"x-algolia-api-key", "fn_api_key"},
-            {"x-algolia-application-id", "fn_application_id"}
+            {"x-algolia-api-key", "api_key_1"},
+            {"x-algolia-application-id", "APPLICATION_ID_1"}
           ]
         }
       )
