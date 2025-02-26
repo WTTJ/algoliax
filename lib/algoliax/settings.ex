@@ -73,7 +73,7 @@ defmodule Algoliax.Settings do
     :max_facet_hits,
     :attribute_criteria_computed_by_min_proximity,
     :user_data,
-    :rendering_content,
+    :rendering_content
   ]
 
   def settings do
