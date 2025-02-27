@@ -10,8 +10,11 @@ defmodule Algoliax.Resources.Task do
       action: :task,
       url_params: [
         index_name: index_name,
-        task_id: response.task_id
-      ]
+        task_id: response.task_id,
+        application_id: response.application_id
+      ],
+      api_key: response.api_key,
+      application_id: response.application_id
     })
   end
 end

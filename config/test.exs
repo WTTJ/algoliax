@@ -4,7 +4,10 @@ config :algoliax,
   application_id: "APPLICATION_ID",
   api_key: "api_key",
   batch_size: 1,
-  ecto_repos: [Algoliax.Repo]
+  ecto_repos: [Algoliax.Repo],
+  credentials: %{
+    custom_1: {"APPLICATION_ID_1", "api_key_1"}
+  }
 
 config :algoliax, Algoliax.Repo,
   pool: Ecto.Adapters.SQL.Sandbox,

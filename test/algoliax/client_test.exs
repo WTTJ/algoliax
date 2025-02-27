@@ -2,10 +2,20 @@ defmodule Algoliax.ClientTest do
   use Algoliax.RequestCase
 
   test "test retries" do
-    Application.put_env(:algoliax, :api_key, "api_key")
+    api_key = "api_key"
+    application_id = "APPLICATION_ID"
 
     Algoliax.Client.request(
-      %{action: :get_object, url_params: [index_name: :index_name, object_id: "error"]},
+      %{
+        action: :get_object,
+        api_key: api_key,
+        application_id: application_id,
+        url_params: [
+          application_id: application_id,
+          index_name: :index_name,
+          object_id: "error"
+        ]
+      },
       0
     )
 
@@ -16,7 +26,8 @@ defmodule Algoliax.ClientTest do
   end
 
   test "Error http" do
-    Application.put_env(:algoliax, :api_key, "api_key_invalid")
+    api_key = "api_key_invalid"
+    application_id = "APPLICATION_ID"
 
     message = """
     Algolia HTTP error:
@@ -28,7 +39,13 @@ defmodule Algoliax.ClientTest do
       Algoliax.Client.request(
         %{
           action: :get_object,
-          url_params: [index_name: :index_name_not_authorized, object_id: "Whatever"]
+          api_key: api_key,
+          application_id: application_id,
+          url_params: [
+            application_id: application_id,
+            index_name: :index_name_not_authorized,
+            object_id: "Whatever"
+          ]
         },
         0
       )

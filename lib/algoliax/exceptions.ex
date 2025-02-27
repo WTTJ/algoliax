@@ -44,6 +44,19 @@ defmodule Algoliax.InvalidAlgoliaSettingsFunctionError do
   end
 end
 
+defmodule Algoliax.InvalidAlgoliaCredentialsError do
+  @moduledoc "Raise when `:crendentials` are invalid"
+
+  defexception [:message]
+
+  @impl true
+  def exception(%{name: name}) do
+    %__MODULE__{
+      message: "Expected #{name} to be configuired in alogila credentials"
+    }
+  end
+end
+
 defmodule Algoliax.InvalidAlgoliaSettingsConfigurationError do
   @moduledoc "Raise when the `:algolia` settings are unsupported"
 

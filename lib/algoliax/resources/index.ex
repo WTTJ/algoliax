@@ -1,8 +1,16 @@
 defmodule Algoliax.Resources.Index do
   @moduledoc false
 
-  import Algoliax.Utils, only: [index_name: 2, algolia_settings: 2, render_response: 1]
   import Algoliax.Client, only: [request: 1]
+
+  import Algoliax.Utils,
+    only: [
+      algolia_settings: 2,
+      api_key: 1,
+      application_id: 1,
+      index_name: 2,
+      render_response: 1
+    ]
 
   alias Algoliax.{Settings, SettingsStore}
 
@@ -11,10 +19,11 @@ defmodule Algoliax.Resources.Index do
       nil ->
         request_configure_index(
           index_name,
+          settings,
           settings_to_algolia_settings(module, settings, replica_index)
         )
 
-        algolia_remote_settings = request_get_settings(index_name)
+        algolia_remote_settings = request_get_settings(index_name, settings)
         SettingsStore.set_settings(index_name, algolia_remote_settings)
         replicas_names(module, settings, replica_index)
 
@@ -94,7 +103,7 @@ defmodule Algoliax.Resources.Index do
   def get_settings(module, settings) do
     index_name(module, settings)
     |> Enum.map(fn index_name ->
-      algolia_remote_settings = request_get_settings(index_name)
+      algolia_remote_settings = request_get_settings(index_name, settings)
       SettingsStore.set_settings(index_name, algolia_remote_settings)
       algolia_remote_settings
     end)
@@ -108,6 +117,7 @@ defmodule Algoliax.Resources.Index do
       r =
         request_configure_index(
           index_name,
+          settings,
           settings_to_algolia_settings(module, settings, replica_index)
         )
 
@@ -125,25 +135,43 @@ defmodule Algoliax.Resources.Index do
     end)
   end
 
-  defp request_configure_index(index_name, settings) do
+  defp request_configure_index(index_name, settings, alogolia_settings) do
+    api_key = api_key(settings)
+    application_id = application_id(settings)
+
     request(%{
       action: :configure_index,
-      url_params: [index_name: index_name],
-      body: settings
+      url_params: [index_name: index_name, application_id: application_id],
+      body: alogolia_settings,
+      api_key: api_key,
+      application_id: application_id
     })
   end
 
-  defp request_get_settings(index_name) do
+  defp request_get_settings(index_name, settings) do
+    api_key = api_key(settings)
+    application_id = application_id(settings)
+
     request(%{
       action: :get_settings,
-      url_params: [index_name: index_name]
+      url_params: [index_name: index_name, application_id: application_id],
+      api_key: api_key,
+      application_id: application_id
     })
   end
 
   def delete_index(module, settings) do
+    api_key = api_key(settings)
+    application_id = application_id(settings)
+
     index_name(module, settings)
     |> Enum.map(fn index_name ->
-      request(%{action: :delete_index, url_params: [index_name: index_name]})
+      request(%{
+        action: :delete_index,
+        url_params: [index_name: index_name, application_id: application_id],
+        api_key: api_key,
+        application_id: application_id
+      })
     end)
     |> render_response()
   end

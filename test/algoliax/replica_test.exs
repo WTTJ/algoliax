@@ -5,6 +5,9 @@ defmodule AlgoliaxTest.ReplicaTest do
   alias Algoliax.Schemas.PeopleWithReplicasMultipleIndexes
   alias Algoliax.Schemas.PeopleWithInvalidReplicas
 
+  @application_id "APPLICATION_ID"
+  @api_key "api_key"
+
   setup do
     Algoliax.SettingsStore.set_settings(:algoliax_people_replicas, %{})
     Algoliax.SettingsStore.set_settings(:algoliax_people_replicas_en, %{})
@@ -56,7 +59,12 @@ defmodule AlgoliaxTest.ReplicaTest do
                  {:ok,
                   %Algoliax.Response{
                     response: %{"taskID" => _, "updatedAt" => _},
-                    params: [index_name: :algoliax_people_replicas_en]
+                    params: [
+                      index_name: :algoliax_people_replicas_en,
+                      application_id: @application_id
+                    ],
+                    application_id: @application_id,
+                    api_key: @api_key
                   }}
                ]
              } = res
@@ -67,7 +75,12 @@ defmodule AlgoliaxTest.ReplicaTest do
                  {:ok,
                   %Algoliax.Response{
                     response: %{"taskID" => _, "updatedAt" => _},
-                    params: [index_name: :algoliax_people_replicas_fr]
+                    params: [
+                      index_name: :algoliax_people_replicas_fr,
+                      application_id: @application_id
+                    ],
+                    application_id: @application_id,
+                    api_key: @api_key
                   }}
                ]
              } = res2
@@ -200,7 +213,11 @@ defmodule AlgoliaxTest.ReplicaTest do
                  {:ok,
                   %Algoliax.Response{
                     response: %{"taskID" => _, "updatedAt" => _, "objectID" => ^reference},
-                    params: [index_name: :algoliax_people_replicas_en, object_id: ^reference]
+                    params: [
+                      index_name: :algoliax_people_replicas_en,
+                      object_id: ^reference,
+                      application_id: @application_id
+                    ]
                   }}
                ]
              } = res
@@ -211,7 +228,11 @@ defmodule AlgoliaxTest.ReplicaTest do
                  {:ok,
                   %Algoliax.Response{
                     response: %{"taskID" => _, "updatedAt" => _, "objectID" => ^reference},
-                    params: [index_name: :algoliax_people_replicas_fr, object_id: ^reference]
+                    params: [
+                      index_name: :algoliax_people_replicas_fr,
+                      object_id: ^reference,
+                      application_id: @application_id
+                    ]
                   }}
                ]
              } = res2
@@ -301,7 +322,12 @@ defmodule AlgoliaxTest.ReplicaTest do
                       "taskID" => _,
                       "objectIDs" => [^reference1, ^reference2]
                     },
-                    params: [index_name: :algoliax_people_replicas_en]
+                    params: [
+                      index_name: :algoliax_people_replicas_en,
+                      application_id: @application_id
+                    ],
+                    application_id: @application_id,
+                    api_key: @api_key
                   }}
                ]
              } = res
@@ -315,7 +341,12 @@ defmodule AlgoliaxTest.ReplicaTest do
                       "taskID" => _,
                       "objectIDs" => [^reference1, ^reference2]
                     },
-                    params: [index_name: :algoliax_people_replicas_fr]
+                    params: [
+                      index_name: :algoliax_people_replicas_fr,
+                      application_id: @application_id
+                    ],
+                    application_id: @application_id,
+                    api_key: @api_key
                   }}
                ]
              } = res2
@@ -370,7 +401,13 @@ defmodule AlgoliaxTest.ReplicaTest do
                  {:ok,
                   %Algoliax.Response{
                     response: %{"objectID" => "known"},
-                    params: [index_name: :algoliax_people_replicas_en, object_id: "known"]
+                    params: [
+                      index_name: :algoliax_people_replicas_en,
+                      object_id: "known",
+                      application_id: @application_id
+                    ],
+                    application_id: @application_id,
+                    api_key: @api_key
                   }}
                ]
              } = res
@@ -381,7 +418,13 @@ defmodule AlgoliaxTest.ReplicaTest do
                  {:ok,
                   %Algoliax.Response{
                     response: %{"objectID" => "known"},
-                    params: [index_name: :algoliax_people_replicas_fr, object_id: "known"]
+                    params: [
+                      index_name: :algoliax_people_replicas_fr,
+                      object_id: "known",
+                      application_id: @application_id
+                    ],
+                    application_id: @application_id,
+                    api_key: @api_key
                   }}
                ]
              } = res2
@@ -486,7 +529,12 @@ defmodule AlgoliaxTest.ReplicaTest do
                  {:ok,
                   %Algoliax.Response{
                     response: %{"searchableAttributes" => ["test"]},
-                    params: [index_name: :algoliax_people_replicas_en]
+                    params: [
+                      index_name: :algoliax_people_replicas_en,
+                      application_id: @application_id
+                    ],
+                    application_id: @application_id,
+                    api_key: @api_key
                   }}
                ]
              } = res
@@ -497,7 +545,12 @@ defmodule AlgoliaxTest.ReplicaTest do
                  {:ok,
                   %Algoliax.Response{
                     response: %{"searchableAttributes" => ["test"]},
-                    params: [index_name: :algoliax_people_replicas_fr]
+                    params: [
+                      index_name: :algoliax_people_replicas_fr,
+                      application_id: @application_id
+                    ],
+                    application_id: @application_id,
+                    api_key: @api_key
                   }}
                ]
              } = res2

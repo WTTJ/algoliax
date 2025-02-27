@@ -1,7 +1,30 @@
 defmodule Algoliax.Utils do
   @moduledoc false
 
+  alias Algoliax.Config
   alias Algoliax.Resources.Index
+
+  @spec api_key(keyword()) :: binary()
+  def api_key(settings) do
+    case Keyword.get(settings, :credentials) do
+      nil ->
+        Config.api_key()
+
+      atom when is_atom(atom) ->
+        Config.api_key(atom)
+    end
+  end
+
+  @spec application_id(keyword()) :: binary()
+  def application_id(settings) do
+    case Keyword.get(settings, :credentials) do
+      nil ->
+        Config.application_id()
+
+      atom when is_atom(atom) ->
+        Config.application_id(atom)
+    end
+  end
 
   def index_name(module, settings) do
     indexes =

@@ -150,6 +150,42 @@ defmodule Algoliax.UtilsTest do
     end
   end
 
+  describe "api_key/1" do
+    test "with a function" do
+      assert Algoliax.Utils.api_key(credentials: :custom_1) ==
+               "api_key_1"
+    end
+
+    test "without a function (uses Algoliax.Config)" do
+      assert Algoliax.Utils.api_key([]) ==
+               "api_key"
+    end
+
+    test "missing config" do
+      assert_raise(Algoliax.InvalidAlgoliaCredentialsError, fn ->
+        Algoliax.Utils.api_key(credentials: :custom_unknown)
+      end)
+    end
+  end
+
+  describe "application_id/1" do
+    test "with a config" do
+      assert Algoliax.Utils.application_id(credentials: :custom_1) ==
+               "APPLICATION_ID_1"
+    end
+
+    test "without a config (uses Algoliax.Config)" do
+      assert Algoliax.Utils.application_id([]) ==
+               "APPLICATION_ID"
+    end
+
+    test "missing config" do
+      assert_raise(Algoliax.InvalidAlgoliaCredentialsError, fn ->
+        Algoliax.Utils.application_id(credentials: :custom_unknown)
+      end)
+    end
+  end
+
   describe "index_name/2" do
     test "with a function" do
       assert Algoliax.Utils.index_name(IndexNameFromFunction, index_name: :algoliax_people) ==

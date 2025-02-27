@@ -10,6 +10,7 @@ defmodule Algoliax.Indexer do
   - `:schemas`: Specify which schemas used to populate index, Default: `[__CALLER__]`
   - `:default_filters`: Specify default filters to be used when reindex without providing a query. Must be a map or a function name (that returns a map). Default: `%{}`.
   - `:algolia`: Any valid Algolia settings (using snake case or camel case, ie `attributeForFaceting` can be configured with `:attribute_for_faceting`) or the name of 0-arity function that returns those settings.
+  - `:credentials`: Specify an alternative application_id / api_key for this index. Default `nil`
 
   On first call to Algolia, we check that the settings on Algolia are up to date.
 
@@ -157,6 +158,29 @@ defmodule Algoliax.Indexer do
       [attribute_for_faceting: ["age"]]
     end
   end
+
+  ### Alternative Credentials
+
+  An index might need a different application_id / api_key. To accomplish this you can use the credentials configuration.
+
+  ```elixir
+  config :algoliax,
+    api_key: System.get_env("ALGOLIA_API_KEY"),
+    application_id: System.get_env("ALGOLIA_APPLICATION_ID)
+    credentials: %{
+      custom_1: {"<APPLICATION_ID_1>", "<API_KEY_2>"},
+      custom_2: {System.get_env("ALGOLIA_APPLICATION_ID_2"), System.get_env("ALGOLIA_API_KEY_2")},
+    }
+
+  defmodule People do
+    use Algoliax.Indexer,
+      #....
+      credentials: :custom_1
+  end
+
+  If you do not specify a credentials key the default api_key / application_id on the `:algoliax` configuration will be used.
+  ```
+
   """
 
   alias Algoliax.Resources.{Index, Object, Search}

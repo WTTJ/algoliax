@@ -303,6 +303,27 @@ defmodule People do
 end
 ```
 
+## Configure Altnertive Credentials
+
+An index might need a different application_id / api_key. To accomplish this you can use the credentials configuration (each entry should be a `{application_id, api_key}` tuple).
+
+```elixir
+config :algoliax,
+  api_key: System.get_env("ALGOLIA_API_KEY"),
+  application_id: System.get_env("ALGOLIA_APPLICATION_ID)
+  credentials: %{
+    custom_1: {"<APPLICATION_ID_1>", "<API_KEY_2>"},
+    custom_2: {System.get_env("ALGOLIA_APPLICATION_ID_2"), System.get_env("ALGOLIA_API_KEY_2")},
+  }
+
+defmodule People do
+  use Algoliax.Indexer,
+    #....
+    credentials: :custom_1
+end
+
+If you do not specify a credentials key the default api_key / application_id on the `:algoliax` configuration will be used.
+
 ## Copyright and License
 
 Copyright (c) 2020 CORUSCANT (welcome to the jungle) - <https://www.welcometothejungle.com>
