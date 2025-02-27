@@ -2,6 +2,8 @@ defmodule AlgoliaxTest.ReplicaTest do
   use Algoliax.RequestCase
 
   alias Algoliax.Schemas.PeopleWithReplicas
+  alias Algoliax.Schemas.PeopleWithReplicasAndCustomSynonyms
+  alias Algoliax.Schemas.PeopleWithReplicasMultipleIndexes
   alias Algoliax.Schemas.PeopleWithReplicasMultipleIndexes
   alias Algoliax.Schemas.PeopleWithInvalidReplicas
 
@@ -43,6 +45,68 @@ defmodule AlgoliaxTest.ReplicaTest do
           "searchableAttributes" => nil,
           "attributesForFaceting" => nil,
           "ranking" => ["desc(age)"]
+        }
+      })
+
+      assert_request("POST", %{
+        path: ~r/algoliax_people_replicas\/synonyms\/batch/,
+        body: %{
+          "_json" => [
+            %{
+              "objectID" => "synonym1",
+              "synonyms" => ["synonym1", "synonym2"],
+              "type" => "synonym"
+            }
+          ]
+        }
+      })
+    end
+
+    test "configure_index/0 with different synonyms" do
+      assert {:ok, res} = PeopleWithReplicasAndCustomSynonyms.configure_index()
+      assert %Algoliax.Response{response: %{"taskID" => _, "updatedAt" => _}} = res
+
+      assert_request("PUT", %{
+        path: ~r/algoliax_people_replicas_synonyms/,
+        body: %{
+          "searchableAttributes" => ["full_name"],
+          "attributesForFaceting" => ["age"],
+          "replicas" => ["algoliax_people_replicas_synonyms_asc"]
+        }
+      })
+
+      assert_request("PUT", %{
+        path: ~r/algoliax_people_replicas_synonyms_asc/,
+        body: %{
+          "searchableAttributes" => ["age"],
+          "attributesForFaceting" => ["age"],
+          "ranking" => ["asc(age)"]
+        }
+      })
+
+      assert_request("POST", %{
+        path: ~r/algoliax_people_replicas_synonyms\/synonyms\/batch/,
+        body: %{
+          "_json" => [
+            %{
+              "objectID" => "synonym1",
+              "synonyms" => ["synonym1", "synonym2"],
+              "type" => "synonym"
+            }
+          ]
+        }
+      })
+
+      assert_request("POST", %{
+        path: ~r/algoliax_people_replicas_synonyms_asc\/synonyms\/batch/,
+        body: %{
+          "_json" => [
+            %{
+              "objectID" => "synonym2",
+              "synonyms" => ["synonym3", "synonym4"],
+              "type" => "synonym"
+            }
+          ]
         }
       })
     end

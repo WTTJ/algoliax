@@ -52,6 +52,34 @@ defmodule Algoliax.Utils do
     end
   end
 
+  def synonyms_settings(module, settings, index_name) do
+    case Keyword.get(settings, :synonyms, nil) do
+      # Could be nil
+      nil ->
+        nil
+
+      # Could be a 1-arity function that returns a keyword list or nil
+      atom when is_atom(atom) ->
+        with 1 <- Keyword.get(module.__info__(:functions), atom),
+             result when is_list(result) or is_nil(result) <- apply(module, atom, [index_name]) do
+          result
+        else
+          _any ->
+            raise Algoliax.InvalidSynonymsSettingsFunctionError, %{
+              function_name: inspect(atom)
+            }
+        end
+
+      # Could be an hardcoded list
+      list when is_list(list) ->
+        list
+
+      # Refuse anything else
+      _other ->
+        raise Algoliax.InvalidSynonymsSettingsConfigurationError
+    end
+  end
+
   def object_id_attribute(settings) do
     Keyword.get(settings, :object_id, :id)
   end

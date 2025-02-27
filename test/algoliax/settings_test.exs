@@ -10,6 +10,18 @@ defmodule Algoliax.SettingsTest do
     end
   end
 
+  defmodule SynonymsWithFunc do
+    use Algoliax.Indexer,
+      index_name: :algoliax_people,
+      algolia: [],
+      object_id: :reference,
+      synonyms: :get_synonyms
+
+    def get_synonyms("list"), do: [forward_to_replicas: false]
+    def get_synonyms("nil"), do: nil
+    def get_synonyms(_), do: [extra_keys: "should be removed"]
+  end
+
   test "settings/0" do
     assert Algoliax.Settings.settings() == [
              :searchable_attributes,
