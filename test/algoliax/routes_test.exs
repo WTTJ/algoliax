@@ -29,6 +29,21 @@ defmodule Algoliax.RoutesTest do
                {:put, "http://localhost:8002/APPLICATION_ID/write/algolia_index/settings"}
     end
 
+    test "url configure_synonyms" do
+      assert Routes.url(:configure_synonyms, index_name: @index_name) ==
+               {:post, "http://localhost:8002/APPLICATION_ID/write/algolia_index/synonyms/batch"}
+    end
+
+    test "url configure_synonyms with query params" do
+      assert Routes.url(
+               :configure_synonyms,
+               [index_name: @index_name],
+               %{"some_param" => "value", "other_param" => "value"}
+             ) ==
+               {:post,
+                "http://localhost:8002/APPLICATION_ID/write/algolia_index/synonyms/batch?other_param=value&some_param=value"}
+    end
+
     test "url save_objects" do
       assert Routes.url(:save_objects, index_name: @index_name) ==
                {:post, "http://localhost:8002/APPLICATION_ID/write/algolia_index/batch"}
@@ -57,42 +72,42 @@ defmodule Algoliax.RoutesTest do
 
   describe "First retry" do
     test "url delete_index" do
-      assert Routes.url(:delete_index, [index_name: @index_name], 1) ==
+      assert Routes.url(:delete_index, [index_name: @index_name], nil, 1) ==
                {:delete, "http://localhost:8002/APPLICATION_ID/retry/1/algolia_index"}
     end
 
     test "url get_settings" do
-      assert Routes.url(:get_settings, [index_name: @index_name], 1) ==
+      assert Routes.url(:get_settings, [index_name: @index_name], nil, 1) ==
                {:get, "http://localhost:8002/APPLICATION_ID/retry/1/algolia_index/settings"}
     end
 
     test "url configure_index" do
-      assert Routes.url(:configure_index, [index_name: @index_name], 1) ==
+      assert Routes.url(:configure_index, [index_name: @index_name], nil, 1) ==
                {:put, "http://localhost:8002/APPLICATION_ID/retry/1/algolia_index/settings"}
     end
 
     test "url save_objects" do
-      assert Routes.url(:save_objects, [index_name: @index_name], 1) ==
+      assert Routes.url(:save_objects, [index_name: @index_name], nil, 1) ==
                {:post, "http://localhost:8002/APPLICATION_ID/retry/1/algolia_index/batch"}
     end
 
     test "url get_object" do
-      assert Routes.url(:get_object, [index_name: @index_name, object_id: 10], 1) ==
+      assert Routes.url(:get_object, [index_name: @index_name, object_id: 10], nil, 1) ==
                {:get, "http://localhost:8002/APPLICATION_ID/retry/1/algolia_index/10"}
     end
 
     test "url save_object" do
-      assert Routes.url(:save_object, [index_name: @index_name, object_id: 10], 1) ==
+      assert Routes.url(:save_object, [index_name: @index_name, object_id: 10], nil, 1) ==
                {:put, "http://localhost:8002/APPLICATION_ID/retry/1/algolia_index/10"}
     end
 
     test "url delete_object" do
-      assert Routes.url(:delete_object, [index_name: @index_name, object_id: 10], 1) ==
+      assert Routes.url(:delete_object, [index_name: @index_name, object_id: 10], nil, 1) ==
                {:delete, "http://localhost:8002/APPLICATION_ID/retry/1/algolia_index/10"}
     end
 
     test "url delete_by" do
-      assert Routes.url(:delete_by, [index_name: @index_name], 1) ==
+      assert Routes.url(:delete_by, [index_name: @index_name], nil, 1) ==
                {:post, "http://localhost:8002/APPLICATION_ID/retry/1/algolia_index/deleteByQuery"}
     end
   end

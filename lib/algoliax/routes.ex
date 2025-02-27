@@ -9,6 +9,7 @@ defmodule Algoliax.Routes do
     move_index: {"/{index_name}/operation", :post},
     get_settings: {"/{index_name}/settings", :get},
     configure_index: {"/{index_name}/settings", :put},
+    configure_synonyms: {"/{index_name}/synonyms/batch", :post},
     save_objects: {"/{index_name}/batch", :post},
     get_object: {"/{index_name}/{object_id}", :get},
     save_object: {"/{index_name}/{object_id}", :put},
@@ -17,7 +18,7 @@ defmodule Algoliax.Routes do
     delete_by: {"/{index_name}/deleteByQuery", :post}
   }
 
-  def url(action, url_params, retry \\ 0) do
+  def url(action, url_params, query_params \\ nil, retry \\ 0) do
     {action_path, method} =
       @paths
       |> Map.get(action)
@@ -25,6 +26,7 @@ defmodule Algoliax.Routes do
     url =
       action_path
       |> build_path(url_params)
+      |> add_query_params(query_params)
       |> build_url(method, retry)
 
     {method, url}
@@ -37,6 +39,14 @@ defmodule Algoliax.Routes do
       path
       |> String.replace("{#{key}}", "#{Keyword.get(args, key)}")
     end)
+  end
+
+  defp add_query_params(path, query_params) do
+    case query_params do
+      nil -> path
+      %{} when map_size(query_params) == 0 -> path
+      _ -> path <> "?" <> URI.encode_query(query_params)
+    end
   end
 
   defp build_url(path, :get, 0) do

@@ -111,6 +111,7 @@ defmodule Algoliax.Resources.Index do
           settings_to_algolia_settings(module, settings, replica_index)
         )
 
+      configure_synonyms(module, settings, index_name)
       configure_replicas(module, settings)
       r
     end)
@@ -125,11 +126,28 @@ defmodule Algoliax.Resources.Index do
     end)
   end
 
+  defp configure_synonyms(module, settings, index_name) do
+    synonyms_settings = Settings.synonyms_settings(module, settings, index_name)
+
+    unless is_nil(synonyms_settings) do
+      request_configure_synonyms(index_name, Settings.map_synonyms_settings(synonyms_settings))
+    end
+  end
+
   defp request_configure_index(index_name, settings) do
     request(%{
       action: :configure_index,
       url_params: [index_name: index_name],
       body: settings
+    })
+  end
+
+  defp request_configure_synonyms(index_name, {synonyms, query_params} = _synonym_settings) do
+    request(%{
+      action: :configure_synonyms,
+      url_params: [index_name: index_name],
+      query_params: query_params,
+      body: synonyms
     })
   end
 
