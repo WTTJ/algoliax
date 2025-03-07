@@ -1,7 +1,7 @@
 defmodule Algoliax.Settings do
   @moduledoc false
 
-  import Algoliax.Utils, only: [camelize: 1, algolia_settings: 2]
+  alias Algoliax.Utils
 
   # https://www.algolia.com/doc/api-reference/settings-api-parameters/
   @algolia_settings [
@@ -76,6 +76,14 @@ defmodule Algoliax.Settings do
     :rendering_content
   ]
 
+  @default_synonyms_settings [
+    synonyms: [],
+    forward_to_replicas: true,
+    replace_existing_synonyms: true
+  ]
+
+  @synonyms_settings Keyword.keys(@default_synonyms_settings)
+
   def settings do
     @algolia_settings
   end
@@ -86,7 +94,7 @@ defmodule Algoliax.Settings do
   def replica_settings(module, settings, replica_settings) do
     replica_settings =
       case Keyword.get(replica_settings, :inherit, true) do
-        true -> replica_settings ++ algolia_settings(module, settings)
+        true -> replica_settings ++ Utils.algolia_settings(module, settings)
         false -> replica_settings
       end
 
@@ -94,9 +102,33 @@ defmodule Algoliax.Settings do
   end
 
   def map_algolia_settings(algolia_settings) do
-    @algolia_settings
-    |> Enum.into(%{}, fn setting ->
-      {camelize(setting), Keyword.get(algolia_settings, setting)}
+    Enum.into(@algolia_settings, %{}, fn setting ->
+      {Utils.camelize(setting), Keyword.get(algolia_settings, setting)}
+    end)
+  end
+
+  def synonyms_settings(module, settings, index_name) do
+    case Utils.synonyms_settings(module, settings, index_name) do
+      nil ->
+        nil
+
+      synonyms_settings ->
+        @default_synonyms_settings
+        |> Keyword.merge(synonyms_settings)
+        |> Keyword.take(@synonyms_settings)
+    end
+  end
+
+  def map_synonyms_settings(synonyms_settings) do
+    @default_synonyms_settings
+    |> Enum.into(%{}, fn {key, value} ->
+      {Utils.camelize(key), Keyword.get(synonyms_settings, key, value)}
+    end)
+    |> then(fn settings ->
+      {
+        Map.get(settings, "synonyms", []),
+        Map.drop(settings, ["synonyms"])
+      }
     end)
   end
 end

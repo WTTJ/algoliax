@@ -102,6 +102,18 @@ defmodule Algoliax.UtilsTest do
     end
   end
 
+  defmodule SynonymsWithFunc do
+    use Algoliax.Indexer,
+      index_name: :algoliax_people,
+      algolia: [],
+      object_id: :reference,
+      synonyms: :get_synonyms
+
+    def get_synonyms("list"), do: []
+    def get_synonyms("nil"), do: nil
+    def get_synonyms(_), do: "invalid"
+  end
+
   defmodule AlgoliaSettingsFunction do
     def valid_func do
       [
@@ -240,6 +252,59 @@ defmodule Algoliax.UtilsTest do
       assert Algoliax.Utils.default_filters(DefaultFiltersWithFunction,
                default_filters: :default_filters
              ) == %{where: [age: 43]}
+    end
+  end
+
+  describe "synonyms_settings/3" do
+    test "should work with hardcoded list" do
+      assert Algoliax.Utils.synonyms_settings(NoRepo, [synonyms: []], "index_name") == []
+    end
+
+    test "should work with hardcoded nil" do
+      assert Algoliax.Utils.synonyms_settings(NoRepo, [synonyms: nil], "index_name") == nil
+    end
+
+    test "should work with no settings" do
+      assert Algoliax.Utils.synonyms_settings(NoRepo, [], "index_name") == nil
+    end
+
+    test "should work with arity-1 function that returns nil" do
+      assert Algoliax.Utils.synonyms_settings(
+               SynonymsWithFunc,
+               [synonyms: :get_synonyms],
+               "nil"
+             ) == nil
+    end
+
+    test "should work with arity-1 function that returns list" do
+      assert Algoliax.Utils.synonyms_settings(
+               SynonymsWithFunc,
+               [synonyms: :get_synonyms],
+               "list"
+             ) == []
+    end
+
+    test "should fail with arity-1 function that returns map" do
+      assert_raise(Algoliax.InvalidSynonymsSettingsFunctionError, fn ->
+        Algoliax.Utils.synonyms_settings(
+          SynonymsWithFunc,
+          [synonyms: :get_synonyms],
+          "invalid"
+        )
+      end)
+    end
+
+    test "should fail with 0-arity function" do
+    end
+
+    test "should if settings is not an atom, a list, nor nil" do
+      assert_raise(Algoliax.InvalidSynonymsSettingsConfigurationError, fn ->
+        Algoliax.Utils.synonyms_settings(
+          SynonymsWithFunc,
+          [synonyms: "invalid settings"],
+          "index_name"
+        )
+      end)
     end
   end
 end

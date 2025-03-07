@@ -51,6 +51,16 @@ defmodule Algoliax.ApiMockServer do
     send_resp(conn, 200, Jason.encode!(response))
   end
 
+  # saves synonyms: https://www.algolia.com/doc/rest-api/search/#tag/Synonyms/operation/saveSynonyms
+  post "/:application_id/:mode/:index_name/synonyms/batch" do
+    response = %{
+      updatedAt: DateTime.utc_now(),
+      taskID: :rand.uniform(10_000)
+    }
+
+    send_resp(conn, 200, Jason.encode!(response))
+  end
+
   @max_retries_before_published 3
 
   # get tasks info

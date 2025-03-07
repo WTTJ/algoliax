@@ -1,20 +1,24 @@
-defmodule Algoliax.Schemas.PeopleWithReplicas do
+defmodule Algoliax.Schemas.PeopleWithReplicasAndCustomSynonyms do
   @moduledoc false
 
   use Algoliax.Indexer,
-    index_name: :algoliax_people_replicas,
+    index_name: :algoliax_people_replicas_synonyms,
     object_id: :reference,
     algolia: :runtime_algolia_settings,
     replicas: [
       [
-        index_name: :algoliax_people_replicas_asc,
+        index_name: :algoliax_people_replicas_synonyms_asc,
         inherit: true,
-        algolia: :runtime_replica_algolia_settings
-      ],
-      [
-        index_name: :algoliax_people_replicas_desc,
-        inherit: false,
-        algolia: [ranking: ["desc(age)"]]
+        algolia: :runtime_replica_algolia_settings,
+        synonyms: [
+          synonyms: [
+            %{
+              objectID: "synonym2",
+              type: "synonym",
+              synonyms: ["synonym3", "synonym4"]
+            }
+          ]
+        ]
       ]
     ],
     synonyms: [
@@ -25,7 +29,7 @@ defmodule Algoliax.Schemas.PeopleWithReplicas do
           synonyms: ["synonym1", "synonym2"]
         }
       ],
-      replace_existing_synonyms: true
+      forward_to_replicas: false
     ]
 
   defstruct reference: nil, last_name: nil, first_name: nil, age: nil
