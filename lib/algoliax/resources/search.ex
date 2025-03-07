@@ -1,9 +1,21 @@
 defmodule Algoliax.Resources.Search do
   @moduledoc false
-  import Algoliax.Utils, only: [index_name: 2, camelize: 1, render_response: 1]
+
   import Algoliax.Client, only: [request: 1]
 
+  import Algoliax.Utils,
+    only: [
+      api_key: 1,
+      application_id: 1,
+      camelize: 1,
+      index_name: 2,
+      render_response: 1
+    ]
+
   def search(module, settings, query, params) do
+    api_key = api_key(settings)
+    application_id = application_id(settings)
+
     index_name(module, settings)
     |> Enum.map(fn index_name ->
       body =
@@ -14,14 +26,22 @@ defmodule Algoliax.Resources.Search do
 
       request(%{
         action: :search,
-        url_params: [index_name: index_name],
-        body: body
+        url_params: [
+          index_name: index_name,
+          application_id: application_id
+        ],
+        body: body,
+        api_key: api_key,
+        application_id: application_id
       })
     end)
     |> render_response()
   end
 
   def search_facet(module, settings, facet_name, facet_query, params) do
+    api_key = api_key(settings)
+    application_id = application_id(settings)
+
     index_name(module, settings)
     |> Enum.map(fn index_name ->
       body =
@@ -36,8 +56,14 @@ defmodule Algoliax.Resources.Search do
 
       request(%{
         action: :search_facet,
-        url_params: [index_name: index_name, facet_name: facet_name],
-        body: body
+        url_params: [
+          index_name: index_name,
+          facet_name: facet_name,
+          application_id: application_id
+        ],
+        body: body,
+        api_key: api_key,
+        application_id: application_id
       })
     end)
     |> render_response()
