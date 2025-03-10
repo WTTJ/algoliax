@@ -10,6 +10,7 @@ defmodule Algoliax.Indexer do
   - `:schemas`: Specify which schemas used to populate index, Default: `[__CALLER__]`
   - `:default_filters`: Specify default filters to be used when reindex without providing a query. Must be a map or a function name (that returns a map). Default: `%{}`.
   - `:algolia`: Any valid Algolia settings (using snake case or camel case, ie `attributeForFaceting` can be configured with `:attribute_for_faceting`) or the name of 0-arity function that returns those settings.
+  - `:synonyms`: Custom configuration for the synonym API, allowing you to register your synonyms. Can be nil, a keyword list, or an arity-1 function that returns either. Default: `nil`
 
   On first call to Algolia, we check that the settings on Algolia are up to date.
 
@@ -157,6 +158,52 @@ defmodule Algoliax.Indexer do
       [attribute_for_faceting: ["age"]]
     end
   end
+
+  ### Configure synonyms
+
+  To automatically setup synonyms, you can provide a configuration under the `:synonyms` key.
+  When calling `configure_index`, the synonyms will be set up in Algolia.
+  It will be performed on both the main index and its replicas.
+
+  If not specified or set to `nil`, the synonyms will not be configured.
+  Otherwise, the following keywords are expected, with each key having a default value:
+  - `synonyms`: a list of synonym groups. Default `[]`
+  - `replace_existing_synonyms`: Whether to replace existing synonyms. Default `true`
+  - `forward_to_replicas`: Whether to forward synonyms to replicas. Default `true`
+  You can also provide an arity-1 function (that takes the index_name) that returns the same keyword list.
+
+  If using `forward_to_replicas: true`, make sure not to specify synonyms on the replicas themselves
+  to avoid conflicts/overwrites.
+
+  ```elixir
+  defmodule Global do
+    use Algoliax.Indexer,
+      index_name: :people,
+      object_id: :reference,
+      schemas: People,
+      algolia: [
+        attribute_for_faceting: ["age"],
+        custom_ranking: ["desc(updated_at)"]
+      ]
+      synonyms: [
+        synonyms: [
+          %{
+            objectID: "synonym1",
+            type: "synonym",
+            synonyms: ["pants", "trousers", "slacks"],
+            ...
+          },
+          %{
+            objectID: "synonym2",
+            ...
+          }
+        ],
+        forward_to_replicas: false,
+        replace_existing_synonyms: false
+      ]
+  end
+
+  See https://www.algolia.com/doc/rest-api/search/#tag/Synonyms/operation/saveSynonyms
   """
 
   alias Algoliax.Resources.{Index, Object, Search}

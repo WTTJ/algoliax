@@ -1,5 +1,56 @@
 # Changelog
 
+## TBD
+
+### New
+
+Added the `synonyms` settings to the `Algoliax.Indexer`.
+It allows you to automatically setup synonyms for your indexes when calling `MyIndexer.configure_index()`
+
+If not specified or set to `nil`, the synonyms will not be configured.
+Otherwise, the following keywords are expected, with each key having a default value:
+
+- `synonyms`: a list of synonym groups, as expected by Algolia. Default `[]`
+- `replace_existing_synonyms`: Whether to replace existing synonyms. Default `true`
+- `forward_to_replicas`: Whether to forward synonyms to replicas. Default `true`
+
+You can also provide an arity-1 function (that takes the `index_name`) that returns the same keyword list.
+
+If using `forward_to_replicas: true`, make sure not to specify synonyms on the replicas themselves to avoid conflicts/overwrites.
+
+```elixir
+  defmodule Global do
+    use Algoliax.Indexer,
+      index_name: :people,
+      object_id: :reference,
+      schemas: People,
+      algolia: [
+        attribute_for_faceting: ["age"],
+        custom_ranking: ["desc(updated_at)"]
+      ]
+      synonyms: [
+        synonyms: [
+          %{
+            objectID: "synonym1",
+            type: "synonym",
+            synonyms: ["pants", "trousers", "slacks"],
+            ...
+          },
+          %{
+            objectID: "synonym2",
+            ...
+          }
+        ],
+        forward_to_replicas: false,
+        replace_existing_synonyms: false
+      ]
+  end
+```
+
+### Other changes
+
+- Updated the list of supported algolia settings.
+
 ## v0.9.1 - 2024-12-12
 
 ### New

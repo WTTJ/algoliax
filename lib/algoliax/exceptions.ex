@@ -58,6 +58,33 @@ defmodule Algoliax.InvalidAlgoliaSettingsConfigurationError do
   end
 end
 
+defmodule Algoliax.InvalidSynonymsSettingsFunctionError do
+  @moduledoc "Raise when dynamic `:synonyms` settings are invalid"
+
+  defexception [:message]
+
+  @impl true
+  def exception(%{function_name: function_name}) do
+    %__MODULE__{
+      message: "Expected #{function_name} to be a 1-arity function that returns a keyword list"
+    }
+  end
+end
+
+defmodule Algoliax.InvalidSynonymsSettingsConfigurationError do
+  @moduledoc "Raise when the `:synonyms` settings are not defined properly"
+
+  defexception [:message]
+
+  @impl true
+  def exception(_) do
+    %__MODULE__{
+      message:
+        "Synonyms settings must either be a keyword list or the name of a 1-arity function that returns a keyword list"
+    }
+  end
+end
+
 defmodule Algoliax.InvalidReplicaConfigurationError do
   @moduledoc "Raise when a replica has an invalid configuration"
 
