@@ -68,7 +68,7 @@ defmodule Algoliax.Routes do
     |> Kernel.<>(path)
   end
 
-  if Mix.env() == :test do
+  if Config.env() == :test do
     defp url_read do
       port = Application.get_env(:algoliax, :mock_api_port)
       "http://localhost:#{port}/{{application_id}}/read"
