@@ -8,8 +8,8 @@ defmodule Algoliax.Response do
           application_id: binary(),
           params: keyword(),
           response: map(),
-          task_id: integer(),
-          updated_at: binary()
+          task_id: integer() | nil,
+          updated_at: binary() | nil
         }
 
   defstruct [
