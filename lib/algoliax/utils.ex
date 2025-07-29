@@ -52,6 +52,11 @@ defmodule Algoliax.Utils do
     end
   end
 
+  def call_store(settings, func, args) do
+    module = Keyword.get(settings, :store, Algoliax.SettingsStore.Agent)
+    apply(module, func, args)
+  end
+
   def synonyms_settings(module, settings, index_name) do
     case Keyword.get(settings, :synonyms, nil) do
       # Could be nil

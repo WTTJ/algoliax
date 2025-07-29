@@ -4,7 +4,7 @@ defmodule AlgoliaxTest do
   alias Algoliax.Schemas.PeopleStruct
 
   setup do
-    Algoliax.SettingsStore.set_settings(:algoliax_people, %{})
+    Algoliax.SettingsStore.Agent.set_settings(:algoliax_people, %{})
     :ok
   end
 

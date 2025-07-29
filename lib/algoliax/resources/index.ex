@@ -1,13 +1,15 @@
 defmodule Algoliax.Resources.Index do
   @moduledoc false
 
-  import Algoliax.Utils, only: [index_name: 2, algolia_settings: 2, render_response: 1]
+  import Algoliax.Utils,
+    only: [index_name: 2, algolia_settings: 2, render_response: 1, call_store: 3]
+
   import Algoliax.Client, only: [request: 1]
 
-  alias Algoliax.{Settings, SettingsStore}
+  alias Algoliax.{Settings}
 
   def ensure_settings(module, index_name, settings, replica_index) do
-    case SettingsStore.get_settings(index_name) do
+    case call_store(settings, :get_settings, [index_name]) do
       nil ->
         request_configure_index(
           index_name,
@@ -15,7 +17,7 @@ defmodule Algoliax.Resources.Index do
         )
 
         algolia_remote_settings = request_get_settings(index_name)
-        SettingsStore.set_settings(index_name, algolia_remote_settings)
+        call_store(settings, :set_settings, [index_name, algolia_remote_settings])
         replicas_names(module, settings, replica_index)
 
       _ ->
@@ -95,7 +97,7 @@ defmodule Algoliax.Resources.Index do
     index_name(module, settings)
     |> Enum.map(fn index_name ->
       algolia_remote_settings = request_get_settings(index_name)
-      SettingsStore.set_settings(index_name, algolia_remote_settings)
+      call_store(settings, :set_settings, [index_name, algolia_remote_settings])
       algolia_remote_settings
     end)
     |> render_response()

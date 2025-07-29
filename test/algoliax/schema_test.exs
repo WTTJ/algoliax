@@ -29,33 +29,33 @@ defmodule AlgoliaxTest.Schema do
   @ref3 Ecto.UUID.generate()
 
   setup do
-    Algoliax.SettingsStore.set_settings(:algoliax_people, %{})
-    Algoliax.SettingsStore.set_settings(:"algoliax_people.tmp", %{})
+    Algoliax.SettingsStore.Agent.set_settings(:algoliax_people, %{})
+    Algoliax.SettingsStore.Agent.set_settings(:"algoliax_people.tmp", %{})
 
-    Algoliax.SettingsStore.set_settings(:algoliax_people_en, %{})
-    Algoliax.SettingsStore.set_settings(:"algoliax_people_en.tmp", %{})
-    Algoliax.SettingsStore.set_settings(:algoliax_people_fr, %{})
-    Algoliax.SettingsStore.set_settings(:"algoliax_people_fr.tmp", %{})
+    Algoliax.SettingsStore.Agent.set_settings(:algoliax_people_en, %{})
+    Algoliax.SettingsStore.Agent.set_settings(:"algoliax_people_en.tmp", %{})
+    Algoliax.SettingsStore.Agent.set_settings(:algoliax_people_fr, %{})
+    Algoliax.SettingsStore.Agent.set_settings(:"algoliax_people_fr.tmp", %{})
 
-    Algoliax.SettingsStore.set_settings(:algoliax_people_fail, %{})
-    Algoliax.SettingsStore.set_settings(:"algoliax_people_fail.tmp", %{})
+    Algoliax.SettingsStore.Agent.set_settings(:algoliax_people_fail, %{})
+    Algoliax.SettingsStore.Agent.set_settings(:"algoliax_people_fail.tmp", %{})
 
-    Algoliax.SettingsStore.set_settings(:algoliax_people_fail_en, %{})
-    Algoliax.SettingsStore.set_settings(:"algoliax_people_fail_en.tmp", %{})
-    Algoliax.SettingsStore.set_settings(:algoliax_people_fail_fr, %{})
-    Algoliax.SettingsStore.set_settings(:"algoliax_people_fail_fr.tmp", %{})
+    Algoliax.SettingsStore.Agent.set_settings(:algoliax_people_fail_en, %{})
+    Algoliax.SettingsStore.Agent.set_settings(:"algoliax_people_fail_en.tmp", %{})
+    Algoliax.SettingsStore.Agent.set_settings(:algoliax_people_fail_fr, %{})
+    Algoliax.SettingsStore.Agent.set_settings(:"algoliax_people_fail_fr.tmp", %{})
 
-    Algoliax.SettingsStore.set_settings(:algoliax_people_without_id, %{})
-    Algoliax.SettingsStore.set_settings(:"algoliax_people_without_id.tmp", %{})
+    Algoliax.SettingsStore.Agent.set_settings(:algoliax_people_without_id, %{})
+    Algoliax.SettingsStore.Agent.set_settings(:"algoliax_people_without_id.tmp", %{})
 
-    Algoliax.SettingsStore.set_settings(:algoliax_with_schemas, %{})
-    Algoliax.SettingsStore.set_settings(:"algoliax_with_schemas.tmp", %{})
+    Algoliax.SettingsStore.Agent.set_settings(:algoliax_with_schemas, %{})
+    Algoliax.SettingsStore.Agent.set_settings(:"algoliax_with_schemas.tmp", %{})
 
-    Algoliax.SettingsStore.set_settings(:algoliax_people_ecto_with_association, %{})
-    Algoliax.SettingsStore.set_settings(:"algoliax_people_ecto_with_association.tmp", %{})
+    Algoliax.SettingsStore.Agent.set_settings(:algoliax_people_ecto_with_association, %{})
+    Algoliax.SettingsStore.Agent.set_settings(:"algoliax_people_ecto_with_association.tmp", %{})
 
-    Algoliax.SettingsStore.set_settings(:algoliax_people_with_custom_object_id, %{})
-    Algoliax.SettingsStore.set_settings(:"algoliax_people_with_custom_object_id.tmp", %{})
+    Algoliax.SettingsStore.Agent.set_settings(:algoliax_people_with_custom_object_id, %{})
+    Algoliax.SettingsStore.Agent.set_settings(:"algoliax_people_with_custom_object_id.tmp", %{})
 
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(Repo)
 
@@ -639,7 +639,7 @@ defmodule AlgoliaxTest.Schema do
       end
 
       assert_request("DELETE", %{path: ~r/algoliax_people_fail\.tmp/, body: %{}})
-      refute Algoliax.SettingsStore.reindexing?(:algoliax_people_fail)
+      refute Algoliax.SettingsStore.Agent.reindexing?(:algoliax_people_fail)
     end
 
     test "with multiple indexes atomic with fail" do
@@ -648,8 +648,8 @@ defmodule AlgoliaxTest.Schema do
       end
 
       assert_request("DELETE", %{path: ~r/algoliax_people_fail_en\.tmp/, body: %{}})
-      refute Algoliax.SettingsStore.reindexing?(:algoliax_people_fail_en)
-      refute Algoliax.SettingsStore.reindexing?(:algoliax_people_fail_fr)
+      refute Algoliax.SettingsStore.Agent.reindexing?(:algoliax_people_fail_en)
+      refute Algoliax.SettingsStore.Agent.reindexing?(:algoliax_people_fail_fr)
     end
   end
 

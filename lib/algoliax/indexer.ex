@@ -11,6 +11,7 @@ defmodule Algoliax.Indexer do
   - `:default_filters`: Specify default filters to be used when reindex without providing a query. Must be a map or a function name (that returns a map). Default: `%{}`.
   - `:algolia`: Any valid Algolia settings (using snake case or camel case, ie `attributeForFaceting` can be configured with `:attribute_for_faceting`) or the name of 0-arity function that returns those settings.
   - `:synonyms`: Custom configuration for the synonym API, allowing you to register your synonyms. Can be nil, a keyword list, or an arity-1 function that returns either. Default: `nil`
+  - `:store`: Specify a module used to store settings, Default: `Algoliax.SettingsStore.Agent`
 
   On first call to Algolia, we check that the settings on Algolia are up to date.
 

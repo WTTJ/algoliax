@@ -4,6 +4,7 @@ defmodule Algoliax.Resources.Object do
   import Algoliax.Utils, only: [index_name: 2, object_id_attribute: 1, render_response: 1]
   import Algoliax.Client, only: [request: 1]
 
+  require Logger
   alias Algoliax.TemporaryIndexer
 
   def get_object(module, settings, model) do

@@ -31,7 +31,7 @@ defmodule Algoliax.MixProject do
 
   defp deps do
     [
-      {:hackney, "~> 1.18"},
+      {:hackney, "~> 1.25.0"},
       {:ssl_verify_fun, "~> 1.1.7"},
       {:jason, "~> 1.3"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false, override: true},

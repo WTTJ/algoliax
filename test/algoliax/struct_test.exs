@@ -9,8 +9,8 @@ defmodule AlgoliaxTest.StructTest do
   }
 
   setup do
-    Algoliax.SettingsStore.set_settings(:algoliax_people_struct, %{})
-    Algoliax.SettingsStore.set_settings(:algoliax_people_with_prepare_object_struct, %{})
+    Algoliax.SettingsStore.Agent.set_settings(:algoliax_people_struct, %{})
+    Algoliax.SettingsStore.Agent.set_settings(:algoliax_people_with_prepare_object_struct, %{})
     :ok
   end
 

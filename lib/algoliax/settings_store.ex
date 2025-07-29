@@ -3,71 +3,15 @@ defmodule Algoliax.SettingsStore do
 
   use Agent
 
-  def start_link(_) do
-    Agent.start_link(fn -> %{} end, name: __MODULE__)
-  end
+  @callback start_reindexing(binary) :: :ok
 
-  def reset do
-    Agent.update(__MODULE__, fn _state ->
-      %{}
-    end)
-  end
+  @callback stop_reindexing(binary) :: :ok
 
-  def start_reindexing(index_name) do
-    Agent.update(__MODULE__, fn state ->
-      reindexings =
-        state
-        |> Map.get(:reindexing, %{})
-        |> Map.put(index_name, "working")
+  @callback reindexing?(binary) :: boolean()
 
-      state
-      |> Map.put(:reindexing, reindexings)
-    end)
-  end
+  @callback set_settings(binary, map) :: :ok
 
-  def stop_reindexing(index_name) do
-    Agent.update(__MODULE__, fn state ->
-      reindexings =
-        state
-        |> Map.get(:reindexing, %{})
-        |> Map.delete(index_name)
+  @callback get_settings(binary) :: map
 
-      state
-      |> Map.put(:reindexing, reindexings)
-    end)
-  end
-
-  def reindexing?(index_name) do
-    Agent.get(__MODULE__, fn state ->
-      state
-      |> Map.get(:reindexing, %{})
-      |> Map.get(index_name)
-    end)
-    |> case do
-      nil ->
-        false
-
-      _ ->
-        true
-    end
-  end
-
-  def set_settings(index_name, settings) do
-    Agent.update(__MODULE__, fn state ->
-      state
-      |> Map.put(index_name, settings)
-    end)
-  end
-
-  def get_settings(index_name) do
-    Agent.get(__MODULE__, fn state ->
-      Map.get(state, index_name)
-    end)
-  end
-
-  def delete_settings(index_name) do
-    Agent.update(__MODULE__, fn state ->
-      Map.delete(state, index_name)
-    end)
-  end
+  @callback delete_settings(binary) :: :ok
 end

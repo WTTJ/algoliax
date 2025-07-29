@@ -5,7 +5,7 @@ defmodule Algoliax.Application do
 
   def start(_type, _args) do
     children = [
-      Algoliax.SettingsStore
+      Algoliax.SettingsStore.Agent
     ]
 
     opts = [strategy: :one_for_one, name: Algoliax.Supervisor]

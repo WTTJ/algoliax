@@ -4,7 +4,7 @@ if Code.ensure_loaded?(Ecto) do
 
     import Ecto.Query
     import Algoliax.Client, only: [request: 1]
-    import Algoliax.Utils, only: [index_name: 2, schemas: 2, default_filters: 2]
+    import Algoliax.Utils, only: [index_name: 2, schemas: 2, default_filters: 2, call_store: 3]
 
     alias Algoliax.Resources.Object
 
@@ -86,7 +86,8 @@ if Code.ensure_loaded?(Ecto) do
         tmp_settings =
           settings |> Keyword.put(:index_name, tmp_index_name) |> Keyword.delete(:replicas)
 
-        Algoliax.SettingsStore.start_reindexing(index_name)
+        call_store(settings, :start_reindexing, [index_name])
+        call_store(settings, :set_settings, [tmp_index_name, tmp_settings])
 
         try do
           reindex(module, tmp_settings, nil, [])
@@ -103,8 +104,8 @@ if Code.ensure_loaded?(Ecto) do
           {:ok, :completed}
         after
           Algoliax.Resources.Index.delete_index(module, tmp_settings)
-          Algoliax.SettingsStore.delete_settings(tmp_index_name)
-          Algoliax.SettingsStore.stop_reindexing(index_name)
+          call_store(settings, :delete_settings, [tmp_index_name])
+          call_store(settings, :stop_reindexing, [index_name])
         end
       end)
       |> render_reindex_atomic()

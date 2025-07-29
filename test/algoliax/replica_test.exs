@@ -8,11 +8,11 @@ defmodule AlgoliaxTest.ReplicaTest do
   alias Algoliax.Schemas.PeopleWithInvalidReplicas
 
   setup do
-    Algoliax.SettingsStore.set_settings(:algoliax_people_replicas, %{})
-    Algoliax.SettingsStore.set_settings(:algoliax_people_replicas_en, %{})
-    Algoliax.SettingsStore.set_settings(:algoliax_people_replicas_fr, %{})
-    Algoliax.SettingsStore.set_settings(:algoliax_people_replicas_asc, %{})
-    Algoliax.SettingsStore.set_settings(:algoliax_people_replicas_desc, %{})
+    Algoliax.SettingsStore.Agent.set_settings(:algoliax_people_replicas, %{})
+    Algoliax.SettingsStore.Agent.set_settings(:algoliax_people_replicas_en, %{})
+    Algoliax.SettingsStore.Agent.set_settings(:algoliax_people_replicas_fr, %{})
+    Algoliax.SettingsStore.Agent.set_settings(:algoliax_people_replicas_asc, %{})
+    Algoliax.SettingsStore.Agent.set_settings(:algoliax_people_replicas_desc, %{})
     :ok
   end
 

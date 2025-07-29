@@ -3,9 +3,8 @@ defmodule Algoliax.TemporaryIndexer do
   Execute save_object(s) on temporary index to keep it synchronized with main index
   """
 
-  import Algoliax.Utils, only: [index_name: 2, render_response: 1]
+  import Algoliax.Utils, only: [index_name: 2, render_response: 1, call_store: 3]
 
-  alias Algoliax.SettingsStore
   alias Algoliax.Resources.Object
 
   def run(action, module, settings, models, opts \\ []) do
@@ -18,9 +17,9 @@ defmodule Algoliax.TemporaryIndexer do
 
     index_name(module, settings)
     |> Enum.map(fn index_name ->
-      if SettingsStore.reindexing?(index_name) do
+      if call_store(settings, :reindexing?, [index_name]) do
         tmp_index_name = :"#{index_name}.tmp"
-        tmp_settings = SettingsStore.get_settings(tmp_index_name)
+        tmp_settings = call_store(settings, :get_settings, [tmp_index_name])
 
         execute(action, module, tmp_settings, models, opts)
       end
