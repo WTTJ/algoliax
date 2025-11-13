@@ -371,7 +371,7 @@ defmodule Algoliax.Indexer do
     > NOTE: filters as Map supports only `:where` and equality
     """
     @callback reindex(query :: Ecto.Query.t(), opts :: Keyword.t()) ::
-                {:ok, [Algoliax.Response.t()]} | {:ok, list(Algoliax.Responses.t())}
+                {:ok, [{:ok, Algoliax.Response.t()}]} | {:ok, list(Algoliax.Responses.t())}
 
     @doc """
     Reindex all objects ([Ecto](https://hexdocs.pm/ecto/Ecto.html) specific)
@@ -385,7 +385,7 @@ defmodule Algoliax.Indexer do
     - `:force_delete`: delete objects where `to_be_indexed?` is `false`
     """
     @callback reindex(opts :: Keyword.t()) ::
-                {:ok, [Algoliax.Response.t()]} | {:ok, list(Algoliax.Responses.t())}
+                {:ok, [{:ok, Algoliax.Response.t()}]} | {:ok, list(Algoliax.Responses.t())}
 
     @doc """
     Reindex atomically ([Ecto](https://hexdocs.pm/ecto/Ecto.html) specific)
