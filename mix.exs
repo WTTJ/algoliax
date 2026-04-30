@@ -39,7 +39,7 @@ defmodule Algoliax.MixProject do
       {:ecto_sql, "== 3.13.5", only: [:dev, :test]},
       {:postgrex, "== 0.22.0", only: [:dev, :test]},
       {:inflex, "== 2.1.0"},
-      {:credo, "== 1.7.17", only: [:dev, :test], runtime: false},
+      {:credo, "== 1.7.18", only: [:dev, :test], runtime: false},
       {:faker, "== 0.18.0", only: :test},
       {:plug_cowboy, "== 2.8.0", only: :test},
       {:mix_test_watch, "== 1.4.0", only: :dev, runtime: false},
