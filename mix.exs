@@ -31,20 +31,20 @@ defmodule Algoliax.MixProject do
 
   defp deps do
     [
-      {:hackney, "== 1.25.0"},
-      {:ssl_verify_fun, "== 1.1.7"},
-      {:jason, "== 1.4.4"},
-      {:ex_doc, "== 0.40.1", only: :dev, runtime: false, override: true},
-      {:ecto, "== 3.13.5", optional: true},
-      {:ecto_sql, "== 3.13.5", only: [:dev, :test]},
-      {:postgrex, "== 0.22.0", only: [:dev, :test]},
-      {:inflex, "== 2.1.0"},
-      {:credo, "== 1.7.18", only: [:dev, :test], runtime: false},
-      {:faker, "== 0.18.0", only: :test},
-      {:plug_cowboy, "== 2.8.0", only: :test},
-      {:mix_test_watch, "== 1.4.0", only: :dev, runtime: false},
-      {:sobelow, "== 0.14.1", only: [:dev, :test]},
-      {:mix_audit, "== 2.1.5", only: [:dev, :test], runtime: false}
+      {:hackney, "~> 1.18"},
+      {:ssl_verify_fun, "~> 1.1.7"},
+      {:jason, "~> 1.3"},
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false, override: true},
+      {:ecto, "~> 3.9", optional: true},
+      {:ecto_sql, "~> 3.9", only: [:dev, :test]},
+      {:postgrex, ">= 0.0.0", only: [:dev, :test]},
+      {:inflex, "~> 2.1.0"},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:faker, "~> 0.12", only: :test},
+      {:plug_cowboy, "~> 2.6", only: :test},
+      {:mix_test_watch, "~> 1.0", only: :dev, runtime: false},
+      {:sobelow, "~> 0.13", only: [:dev, :test]},
+      {:mix_audit, "~> 2.0", only: [:dev, :test], runtime: false}
     ]
   end
 
