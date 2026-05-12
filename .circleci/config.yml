@@ -110,7 +110,7 @@ jobs:
           DB_USERNAME: algoliax
           POSTGRES_HOST: localhost
           POSTGRES_PORT: 5432
-      - image: postgres:11.4-alpine
+      - image: postgres:18.3-alpine
         environment:
           POSTGRES_USER: algoliax
           POSTGRES_DB: algoliax_test
