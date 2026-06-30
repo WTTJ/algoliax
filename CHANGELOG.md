@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.10.1 - 2026-05-30
+## v0.10.1 - 2026-06-30
 
 - Updated `hackney` and `plug_cowboy` to fix multiple CVEs
 
