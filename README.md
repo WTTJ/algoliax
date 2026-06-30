@@ -16,7 +16,7 @@ The package can be installed by adding `:algoliax` to your list of dependencies 
 ```elixir
 def deps do
   [
-    {:algoliax, "~> 0.10.0"}
+    {:algoliax, "~> 0.10.1"}
   ]
 end
 ```
