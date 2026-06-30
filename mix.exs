@@ -41,7 +41,7 @@ defmodule Algoliax.MixProject do
       {:inflex, "~> 2.1.0"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:faker, "~> 0.12", only: :test},
-      {:plug_cowboy, "~> 2.6", only: :test},
+      {:plug_cowboy, "~> 2.9", only: :test},
       {:mix_test_watch, "~> 1.0", only: :dev, runtime: false},
       {:sobelow, "~> 0.13", only: [:dev, :test]},
       {:mix_audit, "~> 2.0", only: [:dev, :test], runtime: false}
