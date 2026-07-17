@@ -2,7 +2,7 @@ defmodule Algoliax.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/WTTJ/algoliax"
-  @version "0.10.1"
+  @version "0.11.0"
 
   def project do
     [
@@ -31,14 +31,13 @@ defmodule Algoliax.MixProject do
 
   defp deps do
     [
-      {:hackney, "~> 4.4"},
-      {:ssl_verify_fun, "~> 1.1.7"},
       {:jason, "~> 1.3"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false, override: true},
       {:ecto, "~> 3.9", optional: true},
       {:ecto_sql, "~> 3.9", only: [:dev, :test]},
       {:postgrex, ">= 0.0.0", only: [:dev, :test]},
       {:inflex, "~> 2.1.0"},
+      {:req, "~> 0.5", only: [:dev, :test]},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:faker, "~> 0.12", only: :test},
       {:plug_cowboy, "~> 2.9", only: :test},

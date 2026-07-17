@@ -17,11 +17,14 @@ defmodule Algoliax.Client do
     {method, url} = Routes.url(action, url_params, query_params, retry)
     log(action, method, url, body)
 
-    method
-    |> :hackney.request(url, request_headers(), Jason.encode!(body), [
-      :with_body,
-      recv_timeout: recv_timeout()
-    ])
+    [
+      method: method,
+      url: url,
+      headers: request_headers(),
+      body: Jason.encode!(body),
+      receive_timeout: recv_timeout()
+    ]
+    |> Algoliax.HttpClient.impl().request()
     |> case do
       {:ok, code, _headers, response} when code in 200..299 ->
         build_response(response, request)

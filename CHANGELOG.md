@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.11.0 - 2026-07-20
+
+### Breaking
+
+Algoliax no longer bundles an HTTP client. The `hackney` (and `ssl_verify_fun`)
+dependencies have been removed. You must now provide your own HTTP client by
+implementing the new `Algoliax.HttpClient` behaviour and configuring it:
+
+```elixir
+config :algoliax, :http_client, MyApp.AlgoliaHttpClient
+```
+
+This lets you reuse whichever HTTP library your application already depends on
+(`Req`, `Finch`, `hackney`, `:httpc`, ...). See the `HTTP client` section of the
+README for the contract and an example implementation.
+
 ## v0.10.1 - 2026-06-30
 
 - Updated `hackney` and `plug_cowboy` to fix multiple CVEs
