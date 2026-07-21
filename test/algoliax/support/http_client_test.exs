@@ -48,6 +48,23 @@ defmodule Algoliax.Support.HttpClientTest do
   end
 
   describe "to_result/1" do
+    test "flattens a header with multiple values into separate tuples" do
+      # Req represents headers as %{name => [values]}; normalize_headers/1 must
+      # emit one {name, value} tuple per value, not {name, [values]}.
+      result =
+        HttpClient.to_result(
+          {:ok,
+           %Req.Response{
+             status: 200,
+             headers: %{"vary" => ["Accept-Encoding", "Origin"]},
+             body: "{}"
+           }}
+        )
+
+      assert result ==
+               {:ok, 200, [{"vary", "Accept-Encoding"}, {"vary", "Origin"}], "{}"}
+    end
+
     test "passes a non-transport error through verbatim" do
       # The adapter's fixed options mean Req only returns TransportError over
       # the wire, so this defensive passthrough is covered directly rather than

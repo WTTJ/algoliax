@@ -4,11 +4,16 @@ defmodule Algoliax do
 
   ### Configuration
 
-  Algoliax needs only `:api_key` and `application_id` config. These configs can either be on config files or using environment varialble `"ALGOLIA_API_KEY"` and `"ALGOLIA_APPLICATION_ID"`.
+  Algoliax needs `:api_key`, `:application_id` and an `:http_client` config. The
+  `:api_key` and `:application_id` can either be set in config files or via the
+  environment variables `"ALGOLIA_API_KEY"` and `"ALGOLIA_APPLICATION_ID"`. The
+  `:http_client` is a module implementing the `Algoliax.HttpClient` behaviour —
+  Algoliax ships none of its own (see `Algoliax.HttpClient`).
 
       config :algoliax,
         api_key: "",
-        application_id: ""
+        application_id: "",
+        http_client: MyApp.AlgoliaHttpClient
   """
 
   @doc """

@@ -29,5 +29,19 @@ defmodule Algoliax.HttpClientTest do
         Algoliax.HttpClient.impl()
       end
     end
+
+    test "raises a distinct error when configured with a non-module value" do
+      Application.put_env(:algoliax, :http_client, nil)
+
+      assert_raise RuntimeError, ~r/Invalid HTTP client configured for Algoliax/, fn ->
+        Algoliax.HttpClient.impl()
+      end
+
+      Application.put_env(:algoliax, :http_client, "not a module")
+
+      assert_raise RuntimeError, ~r/Invalid HTTP client configured for Algoliax/, fn ->
+        Algoliax.HttpClient.impl()
+      end
+    end
   end
 end

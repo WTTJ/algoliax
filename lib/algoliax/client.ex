@@ -21,7 +21,7 @@ defmodule Algoliax.Client do
       method: method,
       url: url,
       headers: request_headers(),
-      body: Jason.encode!(body),
+      body: encode_body(body),
       receive_timeout: recv_timeout()
     ]
     |> Algoliax.HttpClient.impl().request()
@@ -89,6 +89,13 @@ defmodule Algoliax.Client do
 
     Logger.debug(message)
   end
+
+  # Bodyless requests (get_object, get_settings, task, ...) never set :body, so
+  # pass `nil` straight through rather than encoding it to the "null" binary —
+  # this keeps the `Algoliax.HttpClient` `body: binary() | nil` contract honest
+  # and lets implementations special-case bodyless requests with `opts[:body]`.
+  defp encode_body(nil), do: nil
+  defp encode_body(body), do: Jason.encode!(body)
 
   defp recv_timeout() do
     Application.get_env(:algoliax, :recv_timeout, 5000)

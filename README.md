@@ -25,7 +25,7 @@ If using with Ecto schemas, Algoliax requires `:ecto`.
 
 ## Configuration
 
-Algoliax needs only `:api_key` and `:application_id` config. These configs can either be on config files or using environment variables `ALGOLIA_API_KEY` and `ALGOLIA_APPLICATION_ID`.
+Algoliax needs `:api_key`, `:application_id` and an `:http_client` config. The `:api_key` and `:application_id` can either be set in config files or using the environment variables `ALGOLIA_API_KEY` and `ALGOLIA_APPLICATION_ID`. The `:http_client` is a module implementing the `Algoliax.HttpClient` behaviour — Algoliax ships none of its own (see the [HTTP client](#http-client) section below).
 
 ```elixir
 config :algoliax,
@@ -47,6 +47,12 @@ whichever HTTP library your application already depends on (`Req`, `Finch`,
 config :algoliax, :http_client, MyApp.AlgoliaHttpClient
 ```
 
+> **Verify TLS certificates.** Algoliax sends your Algolia API key as a header on
+> every request, so your implementation must verify TLS certificates.
+> `Req`/`Finch`/`Mint` do so by default, but Erlang's `:httpc`/`:ssl` default to
+> `verify_none` — if you build an adapter on those, pass
+> `ssl: [verify: :verify_peer, ...]` explicitly.
+
 The behaviour has a single `request/1` callback. It receives a keyword list
 describing the request and must return `{:ok, status, headers, body}` on any
 completed HTTP exchange (the `body` is a raw binary — Algoliax decodes the JSON
@@ -60,6 +66,14 @@ Supported options in the keyword list:
 - `:headers` — list of `{name, value}` tuples
 - `:body` — request body as a binary (already JSON-encoded), or `nil`
 - `:receive_timeout` — response timeout in milliseconds
+
+Your implementation **must disable any retry and redirect-following** its
+underlying HTTP library does by default. Algoliax retries transport failures
+itself (rotating to a different Algolia host each time) and routes `3xx`/`4xx`
+responses to its own error handling — a client that retries or follows
+redirects on its own would hammer the already-failed host or hide those
+responses. The reference adapter below sets `Req`'s `retry: false` and
+`redirect: false`.
 
 ### Example implementation (using `Req`)
 

@@ -10,6 +10,13 @@ defmodule Algoliax.HttpClient do
   This keeps you free to use whichever HTTP library you already depend on
   (`Req`, `Finch`, `hackney`, `:httpc`, ...).
 
+  > #### Verify TLS certificates {: .warning}
+  >
+  > Algoliax sends your Algolia API key as a header on every request. Make sure
+  > your implementation verifies TLS certificates. `Req`/`Finch`/`Mint` do so by
+  > default, but Erlang's `:httpc`/`:ssl` default to `verify_none` — if you build
+  > an adapter on those, pass `ssl: [verify: :verify_peer, ...]` explicitly.
+
   ## Implementing the behaviour
 
       defmodule MyApp.AlgoliaHttpClient do
@@ -33,6 +40,20 @@ defmodule Algoliax.HttpClient do
     * `:receive_timeout` - response timeout in milliseconds
 
   Unknown options should be silently ignored.
+
+  ## Retries and redirects
+
+  Implementations **must disable any retry and redirect-following** their
+  underlying HTTP library performs by default:
+
+    * Algoliax already retries transport failures itself, rotating to a
+      different Algolia host on each attempt. A client that also retries would
+      hammer the same already-failed host instead of letting Algoliax rotate.
+    * Algoliax routes `3xx`/`4xx` status codes to its own error handling, so a
+      client that transparently follows redirects would hide those responses.
+
+  The shipped reference adapter does this with `Req`'s `retry: false` and
+  `redirect: false` options; use the equivalent for your library.
 
   ## Return value
 
@@ -76,13 +97,29 @@ defmodule Algoliax.HttpClient do
   @doc """
   Returns the configured HTTP client implementation.
 
-  Raises a helpful error if none is configured.
+  Raises a helpful error if none is configured, or if the configured value is
+  not a module.
   """
   @spec impl() :: module()
   def impl do
     case Application.fetch_env(:algoliax, :http_client) do
-      {:ok, module} ->
+      {:ok, module} when is_atom(module) and not is_nil(module) ->
         module
+
+      {:ok, other} ->
+        raise """
+        Invalid HTTP client configured for Algoliax.
+
+        Expected a module implementing the `Algoliax.HttpClient` behaviour, got:
+
+            #{inspect(other)}
+
+        Configure it like:
+
+            config :algoliax, :http_client, MyApp.AlgoliaHttpClient
+
+        See the `Algoliax.HttpClient` documentation for the expected contract.
+        """
 
       :error ->
         raise """

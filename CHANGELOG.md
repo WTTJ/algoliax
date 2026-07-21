@@ -16,6 +16,15 @@ This lets you reuse whichever HTTP library your application already depends on
 (`Req`, `Finch`, `hackney`, `:httpc`, ...). See the `HTTP client` section of the
 README for the contract and an example implementation.
 
+Two things your implementation must handle:
+
+- **Disable its own retry and redirect-following.** Algoliax retries transport
+  failures itself (rotating Algolia hosts) and routes `3xx`/`4xx` responses to
+  its own error handling.
+- **Verify TLS certificates.** The Algolia API key is sent on every request.
+  `Req`/`Finch`/`Mint` verify by default; `:httpc`/`:ssl` default to
+  `verify_none` and need `ssl: [verify: :verify_peer, ...]`.
+
 ## v0.10.1 - 2026-06-30
 
 - Updated `hackney` and `plug_cowboy` to fix multiple CVEs
