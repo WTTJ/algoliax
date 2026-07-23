@@ -22,6 +22,26 @@ defmodule Algoliax.CapturingHttpClient do
   end
 end
 
+defmodule Algoliax.DecodedBodyHttpClient do
+  @moduledoc false
+  @behaviour Algoliax.HttpClient
+
+  # Correctly-shaped 4-tuple with a valid 2xx status, but the body is a decoded
+  # map instead of a raw binary — the classic "forgot decode_body: false" mistake.
+  @impl Algoliax.HttpClient
+  def request(_opts), do: {:ok, 200, [], %{"objectID" => "known"}}
+end
+
+defmodule Algoliax.TransportErrorHttpClient do
+  @moduledoc false
+  @behaviour Algoliax.HttpClient
+
+  # Always reports a transport-level failure, so the Client-level retry loop
+  # (host rotation, then give-up) is exercised end to end.
+  @impl Algoliax.HttpClient
+  def request(_opts), do: {:error, :econnrefused}
+end
+
 defmodule Algoliax.ClientTest do
   use Algoliax.RequestCase
 
@@ -31,12 +51,7 @@ defmodule Algoliax.ClientTest do
     Application.put_env(:algoliax, :http_client, Algoliax.CapturingHttpClient)
     Application.put_env(:algoliax, :api_key, "api_key")
 
-    on_exit(fn ->
-      case original do
-        {:ok, value} -> Application.put_env(:algoliax, :http_client, value)
-        :error -> Application.delete_env(:algoliax, :http_client)
-      end
-    end)
+    on_exit(fn -> restore(:http_client, original) end)
 
     # get_object never sets :body — it must be forwarded as nil, not "null".
     Algoliax.Client.request(
@@ -85,24 +100,12 @@ defmodule Algoliax.ClientTest do
     assert opts[:receive_timeout] == 1234
   end
 
-  defp restore(key, original) do
-    case original do
-      {:ok, value} -> Application.put_env(:algoliax, key, value)
-      :error -> Application.delete_env(:algoliax, key)
-    end
-  end
-
   test "a non-conforming http_client return raises instead of silently retrying" do
     original = Application.fetch_env(:algoliax, :http_client)
     Application.put_env(:algoliax, :http_client, Algoliax.WrongShapeHttpClient)
     Application.put_env(:algoliax, :api_key, "api_key")
 
-    on_exit(fn ->
-      case original do
-        {:ok, value} -> Application.put_env(:algoliax, :http_client, value)
-        :error -> Application.delete_env(:algoliax, :http_client)
-      end
-    end)
+    on_exit(fn -> restore(:http_client, original) end)
 
     assert_raise Algoliax.HttpClientContractError, fn ->
       Algoliax.Client.request(
@@ -110,6 +113,34 @@ defmodule Algoliax.ClientTest do
         0
       )
     end
+  end
+
+  test "a well-shaped response with a non-binary body raises the contract error, not a decode crash" do
+    original = Application.fetch_env(:algoliax, :http_client)
+    Application.put_env(:algoliax, :http_client, Algoliax.DecodedBodyHttpClient)
+    Application.put_env(:algoliax, :api_key, "api_key")
+
+    on_exit(fn -> restore(:http_client, original) end)
+
+    assert_raise Algoliax.HttpClientContractError, fn ->
+      Algoliax.Client.request(
+        %{action: :get_object, url_params: [index_name: :index_name, object_id: "known"]},
+        0
+      )
+    end
+  end
+
+  test "a transport {:error, reason} return is retried and gives up after 3 attempts" do
+    original = Application.fetch_env(:algoliax, :http_client)
+    Application.put_env(:algoliax, :http_client, Algoliax.TransportErrorHttpClient)
+    Application.put_env(:algoliax, :api_key, "api_key")
+
+    on_exit(fn -> restore(:http_client, original) end)
+
+    assert Algoliax.Client.request(
+             %{action: :get_object, url_params: [index_name: :index_name, object_id: "known"]},
+             0
+           ) == {:error, "Failed after 3 attempts"}
   end
 
   test "test retries" do
@@ -144,5 +175,12 @@ defmodule Algoliax.ClientTest do
         0
       )
     end)
+  end
+
+  defp restore(key, original) do
+    case original do
+      {:ok, value} -> Application.put_env(:algoliax, key, value)
+      :error -> Application.delete_env(:algoliax, key)
+    end
   end
 end

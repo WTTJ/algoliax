@@ -25,27 +25,43 @@ defmodule Algoliax.Client do
       receive_timeout: recv_timeout()
     ]
     |> Algoliax.HttpClient.impl().request()
-    |> case do
-      {:ok, code, _headers, response} when code in 200..299 ->
-        build_response(response, request)
+    |> handle_result(action, request, retry)
+  end
 
-      {:ok, code, _, response} when code in 300..499 ->
-        handle_error(code, response, action, request)
+  defp handle_result({:ok, code, _headers, response}, _action, request, _retry)
+       when code in 200..299 and is_binary(response) do
+    build_response(response, request)
+  end
 
-      # Completed exchange with any other status (e.g. 5xx): retry against the
-      # next Algolia host — unchanged from the previous hackney-based behaviour.
-      {:ok, code, _, _} = result when is_integer(code) ->
-        retry_after_error(request, retry, result)
+  defp handle_result({:ok, code, _headers, response}, action, request, _retry)
+       when code in 300..499 and is_binary(response) do
+    handle_error(code, response, action, request)
+  end
 
-      # Transport-level failure: retry against the next Algolia host.
-      {:error, _reason} = error ->
-        retry_after_error(request, retry, error)
+  # Right tuple shape and integer status, but a non-binary body violates the
+  # contract (e.g. a decoded map from forgetting `decode_body: false`). Raise
+  # rather than letting it fall into the retry clause below and be masked.
+  defp handle_result({:ok, code, _headers, response} = result, _action, _request, _retry)
+       when is_integer(code) and not is_binary(response) do
+    raise Algoliax.HttpClientContractError, result
+  end
 
-      # Anything else violates the Algoliax.HttpClient contract. Fail loudly
-      # instead of masking a mis-implemented client as a transport failure.
-      other ->
-        raise Algoliax.HttpClientContractError, other
-    end
+  # Completed exchange with any other status (e.g. 5xx): retry against the next
+  # Algolia host — unchanged from the previous hackney-based behaviour.
+  defp handle_result({:ok, code, _, _} = result, _action, request, retry)
+       when is_integer(code) do
+    retry_after_error(request, retry, result)
+  end
+
+  # Transport-level failure: retry against the next Algolia host.
+  defp handle_result({:error, _reason} = error, _action, request, retry) do
+    retry_after_error(request, retry, error)
+  end
+
+  # Anything else violates the Algoliax.HttpClient contract. Fail loudly instead
+  # of masking a mis-implemented client as a transport failure.
+  defp handle_result(other, _action, _request, _retry) do
+    raise Algoliax.HttpClientContractError, other
   end
 
   defp retry_after_error(request, retry, logged) do

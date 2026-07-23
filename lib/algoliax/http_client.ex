@@ -107,7 +107,9 @@ defmodule Algoliax.HttpClient do
   Returns the configured HTTP client implementation.
 
   Raises a helpful error if none is configured, or if the configured value is
-  not a module.
+  clearly not a module name (`nil`, a boolean, or a non-atom). The module is not
+  loaded or otherwise validated here — a typo'd or non-implementing module name
+  still passes and fails when first called.
   """
   @spec impl() :: module()
   def impl do
