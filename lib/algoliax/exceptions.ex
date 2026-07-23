@@ -99,11 +99,28 @@ defmodule Algoliax.InvalidReplicaConfigurationError do
 end
 
 defmodule Algoliax.HttpClientContractError do
-  @moduledoc "Raise when the configured HTTP client returns a value outside the `Algoliax.HttpClient` contract"
+  @moduledoc """
+  Raise when the configured HTTP client returns a value outside the `Algoliax.HttpClient` contract.
+  """
 
   defexception [:message]
 
   @impl true
+  def exception({:ok, _status, _headers, body} = returned) when not is_binary(body) do
+    %__MODULE__{
+      message: """
+      The configured Algoliax HTTP client returned a non-binary response body.
+
+      Algoliax decodes the JSON itself, so the `body` must be a raw binary. Got:
+
+          #{inspect(returned)}
+
+      Ensure your client does not decode the body (e.g. set Req's `decode_body: false`).
+      See the `Algoliax.HttpClient` documentation for the expected return contract.
+      """
+    }
+  end
+
   def exception(returned) do
     %__MODULE__{
       message: """

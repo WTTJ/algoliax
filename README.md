@@ -77,8 +77,8 @@ responses. The reference adapter below sets `Req`'s `retry: false` and
 
 ### Example implementation (using `Req`)
 
-This is the `Req`-based adapter Algoliax uses in its own test suite, and the
-reference implementation:
+The reference implementation below mirrors the `Req`-based adapter Algoliax
+uses in its own test suite:
 
 ```elixir
 defmodule MyApp.AlgoliaHttpClient do
@@ -87,29 +87,36 @@ defmodule MyApp.AlgoliaHttpClient do
   @impl Algoliax.HttpClient
   def request(opts) do
     opts
-    |> Keyword.take([:method, :url, :headers, :body, :receive_timeout])
-    |> Keyword.put(:decode_body, false)
-    |> Keyword.put(:retry, false)
-    |> Keyword.put(:redirect, false)
+    |> build_req_opts()
     |> Req.request()
     |> to_result()
   end
 
+  defp build_req_opts(opts) do
+    opts
+    |> Keyword.take([:method, :url, :headers, :body, :receive_timeout])
+    |> Keyword.put(:decode_body, false)
+    |> Keyword.put(:retry, false)
+    |> Keyword.put(:redirect, false)
+  end
+
   defp to_result({:ok, %Req.Response{status: status, headers: headers, body: body}}) do
-    {:ok, status, flatten_headers(headers), body}
+    {:ok, status, normalize_headers(headers), body}
   end
 
   defp to_result({:error, %Req.TransportError{reason: reason}}), do: {:error, reason}
   defp to_result({:error, reason}), do: {:error, reason}
 
   # Req returns headers as %{name => [values]}; flatten to {name, value} tuples.
-  defp flatten_headers(headers) do
+  defp normalize_headers(headers) do
     Enum.flat_map(headers, fn {name, values} -> Enum.map(values, &{name, &1}) end)
   end
 end
 ```
 
-The exact source used by the test suite lives at
+The exact adapter used by the test suite — which additionally exposes
+`to_result/1` as a public function so its error branches can be unit-tested —
+lives at
 [`test/support/http_client.ex`](https://github.com/WTTJ/algoliax/blob/main/test/support/http_client.ex)
 (resolves once this is merged to `main`).
 

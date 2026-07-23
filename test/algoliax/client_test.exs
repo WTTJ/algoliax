@@ -122,7 +122,7 @@ defmodule Algoliax.ClientTest do
 
     on_exit(fn -> restore(:http_client, original) end)
 
-    assert_raise Algoliax.HttpClientContractError, fn ->
+    assert_raise Algoliax.HttpClientContractError, ~r/must be a raw binary/, fn ->
       Algoliax.Client.request(
         %{action: :get_object, url_params: [index_name: :index_name, object_id: "known"]},
         0
