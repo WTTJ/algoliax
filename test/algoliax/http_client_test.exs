@@ -43,5 +43,15 @@ defmodule Algoliax.HttpClientTest do
         Algoliax.HttpClient.impl()
       end
     end
+
+    test "raises the invalid error for a boolean value" do
+      # true/false are atoms; without the is_boolean guard they would slip
+      # through as a "module" and fail later with UndefinedFunctionError.
+      Application.put_env(:algoliax, :http_client, true)
+
+      assert_raise RuntimeError, ~r/Invalid HTTP client configured for Algoliax/, fn ->
+        Algoliax.HttpClient.impl()
+      end
+    end
   end
 end

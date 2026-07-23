@@ -25,6 +25,10 @@ Two things your implementation must handle:
   `Req`/`Finch`/`Mint` verify by default; `:httpc`/`:ssl` default to
   `verify_none` and need `ssl: [verify: :verify_peer, ...]`.
 
+Because Algoliax no longer bundles an HTTP/TLS stack, securing that transport —
+keeping it patched against CVEs and verifying TLS — is now your application's
+responsibility rather than Algoliax's.
+
 ## v0.10.1 - 2026-06-30
 
 - Updated `hackney` and `plug_cowboy` to fix multiple CVEs

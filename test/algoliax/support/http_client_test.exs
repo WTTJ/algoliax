@@ -42,8 +42,9 @@ defmodule Algoliax.Support.HttpClientTest do
           receive_timeout: 100
         )
 
-      assert {:error, reason} = result
-      refute match?(%Req.TransportError{}, reason)
+      # Pin the unwrapped reason (not just "it's no longer a struct") so a
+      # regression in to_result/1's unwrapping surfaces a different term here.
+      assert result == {:error, :econnrefused}
     end
   end
 

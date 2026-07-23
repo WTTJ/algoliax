@@ -77,9 +77,41 @@ responses. The reference adapter below sets `Req`'s `retry: false` and
 
 ### Example implementation (using `Req`)
 
-For a complete, working example see the `Req`-based adapter used by Algoliax's
-own test suite:
-[`test/support/http_client.ex`](https://github.com/WTTJ/algoliax/blob/main/test/support/http_client.ex).
+This is the `Req`-based adapter Algoliax uses in its own test suite, and the
+reference implementation:
+
+```elixir
+defmodule MyApp.AlgoliaHttpClient do
+  @behaviour Algoliax.HttpClient
+
+  @impl Algoliax.HttpClient
+  def request(opts) do
+    opts
+    |> Keyword.take([:method, :url, :headers, :body, :receive_timeout])
+    |> Keyword.put(:decode_body, false)
+    |> Keyword.put(:retry, false)
+    |> Keyword.put(:redirect, false)
+    |> Req.request()
+    |> to_result()
+  end
+
+  defp to_result({:ok, %Req.Response{status: status, headers: headers, body: body}}) do
+    {:ok, status, flatten_headers(headers), body}
+  end
+
+  defp to_result({:error, %Req.TransportError{reason: reason}}), do: {:error, reason}
+  defp to_result({:error, reason}), do: {:error, reason}
+
+  # Req returns headers as %{name => [values]}; flatten to {name, value} tuples.
+  defp flatten_headers(headers) do
+    Enum.flat_map(headers, fn {name, values} -> Enum.map(values, &{name, &1}) end)
+  end
+end
+```
+
+The exact source used by the test suite lives at
+[`test/support/http_client.ex`](https://github.com/WTTJ/algoliax/blob/main/test/support/http_client.ex)
+(resolves once this is merged to `main`).
 
 ## Usage
 

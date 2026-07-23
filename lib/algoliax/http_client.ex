@@ -73,8 +73,17 @@ defmodule Algoliax.HttpClient do
   >
   > The `request/1` contract intentionally mirrors a generic
   > `{:ok, status, headers, body}` / `{:error, reason}` shape, so an existing
-  > shared HTTP-client behaviour with the same signature can be configured
-  > directly.
+  > shared HTTP-client behaviour with the same signature is a good starting
+  > point. A matching signature is **necessary but not sufficient**, though —
+  > before configuring such a module directly, confirm it also:
+  >
+  >   * returns the exact `{:ok, status, headers, body}` 4-tuple (a raw binary
+  >     body, not a decoded map or a wrapper struct), and
+  >   * disables its own retry and redirect-following (see *Retries and
+  >     redirects* above).
+  >
+  > A return value outside the contract raises `Algoliax.HttpClientContractError`
+  > rather than being silently retried, so a mismatch surfaces immediately.
   """
 
   @type method :: :get | :post | :put | :delete
@@ -103,7 +112,7 @@ defmodule Algoliax.HttpClient do
   @spec impl() :: module()
   def impl do
     case Application.fetch_env(:algoliax, :http_client) do
-      {:ok, module} when is_atom(module) and not is_nil(module) ->
+      {:ok, module} when is_atom(module) and not is_nil(module) and not is_boolean(module) ->
         module
 
       {:ok, other} ->

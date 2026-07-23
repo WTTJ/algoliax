@@ -32,10 +32,25 @@ defmodule Algoliax.Client do
       {:ok, code, _, response} when code in 300..499 ->
         handle_error(code, response, action, request)
 
-      error ->
-        Logger.debug("#{inspect(error)}")
-        request(request, retry + 1)
+      # Completed exchange with any other status (e.g. 5xx): retry against the
+      # next Algolia host — unchanged from the previous hackney-based behaviour.
+      {:ok, code, _, _} = result when is_integer(code) ->
+        retry_after_error(request, retry, result)
+
+      # Transport-level failure: retry against the next Algolia host.
+      {:error, _reason} = error ->
+        retry_after_error(request, retry, error)
+
+      # Anything else violates the Algoliax.HttpClient contract. Fail loudly
+      # instead of masking a mis-implemented client as a transport failure.
+      other ->
+        raise Algoliax.HttpClientContractError, other
     end
+  end
+
+  defp retry_after_error(request, retry, logged) do
+    Logger.debug("#{inspect(logged)}")
+    request(request, retry + 1)
   end
 
   defp handle_error(404, response, action, request) when action in [:get_settings, :get_object] do

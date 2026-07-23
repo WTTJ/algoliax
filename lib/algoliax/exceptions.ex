@@ -98,6 +98,28 @@ defmodule Algoliax.InvalidReplicaConfigurationError do
   end
 end
 
+defmodule Algoliax.HttpClientContractError do
+  @moduledoc "Raise when the configured HTTP client returns a value outside the `Algoliax.HttpClient` contract"
+
+  defexception [:message]
+
+  @impl true
+  def exception(returned) do
+    %__MODULE__{
+      message: """
+      The configured Algoliax HTTP client returned a value that does not match the
+      `Algoliax.HttpClient` contract.
+
+      Expected `{:ok, status, headers, body}` or `{:error, reason}`, got:
+
+          #{inspect(returned)}
+
+      See the `Algoliax.HttpClient` documentation for the expected return contract.
+      """
+    }
+  end
+end
+
 defmodule Algoliax.AlgoliaApiError do
   @moduledoc "Raise Algolia API error"
 
