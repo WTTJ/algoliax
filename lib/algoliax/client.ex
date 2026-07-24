@@ -17,22 +17,56 @@ defmodule Algoliax.Client do
     {method, url} = Routes.url(action, url_params, query_params, retry)
     log(action, method, url, body)
 
-    method
-    |> :hackney.request(url, request_headers(), Jason.encode!(body), [
-      :with_body,
-      recv_timeout: recv_timeout()
-    ])
-    |> case do
-      {:ok, code, _headers, response} when code in 200..299 ->
-        build_response(response, request)
+    [
+      method: method,
+      url: url,
+      headers: request_headers(),
+      body: encode_body(body),
+      receive_timeout: recv_timeout()
+    ]
+    |> Algoliax.HttpClient.impl().request()
+    |> handle_result(action, request, retry)
+  end
 
-      {:ok, code, _, response} when code in 300..499 ->
-        handle_error(code, response, action, request)
+  defp handle_result({:ok, code, _headers, response}, _action, request, _retry)
+       when code in 200..299 and is_binary(response) do
+    build_response(response, request)
+  end
 
-      error ->
-        Logger.debug("#{inspect(error)}")
-        request(request, retry + 1)
-    end
+  defp handle_result({:ok, code, _headers, response}, action, request, _retry)
+       when code in 300..499 and is_binary(response) do
+    handle_error(code, response, action, request)
+  end
+
+  # Right tuple shape and integer status, but a non-binary body violates the
+  # contract (e.g. a decoded map from forgetting `decode_body: false`). Raise
+  # rather than letting it fall into the retry clause below and be masked.
+  defp handle_result({:ok, code, _headers, response} = result, _action, _request, _retry)
+       when is_integer(code) and not is_binary(response) do
+    raise Algoliax.HttpClientContractError, result
+  end
+
+  # Completed exchange with any other status (e.g. 5xx): retry against the next
+  # Algolia host — unchanged from the previous hackney-based behaviour.
+  defp handle_result({:ok, code, _, _} = result, _action, request, retry)
+       when is_integer(code) do
+    retry_after_error(request, retry, result)
+  end
+
+  # Transport-level failure: retry against the next Algolia host.
+  defp handle_result({:error, _reason} = error, _action, request, retry) do
+    retry_after_error(request, retry, error)
+  end
+
+  # Anything else violates the Algoliax.HttpClient contract. Fail loudly instead
+  # of masking a mis-implemented client as a transport failure.
+  defp handle_result(other, _action, _request, _retry) do
+    raise Algoliax.HttpClientContractError, other
+  end
+
+  defp retry_after_error(request, retry, logged) do
+    Logger.debug("#{inspect(logged)}")
+    request(request, retry + 1)
   end
 
   defp handle_error(404, response, action, request) when action in [:get_settings, :get_object] do
@@ -86,6 +120,13 @@ defmodule Algoliax.Client do
 
     Logger.debug(message)
   end
+
+  # Bodyless requests (get_object, get_settings, task, ...) never set :body, so
+  # pass `nil` straight through rather than encoding it to the "null" binary —
+  # this keeps the `Algoliax.HttpClient` `body: binary() | nil` contract honest
+  # and lets implementations special-case bodyless requests with `opts[:body]`.
+  defp encode_body(nil), do: nil
+  defp encode_body(body), do: Jason.encode!(body)
 
   defp recv_timeout() do
     Application.get_env(:algoliax, :recv_timeout, 5000)

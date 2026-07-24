@@ -1,5 +1,39 @@
 # Changelog
 
+## v0.11.0 - 2026-07-20
+
+### Breaking
+
+Algoliax no longer bundles an HTTP client. The `hackney` (and `ssl_verify_fun`)
+dependencies have been removed. You must now provide your own HTTP client by
+implementing the new `Algoliax.HttpClient` behaviour and configuring it:
+
+```elixir
+config :algoliax, :http_client, MyApp.AlgoliaHttpClient
+```
+
+This lets you reuse whichever HTTP library your application already depends on
+(`Req`, `Finch`, `hackney`, `:httpc`, ...). See the `HTTP client` section of the
+README for the contract and an example implementation.
+
+Two things your implementation must handle:
+
+- **Disable its own retry and redirect-following.** Algoliax retries transport
+  failures itself (rotating Algolia hosts) and routes `3xx`/`4xx` responses to
+  its own error handling.
+- **Verify TLS certificates.** The Algolia API key is sent on every request.
+  `Req`/`Finch`/`Mint` verify by default; `:httpc`/`:ssl` default to
+  `verify_none` and need `ssl: [verify: :verify_peer, ...]`.
+
+The request `body` is `binary() | nil`: Algoliax encodes the JSON itself, and
+bodyless requests (`get_object`, `get_settings`, delete/clear tasks, ...) now
+forward `body: nil` rather than the literal `"null"` the bundled client used to
+send. Adapters can special-case bodyless requests via `opts[:body]`.
+
+Because Algoliax no longer bundles an HTTP/TLS stack, securing that transport —
+keeping it patched against CVEs and verifying TLS — is now your application's
+responsibility rather than Algoliax's.
+
 ## v0.10.1 - 2026-06-30
 
 - Updated `hackney` and `plug_cowboy` to fix multiple CVEs

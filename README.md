@@ -16,7 +16,7 @@ The package can be installed by adding `:algoliax` to your list of dependencies 
 ```elixir
 def deps do
   [
-    {:algoliax, "~> 0.10.1"}
+    {:algoliax, "~> 0.11.0"}
   ]
 end
 ```
@@ -25,15 +25,100 @@ If using with Ecto schemas, Algoliax requires `:ecto`.
 
 ## Configuration
 
-Algoliax needs only `:api_key` and `:application_id` config. These configs can either be on config files or using environment variables `ALGOLIA_API_KEY` and `ALGOLIA_APPLICATION_ID`.
+Algoliax needs `:api_key`, `:application_id` and an `:http_client` config. The `:api_key` and `:application_id` can either be set in config files or using the environment variables `ALGOLIA_API_KEY` and `ALGOLIA_APPLICATION_ID`. The `:http_client` is a module implementing the `Algoliax.HttpClient` behaviour — Algoliax ships none of its own (see the [HTTP client](#http-client) section below).
 
 ```elixir
 config :algoliax,
   api_key: "<API_KEY>",
   application_id: "<APPLICATION_ID>",
   batch_size: 500,
-  recv_timeout: 5000
+  recv_timeout: 5000,
+  http_client: MyApp.AlgoliaHttpClient
 ```
+
+## HTTP client
+
+Algoliax ships **no** HTTP client of its own. You provide one so you can reuse
+whichever HTTP library your application already depends on (`Req`, `Finch`,
+`hackney`, `:httpc`, ...). Configure a module implementing the
+`Algoliax.HttpClient` behaviour:
+
+```elixir
+config :algoliax, :http_client, MyApp.AlgoliaHttpClient
+```
+
+> **Verify TLS certificates.** Algoliax sends your Algolia API key as a header on
+> every request, so your implementation must verify TLS certificates.
+> `Req`/`Finch`/`Mint` do so by default, but Erlang's `:httpc`/`:ssl` default to
+> `verify_none` — if you build an adapter on those, pass
+> `ssl: [verify: :verify_peer, ...]` explicitly.
+
+The behaviour has a single `request/1` callback. It receives a keyword list
+describing the request and must return `{:ok, status, headers, body}` on any
+completed HTTP exchange (the `body` is a raw binary — Algoliax decodes the JSON
+itself), or `{:error, reason}` on a transport failure so Algoliax can retry
+against Algolia's retry hosts.
+
+Supported options in the keyword list:
+
+- `:method` — HTTP verb as an atom (`:get`, `:post`, `:put`, `:delete`)
+- `:url` — full URL string (query parameters already appended)
+- `:headers` — list of `{name, value}` tuples
+- `:body` — request body as a binary (already JSON-encoded), or `nil`
+- `:receive_timeout` — response timeout in milliseconds
+
+Your implementation **must disable any retry and redirect-following** its
+underlying HTTP library does by default. Algoliax retries transport failures
+itself (rotating to a different Algolia host each time) and routes `3xx`/`4xx`
+responses to its own error handling — a client that retries or follows
+redirects on its own would hammer the already-failed host or hide those
+responses. The reference adapter below sets `Req`'s `retry: false` and
+`redirect: false`.
+
+### Example implementation (using `Req`)
+
+The reference implementation below mirrors the `Req`-based adapter Algoliax
+uses in its own test suite:
+
+```elixir
+defmodule MyApp.AlgoliaHttpClient do
+  @behaviour Algoliax.HttpClient
+
+  @impl Algoliax.HttpClient
+  def request(opts) do
+    opts
+    |> build_req_opts()
+    |> Req.request()
+    |> to_result()
+  end
+
+  defp build_req_opts(opts) do
+    opts
+    |> Keyword.take([:method, :url, :headers, :body, :receive_timeout])
+    |> Keyword.put(:decode_body, false)
+    |> Keyword.put(:retry, false)
+    |> Keyword.put(:redirect, false)
+  end
+
+  defp to_result({:ok, %Req.Response{status: status, headers: headers, body: body}}) do
+    {:ok, status, normalize_headers(headers), body}
+  end
+
+  defp to_result({:error, %Req.TransportError{reason: reason}}), do: {:error, reason}
+  defp to_result({:error, reason}), do: {:error, reason}
+
+  # Req returns headers as %{name => [values]}; flatten to {name, value} tuples.
+  defp normalize_headers(headers) do
+    Enum.flat_map(headers, fn {name, values} -> Enum.map(values, &{name, &1}) end)
+  end
+end
+```
+
+The exact adapter used by the test suite — which additionally exposes
+`to_result/1` as a public function so its error branches can be unit-tested —
+lives at
+[`test/support/http_client.ex`](https://github.com/WTTJ/algoliax/blob/main/test/support/http_client.ex)
+(resolves once this is merged to `main`).
 
 ## Usage
 
