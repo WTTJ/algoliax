@@ -37,12 +37,12 @@ defmodule Algoliax.MixProject do
       {:ecto_sql, "~> 3.9", only: [:dev, :test]},
       {:postgrex, ">= 0.0.0", only: [:dev, :test]},
       {:inflex, "~> 2.1.0"},
-      {:req, "~> 0.5", only: :test},
+      {:req, "~> 0.7", only: :test},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
-      {:faker, "~> 0.12", only: :test},
+      {:faker, "~> 0.19", only: :test},
       {:plug_cowboy, "~> 2.9", only: :test},
       {:mix_test_watch, "~> 1.0", only: :dev, runtime: false},
-      {:sobelow, "~> 0.13", only: [:dev, :test]},
+      {:sobelow, "~> 0.15", only: [:dev, :test]},
       {:mix_audit, "~> 2.0", only: [:dev, :test], runtime: false}
     ]
   end
