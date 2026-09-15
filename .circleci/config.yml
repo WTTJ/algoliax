@@ -4,7 +4,7 @@ defaults: &defaults
 parameters:
   elixir_base_image:
     type: string
-    default: cimg/elixir:1.15.5-erlang-26.0.2
+    default: cimg/elixir:1.18.5-erlang-27.3.4
   cache_version:
     type: string
     default: v2
