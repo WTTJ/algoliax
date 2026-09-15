@@ -15,8 +15,8 @@ jobs:
     - name: Set up Elixir
       uses: erlef/setup-beam@v1
       with:
-        elixir-version: '1.17.2'
-        otp-version: '26.2.5.2'
+        elixir-version: '1.18.5'
+        otp-version: '27.3.4'
 
     - name: Install dependencies
       run: |
