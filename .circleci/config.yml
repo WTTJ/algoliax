@@ -98,8 +98,8 @@ jobs:
       - store_artifacts:
           path: sobelow.txt
       - run:
-          name: Run mix audit
-          command: mix deps.audit --format human
+          name: Run dependencies audit
+          command: mix hex.audit
 
   test:
     <<: *defaults
