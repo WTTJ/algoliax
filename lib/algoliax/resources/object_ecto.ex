@@ -6,7 +6,8 @@ if Code.ensure_loaded?(Ecto) do
     import Algoliax.Client, only: [request: 1]
     import Algoliax.Utils, only: [index_name: 2, schemas: 2, default_filters: 2]
 
-    alias Algoliax.Resources.Object
+    alias Algoliax.Resources.{Index, Object}
+    alias Algoliax.SettingsStore
 
     def reindex(module, settings, %Ecto.Query{} = query, opts) do
       repo = Algoliax.UtilsEcto.repo(settings)
@@ -86,25 +87,26 @@ if Code.ensure_loaded?(Ecto) do
         tmp_settings =
           settings |> Keyword.put(:index_name, tmp_index_name) |> Keyword.delete(:replicas)
 
-        Algoliax.SettingsStore.start_reindexing(index_name)
+        SettingsStore.start_reindexing(index_name)
 
         try do
-          reindex(module, tmp_settings, nil, [])
+          _ = reindex(module, tmp_settings, nil, [])
 
-          request(%{
-            action: :move_index,
-            url_params: [index_name: tmp_index_name],
-            body: %{
-              operation: "move",
-              destination: "#{index_name}"
-            }
-          })
+          _ =
+            request(%{
+              action: :move_index,
+              url_params: [index_name: tmp_index_name],
+              body: %{
+                operation: "move",
+                destination: "#{index_name}"
+              }
+            })
 
           {:ok, :completed}
         after
-          Algoliax.Resources.Index.delete_index(module, tmp_settings)
-          Algoliax.SettingsStore.delete_settings(tmp_index_name)
-          Algoliax.SettingsStore.stop_reindexing(index_name)
+          Index.delete_index(module, tmp_settings)
+          SettingsStore.delete_settings(tmp_index_name)
+          SettingsStore.stop_reindexing(index_name)
         end
       end)
       |> render_reindex_atomic()

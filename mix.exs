@@ -15,7 +15,27 @@ defmodule Algoliax.MixProject do
       aliases: aliases(),
       elixirc_paths: elixirc_paths(Mix.env()),
       docs: docs(),
-      package: package()
+      package: package(),
+      test_coverage: [tool: ExCoveralls],
+      dialyzer: [
+        flags: [:unmatched_returns, :error_handling, :unknown, :extra_return],
+        list_unused_filters: true,
+        ignore_warnings: ".dialyzer_ignore.exs",
+        plt_add_apps: [:ex_unit, :mix],
+        plt_local_path: "_build/plts"
+      ]
+    ]
+  end
+
+  def cli do
+    [
+      preferred_envs: [
+        quality: :test,
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.html": :test,
+        "coveralls.xml": :test
+      ]
     ]
   end
 
@@ -42,14 +62,27 @@ defmodule Algoliax.MixProject do
       {:faker, "~> 0.12", only: :test},
       {:bandit, "~> 1.0", only: :test},
       {:mix_test_watch, "~> 1.0", only: :dev, runtime: false},
-      {:sobelow, "~> 0.13", only: [:dev, :test]}
+      {:sobelow, "~> 0.13", only: [:dev, :test]},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:excoveralls, "~> 0.18", only: :test}
     ]
   end
 
   defp aliases do
     [
       # Ensures database is reset before tests are run
-      test: ["ecto.drop --quiet", "ecto.create --quiet", "ecto.migrate --quiet", "test"]
+      test: ["ecto.drop --quiet", "ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      quality: [
+        "hex.audit",
+        "format",
+        "credo --strict",
+        "sobelow --config",
+        "dialyzer",
+        "ecto.drop --quiet",
+        "ecto.create --quiet",
+        "ecto.migrate --quiet",
+        "coveralls.html"
+      ]
     ]
   end
 

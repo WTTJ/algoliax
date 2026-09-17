@@ -3,6 +3,7 @@ defmodule AlgoliaxTest.Schema do
   import Ecto.Query
 
   alias Algoliax.Repo
+  alias Ecto.Adapters.SQL.Sandbox
 
   alias Algoliax.Schemas.{
     Animal,
@@ -57,7 +58,7 @@ defmodule AlgoliaxTest.Schema do
     Algoliax.SettingsStore.set_settings(:algoliax_people_with_custom_object_id, %{})
     Algoliax.SettingsStore.set_settings(:"algoliax_people_with_custom_object_id.tmp", %{})
 
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Repo)
+    :ok = Sandbox.checkout(Repo)
 
     [
       %PeopleEcto{reference: @ref1, last_name: "Doe", first_name: "John", age: 77},

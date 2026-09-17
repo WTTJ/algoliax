@@ -74,7 +74,7 @@ jobs:
           command: mix format --check-formatted
       - run:
           name: Run credo
-          command: mix credo
+          command: mix credo --strict
 
   vulnerabilities_mix:
     <<: *defaults
@@ -100,6 +100,34 @@ jobs:
       - run:
           name: Run dependencies audit
           command: mix hex.audit
+
+  dialyzer:
+    <<: *defaults
+    docker:
+      - image: << pipeline.parameters.elixir_base_image >>
+        environment:
+          MIX_ENV: test
+    steps:
+      - run:
+          name: install hex & rebar
+          command: mix do local.hex --force, local.rebar --force
+      - restore_cache:
+          key: << pipeline.parameters.cache_version >>-code-{{ .Environment.CIRCLE_SHA1 }}
+      - restore_cache:
+          keys:
+            - << pipeline.parameters.cache_version >>-mix-{{ .Branch }}-{{ checksum "mix.lock" }}
+            - << pipeline.parameters.cache_version >>-mix-{{ .Branch }}
+      - restore_cache:
+          keys:
+            - << pipeline.parameters.cache_version >>-plts-{{ checksum "mix.lock" }}
+            - << pipeline.parameters.cache_version >>-plts-
+      - run:
+          name: Run dialyzer
+          command: mix dialyzer
+      - save_cache:
+          key: << pipeline.parameters.cache_version >>-plts-{{ checksum "mix.lock" }}
+          paths:
+            - _build/plts
 
   test:
     <<: *defaults
@@ -160,5 +188,8 @@ workflows:
           requires:
             - mix_deps_get
       - vulnerabilities_mix:
+          requires:
+            - mix_deps_get
+      - dialyzer:
           requires:
             - mix_deps_get
