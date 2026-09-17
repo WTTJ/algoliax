@@ -1,6 +1,8 @@
 defmodule Algoliax.UtilsTest do
   use ExUnit.Case, async: false
 
+  alias Algoliax.UtilsTest.{NoIndexName, NoRepo}
+
   defmodule NoRepo do
     use Algoliax.Indexer,
       index_name: :algoliax_people,
@@ -134,11 +136,11 @@ defmodule Algoliax.UtilsTest do
   describe "Raise exception if trying Ecto specific methods" do
     test "Algoliax.MissingRepoError" do
       assert_raise(Algoliax.MissingRepoError, fn ->
-        Algoliax.UtilsTest.NoRepo.reindex()
+        NoRepo.reindex()
       end)
 
       assert_raise(Algoliax.MissingRepoError, fn ->
-        Algoliax.UtilsTest.NoRepo.reindex_atomic()
+        NoRepo.reindex_atomic()
       end)
     end
   end
@@ -146,7 +148,7 @@ defmodule Algoliax.UtilsTest do
   describe "Raise exception if index_name missing" do
     test "Algoliax.MissingRepoError" do
       assert_raise(Algoliax.MissingIndexNameError, fn ->
-        Algoliax.UtilsTest.NoIndexName.get_settings()
+        NoIndexName.get_settings()
       end)
     end
   end

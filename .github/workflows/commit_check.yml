@@ -1,0 +1,9 @@
+name: commit-check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  commit-check:
+    uses: WTTJ/domain-platform/.github/workflows/common_commit_check.yml@v1

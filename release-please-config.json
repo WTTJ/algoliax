@@ -1,0 +1,24 @@
+{
+  "packages": {
+    ".": {
+      "release-type": "elixir",
+      "version-file": "mix.exs",
+      "package-name": "algoliax",
+      "include-component-in-tag": false,
+      "include-v-in-tag": false,
+      "changelog-sections": [
+        { "type": "feat", "section": "Features" },
+        { "type": "fix", "section": "Bug Fixes" },
+        { "type": "chore", "section": "Chores" },
+        { "type": "ci", "section": "CI/CD" },
+        { "type": "build", "section": "Build" },
+        { "type": "docs", "section": "Documentation" },
+        { "type": "refactor", "section": "Refactors" },
+        { "type": "perf", "section": "Performance" },
+        { "type": "style", "section": "Styling" },
+        { "type": "test", "section": "Tests" },
+        { "type": "revert", "section": "Reverts" }
+      ]
+    }
+  }
+}

@@ -19,15 +19,22 @@ Then run `mix test` to run the tests.
 
 ## Quality
 
+Run `mix quality` to run the full set of quality checks (hex.audit, format,
+credo --strict, sobelow, dialyzer, test --cover) in one command, or run
+them individually:
+
 - Run `mix format` to format the code.
 - Run `mix credo` to run the linter.
 
 ## CI/CD
 
-We use CircleCI to:
+We use GitHub Actions to:
 
-- Run the code_analysis (format/credo)
-- Check for vulnerabilities
-- Run the tests
+- Run the test suite across a matrix of Elixir/OTP versions
+- Run format/credo --strict
+- Check for vulnerabilities (sobelow/hex.audit)
+- Run dialyzer
+- Enforce conventional commits on PRs
+- Cut releases and publish to Hex.pm via release-please
 
-See the `.circleci/config.yml` file for more details.
+See the `.github/workflows/` directory for more details.

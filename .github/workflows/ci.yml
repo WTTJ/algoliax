@@ -1,0 +1,147 @@
+name: Elixir CI
+
+on:
+  push:
+  pull_request:
+  workflow_call:
+
+env:
+  primary_otp: "27.x"
+  primary_elixir: "1.18.x"
+
+jobs:
+  test:
+    name: Build and test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    strategy:
+      fail-fast: false
+      matrix:
+        otp: ["27.x", "28.x", "29.x"]
+        elixir: ["1.17.x", "1.18.x", "1.19.x", "1.20.x"]
+        exclude:
+          - elixir: 1.17.x
+            otp: 28.x
+          - elixir: 1.17.x
+            otp: 29.x
+          - elixir: 1.18.x
+            otp: 28.x
+          - elixir: 1.18.x
+            otp: 29.x
+          - elixir: 1.19.x
+            otp: 29.x
+    steps:
+      - uses: actions/checkout@v7
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: ${{ matrix.elixir }}
+          otp-version: ${{ matrix.otp }}
+        env:
+          ImageOS: ubuntu24
+      - name: Restore dependencies cache
+        uses: actions/cache@v6
+        with:
+          path: deps
+          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-mix-
+      - name: Install dependencies
+        run: mix deps.get
+      - name: Run tests
+        run: mix test
+
+  code_analysis:
+    name: Format & Credo
+    runs-on: ubuntu-latest
+    env:
+      MIX_ENV: test
+    steps:
+      - uses: actions/checkout@v7
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: ${{ env.primary_elixir }}
+          otp-version: ${{ env.primary_otp }}
+        env:
+          ImageOS: ubuntu24
+      - name: Restore dependencies cache
+        uses: actions/cache@v6
+        with:
+          path: deps
+          key: ${{ runner.os }}-${{ env.primary_otp }}-${{ env.primary_elixir }}-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-${{ env.primary_otp }}-${{ env.primary_elixir }}-mix-
+      - name: Install dependencies
+        run: mix deps.get
+      - name: Run mix format
+        run: mix format --check-formatted
+      - name: Run credo
+        run: mix credo --strict
+
+  vulnerabilities:
+    name: Sobelow & hex.audit
+    runs-on: ubuntu-latest
+    env:
+      MIX_ENV: test
+    steps:
+      - uses: actions/checkout@v7
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: ${{ env.primary_elixir }}
+          otp-version: ${{ env.primary_otp }}
+        env:
+          ImageOS: ubuntu24
+      - name: Restore dependencies cache
+        uses: actions/cache@v6
+        with:
+          path: deps
+          key: ${{ runner.os }}-${{ env.primary_otp }}-${{ env.primary_elixir }}-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-${{ env.primary_otp }}-${{ env.primary_elixir }}-mix-
+      - name: Install dependencies
+        run: mix deps.get
+      - name: Run sobelow
+        run: mix sobelow --config
+      - name: Run dependencies audit
+        run: mix hex.audit
+
+  dialyzer:
+    name: Dialyzer
+    runs-on: ubuntu-latest
+    env:
+      MIX_ENV: test
+    steps:
+      - uses: actions/checkout@v7
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: ${{ env.primary_elixir }}
+          otp-version: ${{ env.primary_otp }}
+        env:
+          ImageOS: ubuntu24
+      - name: Restore dependencies cache
+        uses: actions/cache@v6
+        with:
+          path: deps
+          key: ${{ runner.os }}-${{ env.primary_otp }}-${{ env.primary_elixir }}-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-${{ env.primary_otp }}-${{ env.primary_elixir }}-mix-
+      - name: Install dependencies
+        run: mix deps.get
+      - name: Restore PLT cache
+        uses: actions/cache@v6
+        with:
+          path: _build/plts
+          key: ${{ runner.os }}-${{ env.primary_otp }}-${{ env.primary_elixir }}-plts-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-${{ env.primary_otp }}-${{ env.primary_elixir }}-plts-
+      - name: Run dialyzer
+        run: mix dialyzer

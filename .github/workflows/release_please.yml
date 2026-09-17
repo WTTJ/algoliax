@@ -1,0 +1,40 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  release-please:
+    uses: WTTJ/domain-platform/.github/workflows/common_release_please.yml@v1
+
+  publish:
+    needs: [ci, release-please]
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: "1.18.5"
+          otp-version: "27.3.4"
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Compile
+        run: mix compile
+
+      - name: Publish to Hex.pm
+        env:
+          HEX_API_KEY: ${{ secrets.HEXPM_PUBLIC_PACKAGES_KEY }}
+        run: mix hex.publish --yes

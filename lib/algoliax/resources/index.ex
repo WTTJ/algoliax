@@ -9,10 +9,11 @@ defmodule Algoliax.Resources.Index do
   def ensure_settings(module, index_name, settings, replica_index) do
     case SettingsStore.get_settings(index_name) do
       nil ->
-        request_configure_index(
-          index_name,
-          settings_to_algolia_settings(module, settings, replica_index)
-        )
+        _ =
+          request_configure_index(
+            index_name,
+            settings_to_algolia_settings(module, settings, replica_index)
+          )
 
         algolia_remote_settings = request_get_settings(index_name)
         SettingsStore.set_settings(index_name, algolia_remote_settings)
@@ -111,8 +112,8 @@ defmodule Algoliax.Resources.Index do
           settings_to_algolia_settings(module, settings, replica_index)
         )
 
-      configure_synonyms(module, settings, index_name)
-      configure_replicas(module, settings)
+      _ = configure_synonyms(module, settings, index_name)
+      _ = configure_replicas(module, settings)
       r
     end)
     |> render_response()
