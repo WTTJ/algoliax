@@ -19,6 +19,10 @@ Then run `mix test` to run the tests.
 
 ## Quality
 
+Run `mix quality` to run the full set of quality checks (hex.audit, format,
+credo --strict, sobelow, dialyzer, test --cover) in one command, or run
+them individually:
+
 - Run `mix format` to format the code.
 - Run `mix credo` to run the linter.
 
@@ -26,8 +30,9 @@ Then run `mix test` to run the tests.
 
 We use CircleCI to:
 
-- Run the code_analysis (format/credo)
+- Run the code_analysis (format/credo --strict)
 - Check for vulnerabilities
+- Run dialyzer
 - Run the tests
 
 See the `.circleci/config.yml` file for more details.

@@ -4,6 +4,5 @@
   # in `do_wait_task/2` is unreachable as written. Whether this is dead code
   # or masks a real bug in the batch/multi-task polling path needs domain
   # investigation, not a mechanical fix bundled into a CI-tooling change.
-  # Tracked in PLA-2889.
-  {"lib/algoliax.ex", :guard_fail}
+  {"lib/algoliax.ex", :guard_fail, 135}
 ]

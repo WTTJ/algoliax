@@ -16,7 +16,6 @@ defmodule Algoliax.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       docs: docs(),
       package: package(),
-      test_coverage: [tool: ExCoveralls],
       dialyzer: [
         flags: [:unmatched_returns, :error_handling, :unknown, :extra_return],
         list_unused_filters: true,
@@ -30,11 +29,7 @@ defmodule Algoliax.MixProject do
   def cli do
     [
       preferred_envs: [
-        quality: :test,
-        coveralls: :test,
-        "coveralls.detail": :test,
-        "coveralls.html": :test,
-        "coveralls.xml": :test
+        quality: :test
       ]
     ]
   end
@@ -63,8 +58,7 @@ defmodule Algoliax.MixProject do
       {:bandit, "~> 1.0", only: :test},
       {:mix_test_watch, "~> 1.0", only: :dev, runtime: false},
       {:sobelow, "~> 0.13", only: [:dev, :test]},
-      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
-      {:excoveralls, "~> 0.18", only: :test}
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
     ]
   end
 
@@ -72,16 +66,15 @@ defmodule Algoliax.MixProject do
     [
       # Ensures database is reset before tests are run
       test: ["ecto.drop --quiet", "ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      # Local dev-convenience mirror of the CircleCI jobs (code_analysis,
+      # vulnerabilities_mix, dialyzer, test) - keep both in sync by hand.
       quality: [
         "hex.audit",
         "format",
         "credo --strict",
         "sobelow --config",
         "dialyzer",
-        "ecto.drop --quiet",
-        "ecto.create --quiet",
-        "ecto.migrate --quiet",
-        "coveralls.html"
+        "test --cover"
       ]
     ]
   end
