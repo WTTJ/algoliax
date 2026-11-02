@@ -94,9 +94,10 @@ jobs:
             - << pipeline.parameters.cache_version >>-mix-{{ .Branch }}
       - run:
           name: Run sobelow
-          command: mix sobelow --config > sobelow.txt
+          command: mix sobelow --config | tee sobelow.txt
       - store_artifacts:
           path: sobelow.txt
+          when: always
       - run:
           name: Run dependencies audit
           command: mix hex.audit

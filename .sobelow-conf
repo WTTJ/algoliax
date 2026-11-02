@@ -1,0 +1,6 @@
+[
+  router: :none,
+  private: true,
+  skip: true,
+  exit: :low
+]
