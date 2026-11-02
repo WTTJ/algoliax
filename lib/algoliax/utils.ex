@@ -28,9 +28,6 @@ defmodule Algoliax.Utils do
     indexes
   end
 
-  # index_name is resolved from the consuming app's own settings: a static atom, a list, or
-  # a 0-arity function the app defines. None of these come from request or user input, so
-  # atom creation here is bounded by app configuration, not attacker-driven.
   # sobelow_skip ["DOS.BinToAtom"]
   def tmp_index_name(index_name), do: :"#{index_name}.tmp"
 
