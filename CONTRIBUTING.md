@@ -21,6 +21,9 @@ Then run `mix test` to run the tests.
 
 - Run `mix format` to format the code.
 - Run `mix credo` to run the linter.
+- Run `mix sobelow --config` to run the security scanner. It fails on any finding, as set by
+  `exit: :low` in `.sobelow-conf`. Suppress a false positive with a `# sobelow_skip [...]`
+  comment directly above the function, with a reason.
 
 ## CI/CD
 

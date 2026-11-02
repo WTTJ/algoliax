@@ -12,6 +12,9 @@ defmodule Algoliax.TemporaryIndexer do
     do_run(action, module, settings, models, opts)
   end
 
+  # index_name is resolved from the consuming app's own settings: a static atom, a list, or
+  # a 0-arity function the app defines. None of these come from request or user input, so
+  # atom creation here is bounded by app configuration, not attacker-driven.
   # sobelow_skip ["DOS.BinToAtom"]
   defp do_run(action, module, settings, models, opts) do
     opts = Keyword.delete(opts, :temporary_only)
