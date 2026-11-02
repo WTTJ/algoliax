@@ -3,7 +3,7 @@ defmodule Algoliax.TemporaryIndexer do
   Execute save_object(s) on temporary index to keep it synchronized with main index
   """
 
-  import Algoliax.Utils, only: [index_name: 2, render_response: 1]
+  import Algoliax.Utils, only: [index_name: 2, tmp_index_name: 1, render_response: 1]
 
   alias Algoliax.SettingsStore
   alias Algoliax.Resources.Object
@@ -12,17 +12,13 @@ defmodule Algoliax.TemporaryIndexer do
     do_run(action, module, settings, models, opts)
   end
 
-  # index_name is resolved from the consuming app's own settings: a static atom, a list, or
-  # a 0-arity function the app defines. None of these come from request or user input, so
-  # atom creation here is bounded by app configuration, not attacker-driven.
-  # sobelow_skip ["DOS.BinToAtom"]
   defp do_run(action, module, settings, models, opts) do
     opts = Keyword.delete(opts, :temporary_only)
 
     index_name(module, settings)
     |> Enum.map(fn index_name ->
       if SettingsStore.reindexing?(index_name) do
-        tmp_index_name = :"#{index_name}.tmp"
+        tmp_index_name = tmp_index_name(index_name)
         tmp_settings = SettingsStore.get_settings(tmp_index_name)
 
         execute(action, module, tmp_settings, models, opts)
