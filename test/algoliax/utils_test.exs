@@ -112,6 +112,8 @@ defmodule Algoliax.UtilsTest do
     def get_synonyms("list"), do: []
     def get_synonyms("nil"), do: nil
     def get_synonyms(_), do: "invalid"
+
+    def zero_arity_synonyms, do: []
   end
 
   defmodule AlgoliaSettingsFunction do
@@ -159,6 +161,22 @@ defmodule Algoliax.UtilsTest do
     test "a map" do
       a = %{foo_bar: "test", bar_foo: "test"}
       assert Algoliax.Utils.camelize(a) == %{"fooBar" => "test", "barFoo" => "test"}
+    end
+
+    test "a key with a leading underscore lowercases the first segment" do
+      assert Algoliax.Utils.camelize(:_foo_bar) == "fooBar"
+    end
+
+    test "a key with hyphens is still split into camelCase" do
+      assert Algoliax.Utils.camelize(:"foo-bar") == "fooBar"
+    end
+
+    test "an already-mixed-case key downcases its first segment" do
+      assert Algoliax.Utils.camelize(:HitsPerPage) == "hitsPerPage"
+    end
+
+    test "a key made only of underscores returns an empty string" do
+      assert Algoliax.Utils.camelize(:_) == ""
     end
   end
 
@@ -295,6 +313,15 @@ defmodule Algoliax.UtilsTest do
     end
 
     test "should fail with 0-arity function" do
+      assert function_exported?(SynonymsWithFunc, :zero_arity_synonyms, 0)
+
+      assert_raise(Algoliax.InvalidSynonymsSettingsFunctionError, fn ->
+        Algoliax.Utils.synonyms_settings(
+          SynonymsWithFunc,
+          [synonyms: :zero_arity_synonyms],
+          "index_name"
+        )
+      end)
     end
 
     test "should if settings is not an atom, a list, nor nil" do

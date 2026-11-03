@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Breaking
+
+The `inflex` dependency has been removed. If your application uses `Inflex`
+directly, add `{:inflex, "~> 2.1"}` to your own `mix.exs`.
+
 ## v0.11.0 - 2026-07-20
 
 ### Breaking
