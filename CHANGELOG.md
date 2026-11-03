@@ -7,6 +7,13 @@
 The `inflex` dependency has been removed. If your application uses `Inflex`
 directly, add `{:inflex, "~> 2.1"}` to your own `mix.exs`.
 
+### Fixed
+
+`Algoliax.wait_task/1` now returns immediately, without polling Algolia, when
+given a response with a `nil` task_id (e.g. no indexing task was created).
+Previously this case fell through to the same polling path as a real task,
+which crashed or polled the Algolia task endpoint with a `nil` task_id.
+
 ## v0.11.0 - 2026-07-20
 
 ### Breaking

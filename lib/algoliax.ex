@@ -107,6 +107,7 @@ defmodule Algoliax do
 
       MyApp.People.save_object(%MyApp.People{id: 1}) |> Algoliax.wait_task()
   """
+  def wait_task({:ok, %Algoliax.Response{task_id: nil}} = response), do: response
   def wait_task({:ok, %Algoliax.Response{} = response}), do: wait_task(response)
 
   def wait_task({:ok, responses}) when is_list(responses) do
@@ -120,7 +121,6 @@ defmodule Algoliax do
     |> Enum.map(&Task.await/1)
   end
 
-  def wait_task({:ok, %Algoliax.Response{task_id: nil}} = response), do: response
   def wait_task({:error} = response), do: response
   def wait_task(response), do: do_wait_task(response)
 
