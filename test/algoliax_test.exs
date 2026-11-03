@@ -1,5 +1,7 @@
 defmodule AlgoliaxTest do
-  use ExUnit.Case, async: true
+  # async: false -- shares the :algoliax_people key in the global
+  # Algoliax.SettingsStore Agent with test/algoliax/schema_test.exs
+  use ExUnit.Case, async: false
 
   alias Algoliax.Schemas.PeopleStruct
 

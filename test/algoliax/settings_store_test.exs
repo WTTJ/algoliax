@@ -9,6 +9,7 @@ defmodule Algoliax.SettingsStoreTest do
     pid = Process.whereis(SettingsStore)
 
     SettingsStore.reset()
+    on_exit(fn -> SettingsStore.reset() end)
     %{agent_pid: pid}
   end
 
