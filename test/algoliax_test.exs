@@ -48,6 +48,13 @@ defmodule AlgoliaxTest do
     assert PeopleStruct.to_be_indexed?(people)
   end
 
+  describe "wait_task/1" do
+    test "returns immediately without polling when task_id is nil" do
+      response = {:ok, %Algoliax.Response{task_id: nil}}
+      assert Algoliax.wait_task(response) == response
+    end
+  end
+
   describe "generate_secured_api_key/2" do
     test "should generate key if correct params" do
       assert {:ok, _} = Algoliax.generate_secured_api_key("api_key", %{filters: "reference:10"})

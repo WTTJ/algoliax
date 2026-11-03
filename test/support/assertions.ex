@@ -5,9 +5,7 @@ defmodule Algoliax.Assertions do
 
   defmacro assert_request(method, data) do
     quote bind_quoted: [method: method, data: data] do
-      body = Map.get(data, :body)
-      path = Map.get(data, :path)
-      headers = Map.get(data, :headers)
+      {body, path, headers} = Algoliax.Assertions.unpack_request_data(data)
       requests = RequestsStore.get()
 
       request =
@@ -46,6 +44,10 @@ defmodule Algoliax.Assertions do
           assert request
       end
     end
+  end
+
+  def unpack_request_data(data) do
+    {Map.get(data, :body), Map.get(data, :path), Map.get(data, :headers)}
   end
 
   def has_headers?(nil, _), do: true
