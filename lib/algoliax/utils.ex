@@ -112,8 +112,27 @@ defmodule Algoliax.Utils do
   def camelize(key) do
     key
     |> Atom.to_string()
-    |> Inflex.camelize(:lower)
+    |> split_words()
+    |> Enum.with_index()
+    |> Enum.map_join(fn
+      {word, 0} -> String.downcase(word)
+      {word, _} -> String.capitalize(word)
+    end)
   end
+
+  defp split_words(string) do
+    string
+    |> String.graphemes()
+    |> Enum.reduce([""], &accumulate_word/2)
+    |> Enum.reverse()
+    |> Enum.reject(&(&1 == ""))
+  end
+
+  defp accumulate_word(separator, acc) when separator in ["-", "_"], do: ["" | acc]
+
+  defp accumulate_word(<<char>> = letter, acc) when char in ?A..?Z, do: [letter | acc]
+
+  defp accumulate_word(char, [current | rest]), do: [current <> char | rest]
 
   def render_response([response]), do: response
 
